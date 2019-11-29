@@ -3,7 +3,7 @@ title: "Deep Learning I"
 date: 2019-11-29
 tags: [machine learning, data science]
 header:
-  image: "/images/AI.jpg"
+  image: "/images/neuralnet.png"
 excerpt: "Machine Learning"
 mathjax: true
 ---
