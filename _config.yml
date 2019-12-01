@@ -299,6 +299,6 @@ defaults:
   - scope:
     path: ""
     type: pages
-    flow:
-    layout: single
-    author_profile: true
+    values:
+      layout: single
+      author_profile: true
