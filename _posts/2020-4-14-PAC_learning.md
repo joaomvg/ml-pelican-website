@@ -16,4 +16,4 @@ PAC stands for "probably approximately correct". As the name suggests, it relate
 
 Suppose we have a classification problem with $$N$$ classes, labeled by an integer $$\{0,1,\ldots N-1\}$$, and we are given a dataset which contains $$m$$ data-points. The data-points are characterized by $$Q$$ features $$(f_1,f_2,\ldots,f_Q)$$ and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class:
 
-      $$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow \{0,1,\ldots, N-1\}$$
+$$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow \{0,1,\ldots, N-1\}$$
