@@ -1,5 +1,5 @@
 ---
-title: "PAC learning"
+title: "Probably Approximately Correct "
 date: 2020-04-14
 tags: [machine learning, data science]
 header:
@@ -7,6 +7,8 @@ header:
 excerpt: "Machine Learning"
 mathjax: true
 ---
+
+
 
 # PAC theorem
 
