@@ -24,6 +24,4 @@ Lets assume for the moment that such a map exists. A simple example is as follow
 
 One of the simplest algorithm is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified. Simply memorising the data can lead to very erroneous outcomes- this is also known as overfitting.
 
-|![PAC learning](/images/PAC learning.png "PAC learning with circles.")|
-|:-:|
-| *Learning with circles. Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to pass by the most outward red training point.* |
+{% include image.html url="/images/PAC learning.png" description="Learning with circles. Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to pass by the most outward red training point." %}
