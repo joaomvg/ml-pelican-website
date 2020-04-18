@@ -17,13 +17,13 @@ PAC stands for "probably approximately correct". As the name suggests, it relate
 
 Suppose we have a classification problem with $$N$$ classes, labelled by an integer $$\{0,1,\ldots N-1\}$$, and we are given a dataset which contains $$m$$ data-points. The data-points are characterized by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
 
-$$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{0,1,\ldots, N-1\}$$
+$$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
 
 This map, however, does not always exist. In this case we can only determine the class up to a certain confidence level. An example, is in image recognition where one attempts to classify pictures. Imagine that we want to determine whether the picture in hands corresponds to a dog or not. As humans, typically we find easy to identify a dog in a picture. But what if the picture was taken with a weird angle or the animal in it is actually a wolf that looks like a dog. The truth is that one cannot define exactly the class of a dog solely from the information that is stored in a picture. If we had access to other features like animal hair, body temperature, height to mass ratio, and so on, we would have been much more confident about the classification. Ultimately, having genetic information would allow us to unequivocally identify the subject (would it?).
 
 Let us assume for the moment that such a map exists. Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
 
-The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is calculated by a loss function calculated on the training dataset $$S$$ and defined as follows:
+The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is given by a loss function calculated on the training dataset $$S$$ and defined as follows:
 
 $$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
 
