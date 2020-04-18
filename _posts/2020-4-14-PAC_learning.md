@@ -15,7 +15,7 @@ toc: true
 
 PAC stands for "probably approximately correct". As the name suggests, it relates to the probability, or confidence, of a quantity to be approximately correct. This is in essence what machine learning tries to do.  
 
-Suppose we have a classification problem with $$N$$ classes, labelled by an integer $$\{0,1,\ldots N-1\}$$, and we are given a dataset which contains $$m$$ data-points. The data-points are characterized by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
+Suppose we have a classification problem with $$N$$ classes $y_i\in {y_0,y_1,\ldots,y_{N-1}}$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
 
 $$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
 
@@ -31,9 +31,11 @@ which is just the ratio of the number of misclassified points over the total num
 
 $$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
 
-and equals the probability of a point to be misclassified:
+and equals the probability of misclassifying a point:
 
-$$\mathcal{L}(D,h)=\mathbb{P}(h(x)\neq y(x))$$
+$$\mathcal{L}(D,h)=\mathbb{P}_{x~D(x)}(h(x)\neq y(x))$$
+
+Overfitting consists in choosing an hypotheses $$h(x)$$ that has zero empirical error. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem explained simply is essentially two fold: we may be overfitting on data that is not representative and therefore the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to high variance on unseen data.   
 
 One of the simplest algorithms is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. Needless to say, when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified.  Simply memorising the data can lead to very erroneous outcomes- this is also known as overfitting.
 
