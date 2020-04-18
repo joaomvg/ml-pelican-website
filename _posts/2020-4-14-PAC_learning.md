@@ -11,7 +11,7 @@ toc: true
 
 
 
-# 1. The learning problem
+### 1. The learning problem
 
 PAC stands for "probably approximately correct". As the name suggests, it relates to the probability, or confidence, of a quantity to be approximately correct. This is in essence what machine learning tries to do.  
 
