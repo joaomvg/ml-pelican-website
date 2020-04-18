@@ -27,9 +27,13 @@ The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has 
 
 $$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
 
-which is just the ratio of the number of misclassified points over the total number of data-points. The true error or *generalization error* is the unbiased estimator
+which is just the ratio of the number of misclassified points over the total number of data-points. Here the function $$\mathbb{I}(.)$$ is the Kronecker delta function which gives one when the condition is satisfied and zero otherwise. The true error or *generalization error* is the unbiased estimator
 
-$$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$.
+$$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
+
+and equals the probability of a point to be misclassified:
+
+$$\mathcal{L}(D,h)=\mathbb{P}(h(x)\neq y(x))$$
 
 One of the simplest algorithms is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. Needless to say, when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified.  Simply memorising the data can lead to very erroneous outcomes- this is also known as overfitting.
 
