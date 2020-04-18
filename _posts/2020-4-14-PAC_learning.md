@@ -1,16 +1,17 @@
 ---
-title: "Probably Approximately Correct "
+title: "Probably Approximately Correct (PAC) "
 date: 2020-04-14
 tags: [machine learning, data science]
 header:
   #image: "/images/NeuralNetwork.jpg"
 excerpt: "Machine Learning"
 mathjax: true
+toc: true
 ---
 
 
 
-# PAC theorem
+# A simple learning problem
 
 PAC stands for "probably approximately correct". As the name suggests, it relates to the probability, or confidence, of a quantity to be approximately correct. This is in essence what machine learning tries to do.  
 
