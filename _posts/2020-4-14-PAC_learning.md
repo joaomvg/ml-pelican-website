@@ -26,4 +26,5 @@ One of the simplest algorithm is to draw a decision boundary, call it $$\mathcal
 
 
 ![](/images/PAC learning.png)
-*Learning with circles. Here the circumference $$R$$ denotes the ground truth which classifies #points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to #pass by the most outward red training point.*
+
+  *Learning with circles. Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to #pass by the most outward red training point.*
