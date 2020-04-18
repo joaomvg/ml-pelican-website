@@ -23,9 +23,13 @@ This map, however, does not always exist. In this case we can only determine the
 
 Let us assume for the moment that such a map exists. Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
 
-The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is defined by the loss function calculated on the training dataset:
+The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is calculated by a loss function calculated on the training dataset $$S$$ and defined as follows:
 
-$$\mathcal{L}=\frac{1}{m}\sum_{i=1:m}\mathbb{1}(h(x)\neq y(x))$$ 
+$$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
+
+which is just the ratio of the number of misclassified points over the total number of data-points. The true error or *generalization error* is the unbiased estimator
+
+$$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$.
 
 One of the simplest algorithms is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. Needless to say, when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified.  Simply memorising the data can lead to very erroneous outcomes- this is also known as overfitting.
 
