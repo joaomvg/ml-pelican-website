@@ -15,7 +15,7 @@ toc: true
 
 PAC stands for "probably approximately correct". As the name suggests, it relates to the probability, or confidence, of a quantity to be approximately correct. This is in essence what machine learning tries to do.  
 
-Suppose we have a classification problem with $$N$$ classes $y_i\in {y_0,y_1,\ldots,y_{N-1}}$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
+Suppose we have a classification problem with $$N$$ classes $$y_i\in {y_0,y_1,\ldots,y_{N-1}}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
 
 $$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
 
@@ -23,7 +23,10 @@ This map, however, does not always exist. In this case we can only determine the
 
 Let us assume for the moment that such a map exists. Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
 
-The learning problem is to find an hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is given by a loss function calculated on the training dataset $$S$$ and defined as follows:
+![](/images/PAC learning.png){: .align-center}
+*Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to pass by the most outward red training point.*
+
+The learning problem is to find a hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data. The *empirical error* or *training error* is given by a loss function calculated on the training dataset $$S$$ and defined as follows:
 
 $$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
 
@@ -35,10 +38,8 @@ and equals the probability of misclassifying a point:
 
 $$\mathcal{L}(D,h)=\mathbb{P}_{x~D(x)}(h(x)\neq y(x))$$
 
-Overfitting consists in choosing an hypotheses $$h(x)$$ that has zero empirical error. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem explained simply is essentially two fold: we may be overfitting on data that is not representative and therefore the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to high variance on unseen data.   
+When a hypotheses $$h(x)$$ that has zero empirical error one says that it *overfits* the data. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem, explained simply, is essentially two fold: we may be overfitting on data that is not representative and so the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to a prediction with high variance.   
 
 One of the simplest algorithms is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. Needless to say, when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified.  Simply memorising the data can lead to very erroneous outcomes- this is also known as overfitting.
 
-
-![](/images/PAC learning.png){: .align-center}
-*Learning with circles. Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue. The hypotheses $$h$$ correctly classifies all the training points and we choose it to pass by the most outward red training point.*
+![](/images/circle_learning_epsilon.png){: .align-center}
