@@ -48,6 +48,8 @@ One of the simplest algorithms is to draw a decision boundary that is as close a
 
 Since overfitting can lead to very erroneous predictions, the question is whether one can put a bound on the probability of that happening. Suppose we have a bound on this probability of the form
 
-$$\mathbb{P}_{x\sim D(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$
 
-then we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
+Note that this is the probability of drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Then we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
+
+In the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
