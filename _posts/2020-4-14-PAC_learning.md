@@ -48,6 +48,6 @@ One of the simplest algorithms is to draw a decision boundary that is as close a
 
 Since overfitting can lead to very erroneous predictions, the question is whether one can put a bound on the probability of that happening. Suppose we have a bound on this probability of the form
 
-$$\mathbb{P}(\mathcal{L}(D,h)>\epsilon)<\delta$$
+$$\mathbb{P}_{x\sim D(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$
 
-then we know with confidence $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$. 
+then we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
