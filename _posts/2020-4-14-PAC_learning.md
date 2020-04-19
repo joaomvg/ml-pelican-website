@@ -45,3 +45,9 @@ One of the simplest algorithms is to draw a decision boundary that is as close a
 
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h$$ is a circumference of radius $$R'$$ concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference of radius $$R_{\epsilon}$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
+
+Since overfitting can lead to very erroneous predictions, the question is whether one can put a bound on the probability of that happening. Suppose we have a bound on this probability of the form
+
+$$\mathbb{P}(\mathcal{L}(D,h)>\epsilon)<\delta$$
+
+then we know with confidence $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$. 
