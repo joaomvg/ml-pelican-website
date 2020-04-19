@@ -26,7 +26,7 @@ Let us assume for the moment that such a map exists. Consider the problem of cla
 ![](/images/PAC learning_1.png){: .align-center}
 *Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue, depending on whether they are inside or outside of the circle, respectively.*
 
-The learning problem is to find a hypotheses $$h(x): x\rightarrow y$$ that has small error on unseen data.
+The learning problem is to find a hypothesis $$h(x): x\rightarrow y$$ that has small error on unseen data.
 The *empirical error* or *training error* is given by a loss function calculated on the training dataset $$S$$ and defined as follows:
 
 $$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
@@ -39,9 +39,9 @@ and equals the probability of misclassifying a point:
 
 $$\mathcal{L}(D,h)=\mathbb{P}_{x~D(x)}(h(x)\neq y(x))$$
 
-When a hypotheses $$h(x)$$ that has zero empirical error one says that it *overfits* the data. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem, explained simply, is essentially two fold: we may be overfitting on data that is not representative and so the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to a prediction with high variance.   
+When a hypotheses $$h(x)$$ that has zero empirical error one says that it *overfits* the data. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem, explained simply, is due essentially to the following reasons: we may be overfitting on data that is not representative and so the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to a prediction with high variance.   
 
-One of the simplest algorithms is to draw a decision boundary, call it $$\mathcal{C}$$, that is as close as possible to the most outward red or inward blue data-points. Needless to say, when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference. This ensures that all the points in the sample data are correctly classified. The problem however is that if we draw more data samples we can generate points that lie in between $$\mathcal{C}$$ and the circumference of radius $$R$$, and would therefore be misclassified.
+One of the simplest algorithms is to draw a decision boundary that is as close as possible to the most outward red (inward blue data-points). This guarantees that when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference $$R$$. Note that we have chosen a set of hypothesis $\mathcal{H}$ that contains the ground truth: the set of concentric circumferences. This is called the *realizability assumption*. This choice of $$h$$, as shown in the figure below, ensures that all the points in the sample data are correctly classified. However newly generated data samples may lie in between $$h$$ and the circumference of radius $$R$$, and therefore would be misclassified.
 
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h_S$$ is a circumference concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference $$\epsilon$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
