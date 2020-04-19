@@ -37,7 +37,7 @@ $$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
 
 and equals the probability of misclassifying a point:
 
-$$\mathcal{L}(D,h)=\mathbb{P}_{x~D(x)}(h(x)\neq y(x))$$
+$$\mathcal{L}(D,h)=\mathbb{P}_{x\sim D(x)}(h(x)\neq y(x))$$
 
 When a hypotheses $$h(x)$$ that has zero empirical error one says that it *overfits* the data. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem, explained simply, is due essentially to the following reasons: we may be overfitting on data that is not representative and so the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to a prediction with high variance.   
 
