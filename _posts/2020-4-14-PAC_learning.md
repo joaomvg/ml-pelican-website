@@ -55,8 +55,8 @@ Note that this is the probability while drawing a sample $$S$$ with $$m$$ data-p
 A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form.
 
 $$\begin{equation}
-a=y
+a=y\tag{abc}\label{eq:one}
 \end{equation}
 $$
 
-In the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
+In \eqref{eq:one} the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
