@@ -50,7 +50,9 @@ Since overfitting can lead to very erroneous predictions, it is important to est
 
 $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta \tag{1}\label{eq1}$$
 
-Note that the probability is calculated against drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
+Note that the probability is calculated against drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know  
+
+*with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon\tag{2}\label{eq2}$$.*
 
 A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
 
@@ -58,4 +60,8 @@ In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsi
 
 $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m \tag{2}\label{eq2}$$
 
-Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$.
+Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$. Hence using equation \eqref{eq2}, we have
+
+$$\mathcal{L}(D,h)<\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
+
+with probability $$1-\delta$$.
