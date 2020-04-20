@@ -58,7 +58,7 @@ A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on th
 
 In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$. The probability of drawing a point and falling in the region between $$R'$$ and $$R$$ is precisely $$\epsilon$$. Therefore the probability of falling outside that region is $$1-\epsilon$$. It is then easy to see that the probability that we need equals
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m \tag{2}\label{eq2}$$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m $$
 
 Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$. Hence using equation \eqref{eq2}, we have
 
