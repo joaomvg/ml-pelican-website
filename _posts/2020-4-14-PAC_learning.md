@@ -58,4 +58,4 @@ In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsi
 
 $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m \tag{2}\label{eq2}$$
 
-Using the bound $1-\epsilon<e^{-\epsilon}$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$.
+Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$.
