@@ -48,15 +48,15 @@ One of the simplest algorithms is to draw a decision boundary that is as close a
 
 Since overfitting can lead to very erroneous predictions, it is important to estimate the chance of that happening. Suppose we have a bound on this probability of the form
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta \tag{(1)}\label{eq1}$$
 
 Note that this is the probability while drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
 
-A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form.
+A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
 
 $$\begin{equation}
-a=y\tag{abc}\label{eq:one}
+a=y
 \end{equation}
 $$
 
-In \eqref{eq:one} the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
+In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
