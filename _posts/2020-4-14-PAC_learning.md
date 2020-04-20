@@ -52,8 +52,10 @@ $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta \tag{1}\label{eq1
 
 Note that the probability is calculated against drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
 
-A
-*PAC learnable hypothesis*{: .blue .bold}
-is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
+A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
 
-In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
+In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$. The probability of drawing a point and falling in the region between $$R'$$ and $$R$$ is precisely $$\epsilon$$. Therefore the probability of falling outside that region is $$1-\epsilon$$. It is then easy to see that the probability that we need equals
+
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m \tag{2}\label{eq2}$$
+
+Using the bound $1-\epsilon<e^{-\epsilon}$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$.
