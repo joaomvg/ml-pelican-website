@@ -62,6 +62,10 @@ $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m $$
 
 Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$. Hence using equation \eqref{eq2}, we have
 
-$$\mathcal{L}(D,h)<\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
+$$\mathcal{L}(D,h)\leq\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
 
 with probability $$1-\delta$$.
+
+### 2. Finite hypothesis classes are PAC learnable
+
+asdasd
