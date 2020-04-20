@@ -46,10 +46,17 @@ One of the simplest algorithms is to draw a decision boundary that is as close a
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h$$ is a circumference of radius $$R'$$ concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference of radius $$R_{\epsilon}$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
 
-Since overfitting can lead to very erroneous predictions, the question is whether one can put a bound on the probability of that happening. Suppose we have a bound on this probability of the form
+Since overfitting can lead to very erroneous predictions, it is important to estimate the chance of that happening. Suppose we have a bound on this probability of the form
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta$$ (1)
 
-Note that this is the probability of drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Then we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
+Note that this is the probability while drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon$$.
+
+A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form (1).
+
+$$\begin{align}
+a=y
+\end{align}
+$$
 
 In the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$.  
