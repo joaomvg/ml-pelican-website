@@ -13,15 +13,25 @@ toc: true
 
 ### 1. The learning problem
 
-PAC stands for "probably approximately correct". As the name suggests, it relates to the probability, or confidence, of a quantity to be approximately correct. This is in essence what machine learning tries to do.  
+PAC stands for "probably approximately correct". In machine learning we want to find a hypothesis that is as close as possible to the ground truth. Since we only have access to a sample of the real distribution, the hypothesis that one builds is itself a function of the sample data, and therefore it is a random variable.  The problem that we want to solve is whether the sample error incurred in choosing a particular hypothesis  is approximately the same as the exact distribution error, within a certain confidence.
 
-Suppose we have a classification problem with $$N$$ classes $$y_i\in {y_0,y_1,\ldots,y_{N-1}}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, usually represented as a vector $$(f_1,f_2,\ldots,f_Q)$$, and we want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
+Suppose we have a classification problem with $$N$$ classes $$y_i\in {y_0,y_1,\ldots,y_{N-1}}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, and represented as a vector $$(f_1,f_2,\ldots,f_Q)$$. We want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
 
 $$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
 
-This map, however, does not always exist. In this case we can only determine the class up to a certain confidence level. An example, is in image recognition where one attempts to classify pictures. Imagine that we want to determine whether the picture in hands corresponds to a dog or not. As humans, typically we find easy to identify a dog in a picture. But what if the picture was taken with a weird angle or the animal in it is actually a wolf that looks like a dog. The truth is that one cannot define exactly the class of a dog solely from the information that is stored in a picture. If we had access to other features like animal hair, body temperature, height to mass ratio, and so on, we would have been much more confident about the classification. Ultimately, having genetic information would allow us to unequivocally identify the subject (would it?).
+This map, however, does not always exist. In this case we can only determine the class up to a certain confidence level. We say that the learning problem is *agnostic*.
 
-Let us assume for the moment that such a map exists. Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
+Let us assume for the moment that such a map exists. The learner chooses a set of hypothesis $$\mathcal{H}={h_1,\ldots,h_n}$$ and uses the empirical risk
+
+$$L_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
+
+with $$\mathbb{I}(.)$$ the Kronecker delta function, to find a hypothesis $$h_S\in \mathcal{H}$$ that minimises the sample error:
+
+$$h_S=\text{argmin}_{h\in \mathcal{H}}L_S(h)$$
+
+The empirical or sample error then equals $$\text{min}L_S(h)$$. If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min}L_S(h)=0$$. In this case the hypothesis is *overfitting* the data. As an example, we can memorise the data. Although this results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform in unseen data. 
+
+Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
 
 ![](/images/PAC learning_1.png){: .align-center}
 *Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue, depending on whether they are inside or outside of the circle, respectively.*
@@ -68,4 +78,6 @@ with probability $$1-\delta$$.
 
 ### 2. Finite hypothesis classes are PAC learnable
 
-asdasd
+We have a finite hypothesis class with $$B$$ hypothesis, that is, $$H_B=\{h_1,\ldots,h_B\}$$. We also assume for the moment that this class is realisable, meaning that it contains $$h^\star$$, the ground truth. We want to show that
+
+$$\mathbb{P}(S: \forall h \in H_B, L(D,h)>\epsilon)<\delta$$
