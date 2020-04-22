@@ -15,21 +15,21 @@ toc: true
 
 PAC stands for "probably approximately correct". In machine learning we want to find a hypothesis that is as close as possible to the ground truth. Since we only have access to a sample of the real distribution, the hypothesis that one builds is itself a function of the sample data, and therefore it is a random variable.  The problem that we want to solve is whether the sample error incurred in choosing a particular hypothesis  is approximately the same as the exact distribution error, within a certain confidence.
 
-Suppose we have a classification problem with $$N$$ classes $$y_i\in {y_0,y_1,\ldots,y_{N-1}}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, and represented as a vector $$(f_1,f_2,\ldots,f_Q)$$. We want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
+Suppose we have a classification problem with $$N$$ classes $$y_i\in \{y_0,y_1,\ldots,y_{N-1}\}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, and represented as a vector $$(f_1,f_2,\ldots,f_Q)$$. We want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
 
 $$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
 
 This map, however, does not always exist. In this case we can only determine the class up to a certain confidence level. We say that the learning problem is *agnostic*.
 
-Let us assume for the moment that such a map exists. The learner chooses a set of hypothesis $$\mathcal{H}={h_1,\ldots,h_n}$$ and uses the empirical risk
+Let us assume for the moment that such a map exists. The learner chooses a set of hypothesis $$\mathcal{H}=\{h_1,\ldots,h_n\}$$ and uses the empirical risk defined as
 
 $$L_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
 
-with $$\mathbb{I}(.)$$ the Kronecker delta function, to find a hypothesis $$h_S\in \mathcal{H}$$ that minimises the sample error:
+with $$\mathbb{I}(.)$$ the Kronecker delta function, to find a hypothesis $$h_S\in \mathcal{H}$$ that minimises this error:
 
 $$h_S=\text{argmin}_{h\in \mathcal{H}}L_S(h)$$
 
-The empirical or sample error then equals $$\text{min}L_S(h)$$. If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min}L_S(h)=0$$. In this case the hypothesis is *overfitting* the data. As an example, we can memorise the data. Although this results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform in unseen data. 
+The empirical error then equals $$\text{min} L_S(h)$$. If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min} L_S(h)=0$$. In this case the hypothesis is *overfitting* the data. An example of overfitting hypothesis consists in memorising the data. Although this results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform in unseen data. In the minimisation problem above, one should find a solution that does well (small error) on a large ensemble of samples rather then having a very small error in a particular sample. Overfitting solutions  should be avoided as they can lead to misleading conclusions. 
 
 Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
 
