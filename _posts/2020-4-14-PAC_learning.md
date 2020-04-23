@@ -3,18 +3,20 @@ title: "Probably Approximately Correct (PAC) "
 date: 2020-04-14
 tags: [machine learning, data science]
 header:
-  teaser: /images/circle_learning_epsilon.png
+  #teaser: /images/circle_learning_epsilon.png
   #image: "/images/NeuralNetwork.jpg"
 excerpt: "One of the most important fundamental concepts of machine learning. We go over an example and later show a proof."
   #image: /images/circle_learning_epsilon.png
 mathjax: true
-toc: true
+#toc: true
 classes: wide
 ---
 
+## Table of Contents
+1. [PAC learning](# pac)
+2. [Proof](# proof)
 
-
-### 1. The learning problem
+### 1. The learning problem <a name="pac"></a>
 
 PAC stands for "probably approximately correct". In machine learning we want to find a hypothesis that is as close as possible to the ground truth. Since we only have access to a sample of the real distribution, the hypothesis that one builds is itself a function of the sample data, and therefore it is a random variable.  The problem that we want to solve is whether the sample error incurred in choosing a particular hypothesis  is approximately the same as the exact distribution error, within a certain confidence interval.
 
@@ -79,7 +81,7 @@ $$\mathcal{L}(D,h)\leq\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
 
 with probability $$1-\delta$$.
 
-### 2. Finite hypothesis classes are PAC learnable
+### 2. Finite hypothesis classes are PAC learnable <a name="proof"></a>
 
 We have a finite hypothesis class with $$B$$ hypothesis, that is, $$H_B=\{h_1,\ldots,h_B\}$$. We also assume for the moment that this class is realisable, meaning that it contains $$h^\star$$, the ground truth. We want to show that
 
