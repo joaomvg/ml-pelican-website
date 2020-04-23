@@ -3,11 +3,13 @@ title: "Probably Approximately Correct (PAC) "
 date: 2020-04-14
 tags: [machine learning, data science]
 header:
+  teaser: /images/circle_learning_epsilon.png
   #image: "/images/NeuralNetwork.jpg"
 excerpt: "One of the most important fundamental concepts of machine learning. We go over an example and later show a proof."
-  image: /images/circle_learning_epsilon.png
+  #image: /images/circle_learning_epsilon.png
 mathjax: true
 toc: true
+classes: wide
 ---
 
 
