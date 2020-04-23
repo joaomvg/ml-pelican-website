@@ -13,8 +13,8 @@ classes: wide
 ---
 
 ## Table of Contents
-1. [PAC learning](# pac)
-2. [Proof](# proof)
+1. [PAC learning](#pac)
+2. [Proof](#proof)
 
 <a name="pac"></a>
 ### 1. The learning problem
