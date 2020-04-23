@@ -4,7 +4,7 @@ date: 2020-04-14
 tags: [machine learning, data science]
 header:
   #image: "/images/NeuralNetwork.jpg"
-excerpt: "Machine Learning"
+excerpt: "One of the most important fundamental concepts of machine learning. We go over an example and later show a proof."
 mathjax: true
 toc: true
 ---
