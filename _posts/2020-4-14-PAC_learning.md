@@ -51,13 +51,13 @@ Assuming that the learner has prior knowledge of the ground truth (realisability
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h$$ is a circumference of radius $$R'$$ concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference of radius $$R_{\epsilon}$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
 
-It is important to estimate the probability of misclassifying data-points. To be measure how accurate the prediction is, one is interested in bounding the probability of making a bad prediction, that is,
+Given that this is an overfitting solution, one has to be careful of how well it generalises. It is possible that the generalisation error is indeed small for such a solution, but one has to estimate how probable is to generate such a solution using the empirical risk.  important to estimate the probability of misclassifying data-points. To be measure how accurate the prediction is, one is interested in bounding the probability of making a bad prediction, that is,
 
 $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)<\delta \tag{1}\label{eq1}$$
 
-Conversely, this tells us *with confidence of at least $$1-\delta$$ that
+Conversely, this tells us with confidence of at least $$1-\delta$$ that
 
-$$\mathcal{L}(D,h)\leq\epsilon \tag{2}\label{eq2}$$.*
+$$\mathcal{L}(D,h)\leq\epsilon \tag{2}\label{eq2}$$
 
 A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
 
