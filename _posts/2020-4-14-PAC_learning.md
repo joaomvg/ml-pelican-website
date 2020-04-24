@@ -85,6 +85,14 @@ with probability $$1-\delta$$.
 <a name="proof"></a>
 ### 2. Finite hypothesis classes are PAC learnable
 
-We have a finite hypothesis class with $$B$$ hypothesis, that is, $$H_B=\{h_1,\ldots,h_B\}$$. We also assume for the moment that this class is realisable, meaning that it contains $$h^\star$$, the ground truth. We want to show that
+Let us assume that we have a finite hypothesis class with $$M$$ hypothesis, that is, $$\mathcal{H}_N=\{h_1,\ldots,h_N\}$$, and that this class is realisable, meaning that it contains a $$h^\star$$ for which $L_S(h^\star)=0$ for all training sets. We want to upper bound the generalisation error of a hypothesis $$h_S$$ obtained using empirical risk minimisation, that is,
 
-$$\mathbb{P}(S: \forall h \in H_B, L(D,h)>\epsilon)<\delta$$
+$$\mathbb{P}_{x\sim D(x)}(S: L(D,h_S)>\epsilon)<\delta$$
+
+Define a bad hypothesis as a hypothesis that has generalization error bigger than $$\epsilon$$ (does not necessarily minimize the emprirical risk). Then the set of bad hypothesis is
+
+$$\mathcal{H}_B=\{h\in \mathcal{H}_N: L(D,h)>\epsilon\}$$
+
+Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $h_S$ with $L_S(h_S)=0$ but a generalisation error larger than $$\epsilon$$. In other words, the the datasets that can be overfitted,
+
+$$M=\{S: h\exists \mathcal{H}_B, L_S(h)=0\}$$
