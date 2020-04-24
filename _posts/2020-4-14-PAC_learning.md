@@ -21,54 +21,43 @@ classes: wide
 
 PAC stands for "probably approximately correct". In machine learning we want to find a hypothesis that is as close as possible to the ground truth. Since we only have access to a sample of the real distribution, the hypothesis that one builds is itself a function of the sample data, and therefore it is a random variable.  The problem that we want to solve is whether the sample error incurred in choosing a particular hypothesis  is approximately the same as the exact distribution error, within a certain confidence interval.
 
-Suppose we have a classification problem with $$N$$ classes $$y_i\in \{y_0,y_1,\ldots,y_{N-1}\}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, and represented as a vector $$(f_1,f_2,\ldots,f_Q)$$. We want to find a map $$\mathcal{G}$$ between these features and the corresponding class $$y$$:
+Suppose we have a binary classification problem (the same applies for multi-class) with classes $$y_i\in \{y_0,y_1\}$$, and we are given a training dataset $$S$$ with $$m$$ data-points. Each data-point is characterised by $$Q$$ features, and represented as a vector $$q=(q_1,q_2,\ldots,q_Q)$$. We want to find a map $$\mathcal{f}$$ between these features and the corresponding class $$y$$:
 
-$$\mathcal{G}: (f_1,f_2,\ldots,f_Q)\rightarrow y=\{y_0,y_1,\ldots, y_{N-1}\}$$
+$$\mathcal{f}: (q_1,q_2,\ldots,q_Q)\rightarrow \{y_0,y_1\}$$
 
-This map, however, does not always exist. In this case we can only determine the class up to a certain confidence level- we say that the learning problem is *agnostic*.
+This map, however, does not always exist. There are problems for which we can only determine the class up to a certain confidence level. In this case we say that the learning problem is *agnostic*, while when the map exists we say that the problem is *realisable*. For example, image recognition is agnostic.
 
-Let us assume for the moment that such a map exists. The learner chooses a set of hypothesis $$\mathcal{H}=\{h_1,\ldots,h_n\}$$ and uses the empirical risk defined as
+Let us assume for the moment that such a map exists. The learner chooses a set of hypothesis $$\mathcal{H}=\{h_1,\ldots,h_n\}$$ and thus introduces *bias* in the problem- a different learner may chose a different set of hypothesis. Then, in order to find the hypothesis that most accurately represents the data, the learner chooses one that has the smallest empirical risk, which is the error on the training set. That is, one tries to find the minimum of the sample loss function
 
-$$L_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
+$$L_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right],\;h\in \mathcal{H}$$
 
-with $$\mathbb{I}(.)$$ the Kronecker delta function, to find a hypothesis $$h_S\in \mathcal{H}$$ that minimises this error:
+with $$\mathbb{I}(.)$$ the Kronecker delta function. We denote the solution as $$h_S$$. The true or *generalization error* is defined instead as the unbiased average
 
-$$h_S=\text{argmin}_{h\in \mathcal{H}}L_S(h)$$
+$$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
 
-The empirical error then equals $$\text{min} L_S(h)$$. If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min} L_S(h)=0$$. For example, by memorising the data. In this case, we say that the hypothesis is *overfitting* the data. Although this results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform in unseen data. In the minimisation problem above, one should find a solution that does well (small error) on a large number of samples rather then having a very small error in a particular sample. Overfitting solutions  should be avoided as they can lead to misleading conclusions.
+where $$D(x)$$ is a distribution, that the learner may or may not know. In the case of classification, the generalisation error is also the probability of misclassifying a point $$\mathcal{L}(D,h)=\mathbb{P}_{x\sim D(x)}(h(x)\neq y(x))$$.
 
-Consider the problem of classifying points on a 2D plane as red or blue. The exact map is characterised by a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$. In most instances, we do not know this distribution.
+If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min}\;L_S(h_S)=0$$, for example, by memorising the data. In this case, we say that the hypothesis is *overfitting* the data. Although memorising results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform on unseen data. The solution performs very well on the data because the learner used prior knowledge to choose an hypothesis set with sufficient capacity to accommodate the entire dataset. In the above minimisation problem, one should find a solution that does well (small error) on a large number of samples rather then having a very small error in a particular sample. Overfitting solutions should be avoided as they can lead to misleading conclusions. Instead, the learner should aim at obtaining a training error that is comparable to the error obtained with different samples.
+
+To make things practical, consider the problem of classifying points on a 2D plane as red or blue. The decision boundary is a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$.
 
 ![](/images/PAC learning_1.png){: .align-center}
 *Here the circumference $$R$$ denotes the ground truth which classifies points as red or blue, depending on whether they are inside or outside of the circle, respectively.*
 
-The learning problem is to find a hypothesis $$h(x): x\rightarrow y$$ that has small error on unseen data.
-The *empirical error* or *training error* is given by a loss function calculated on the training dataset $$S$$ and defined as follows:
+The learning problem is to find a hypothesis $$h(x): x\rightarrow y=\{\text{blue},\text{red}\}$$ that has small error on unseen data.   
 
-$$\mathcal{L}_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right]$$
-
-which is just the ratio of the number of misclassified points over the total number of data-points. Here the function $$\mathbb{I}(.)$$ is the Kronecker delta function which gives one when the condition is satisfied and zero otherwise. The true error or *generalization error* is the unbiased estimator
-
-$$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
-
-and equals the probability of misclassifying a point:
-
-$$\mathcal{L}(D,h)=\mathbb{P}_{x\sim D(x)}(h(x)\neq y(x))$$
-
-When a hypotheses $$h(x)$$ that has zero empirical error one says that it *overfits* the data. This can be achieved, for example, by memorising all the training data. While this works well on the training set, it may lead to very misleading predictions on unseen data. The problem, explained simply, is due essentially to the following reasons: we may be overfitting on data that is not representative and so the hypotheses will generalise poorly, and secondly memorising all the data requires a very complex function $$h(x)$$ which leads to a prediction with high variance.   
-
-One of the simplest algorithms is to draw a decision boundary that is as close as possible to the most outward red (inward blue data-points). Note that we have chosen a set of hypothesis $$\mathcal{H}$$ that contains the ground truth: the set of concentric circumferences. This is called the *realizability assumption*. This guarantees that when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference $$R$$.  This choice of $$h\in \mathcal{H}$$, as represented in the figure below by the circumference $$R'$$, ensures that all the points in the sample data are correctly classified. However newly generated data samples may lie in between $$R'$$ and $$R$$, and therefore would be misclassified.
+Assuming that the learner has prior knowledge of the ground truth (realisability assumption), one of the simplest algorithms is to consider the set of concentric circumferences and minimise the empirical risk. One can achieve this by drawing a decision boundary that is as close as possible to the most outward red (or inward blue data-points). This guarantees that when $$m\rightarrow \infty$$ we recover the exact decision boundary: the circumference $$R$$.  The empirical risk minimisation problem gives the solution represented in the figure below by the circumference $$R'$$. However, newly generated data-points may lie in between $$R'$$ and $$R$$, and therefore would be misclassified.
 
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h$$ is a circumference of radius $$R'$$ concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference of radius $$R_{\epsilon}$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
 
-Since overfitting can lead to very erroneous predictions, it is important to estimate the chance of that happening. Suppose we have a bound on this probability of the form
+It is important to estimate the probability of misclassifying data-points. To be measure how accurate the prediction is, one is interested in bounding the probability of making a bad prediction, that is,
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)<\delta \tag{1}\label{eq1}$$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)<\delta \tag{1}\label{eq1}$$
 
-Note that the probability is calculated against drawing a sample $$S$$ with $$m$$ data-points and $$h$$ is the overfitting hypothesis that results from this sample. Conversely, we know  
+Conversely, this tells us *with confidence of at least $$1-\delta$$ that
 
-*with confidence of at least $$1-\delta$$ that $$\mathcal{L}(D,h)\leq\epsilon\tag{2}\label{eq2}$$.*
+$$\mathcal{L}(D,h)\leq\epsilon \tag{2}\label{eq2}$$.*
 
 A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
 
