@@ -32,13 +32,13 @@ Let us assume for the moment that such a map exists. The learner chooses a set o
 
 $$L_S(h)=\frac{1}{m}\sum_{i=1:m}\mathbb{I}\left[h(x_i)\neq y(x_i)\right],\;h\in \mathcal{H}$$
 
-with $$\mathbb{I}(.)$$ the Kronecker delta function. We denote the solution as $$h_S$$. The true or *generalization error* is defined instead as the unbiased average
+with $$\mathbb{I}(.)$$ the Kronecker delta function. Denote the solution of this optimisation problem as $$h_S$$. The true or *generalization error* is defined instead as the unbiased average
 
 $$\mathcal{L}(D,h)=\sum_x\mathbb{I}\left[h(x)\neq y(x)\right]D(x)$$
 
 where $$D(x)$$ is a distribution, that the learner may or may not know. In the case of classification, the generalisation error is also the probability of misclassifying a point $$\mathcal{L}(D,h)=\mathbb{P}_{x\sim D(x)}(h(x)\neq y(x))$$.
 
-If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min}\;L_S(h_S)=0$$, for example, by memorising the data. In this case, we say that the hypothesis is *overfitting* the data. Although memorising results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform on unseen data. The solution performs very well on the data because the learner used prior knowledge to choose an hypothesis set with sufficient capacity to accommodate the entire dataset. In the above minimisation problem, one should find a solution that does well (small error) on a large number of samples rather then having a very small error in a particular sample. Overfitting solutions should be avoided as they can lead to misleading conclusions. Instead, the learner should aim at obtaining a training error that is comparable to the error obtained with different samples.
+If we choose appropriately $$\mathcal{H}$$ we may find $$\text{min}\;L_S(h_S)=0$$. This can happen, for example, by memorising the data. In this case, we say that the hypothesis is *overfitting* the data. Although memorising results in zero empirical error, the solution is not very instructive because it does not give information of how well it will perform on unseen data. The solution performs very well on the data because the learner used prior knowledge to choose an hypothesis set with sufficient capacity (or complexity) to accommodate the entire dataset. In the above minimisation problem, one should find a solution that does well (small error) on a large number of samples rather then having a very small error in a particular sample. Overfitting solutions should be avoided as they can lead to misleading conclusions. Instead, the learner should aim at obtaining a training error that is comparable to the error obtained with different samples.
 
 To make things practical, consider the problem of classifying points on a 2D plane as red or blue. The decision boundary is a circumference of radius $$R$$ concentric with the origin of the plane, which colours points that are inside as red and outside as blue. See figure below. The training dataset consists of $$m$$ data-points $$\mathbb{x}=(x_1,x_2)$$ sampled independently and identically distributed (i.i.d) from a distribution $$D(x)$$.
 
@@ -52,23 +52,23 @@ Assuming that the learner has prior knowledge of the ground truth (realisability
 ![](/images/circle_learning_epsilon.png){: .align-center}
 *a) The hypothesis $$h$$ is a circumference of radius $$R'$$ concentric with the origin and it is determined by the most outward red data-point. This ensures that all training set $$S$$ is correctly classified. b) The circumference of radius $$R_{\epsilon}$$ corresponds to a hypothesis $$h_{\epsilon}$$ that has generalization error $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$.*
 
-Given that this is an overfitting solution, one has to be careful of how well it generalises. It is possible that the generalisation error is indeed small for such a solution, but one has to estimate how probable is to generate such a solution using the empirical risk.  important to estimate the probability of misclassifying data-points. To be measure how accurate the prediction is, one is interested in bounding the probability of making a bad prediction, that is,
+Given that this is an overfitting solution, one has to be careful of how well it generalises. It is possible that the generalisation error is small for such a solution, but one has to be confident of how common this situation may be. If the sample that led to that solution is a rare event then we should not trust its predictions. Therefore we are interested in bounding the probability of making a bad prediction, that is,
 
 $$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)<\delta \tag{1}\label{eq1}$$
 
 Conversely, this tells us with confidence of at least $$1-\delta$$ that
 
-$$\mathcal{L}(D,h)\leq\epsilon \tag{2}\label{eq2}$$
+$$\mathcal{L}(D,h_S)\leq\epsilon \tag{2}\label{eq2}$$
 
-A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1}.
+A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on the probability of the form \eqref{eq1} with $$\epsilon, \delta$$ arbitrary.
 
-In  the case of the circumference example, we know that $$\mathcal{L}(D,h)=\epsilon$$ happens for a radius $$R_{\epsilon}$$. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalization error larger than $$\epsilon$$. The probability of drawing a point and falling in the region between $$R'$$ and $$R$$ is precisely $$\epsilon$$. Therefore the probability of falling outside that region is $$1-\epsilon$$. It is then easy to see that the probability that we need equals
+In  the case of the circumference example, define $$R_{\epsilon}$$ for which $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$ with $$h_{\epsilon}$$ the corresponding solution. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalisation error larger than $$\epsilon$$. The probability of sampling a point and falling in the region between $$R_{\epsilon}$$ and $$R$$ is precisely $$\epsilon$$. Conversely the probability of falling outside that region is $$1-\epsilon$$. It is then easy to see that the probability that we need equals
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h)>\epsilon)=(1-\epsilon)^m $$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)=(1-\epsilon)^m $$
 
 Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$. Hence using equation \eqref{eq2}, we have
 
-$$\mathcal{L}(D,h)\leq\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
+$$\mathcal{L}(D,h_S)\leq\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$
 
 with probability $$1-\delta$$.
 
