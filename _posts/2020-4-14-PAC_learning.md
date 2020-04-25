@@ -99,7 +99,7 @@ $$\begin{align}
 \mathbb{P}(S\in M)\leq \sum_{h\in \mathcal{H}_B} \mathbb{P}(S: L_S(h)=0)
 \end{align}$$
 
-Now for each $$h\in\mathbb{H}$$ we can put a bound on $$\mathbb{P}(S: L_S(h)=0)$$. Since we want $$\mathcal{L}(D,h)>\epsilon$$, the probability of misclassifying a data-point is larger than $$\epsilon$$, and conversely a point will correctly classified with probability $$1-\leq \epsilon$$. Therefore, as the solution is always overfitting and so all the points are correctly classified, we have
+Now for each $$h\in\mathcal{H}$$ we can put a bound on $$\mathbb{P}(S: L_S(h)=0)$$. Since we want $$\mathcal{L}(D,h)>\epsilon$$, the probability of misclassifying a data-point is larger than $$\epsilon$$, and conversely a point will correctly classified with probability $$1-\leq \epsilon$$. Therefore, as the solution is always overfitting and so all the points are correctly classified, we have
 
 $$\mathbb{P}(S: L_S(h)=0)\leq (1-\epsilon)^m$$
 
