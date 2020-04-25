@@ -109,7 +109,7 @@ $$\begin{align}
 \mathbb{P}(S\in M)\leq \sum_{h\in \mathcal{H}_B}(1-\epsilon)^m\leq |\mathcal{H}|(1-\epsilon)^m\leq |\mathcal{H}|e^{-\epsilon m}
 \end{align}$$
 
-Setting $$\delta=\mathcal{H} e^{-\epsilon m}$$, we have with a probability of at least $$1-\delta$$ that
+Setting $$\delta=| \mathcal{H} | e^{-\epsilon m}$$, we have with a probability of at least $$1-\delta$$ that
 
 $$\mathcal{L}(D,h_S)\leq \frac{1}{m}\ln\left(\frac{\mathcal{H}}{\delta}\right)$$
 
