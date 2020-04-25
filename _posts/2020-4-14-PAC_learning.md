@@ -64,7 +64,7 @@ A *PAC learnable hypothesis* is a hypothesis for which one can put a bound on th
 
 In  the case of the circumference example, define $$R_{\epsilon}$$ for which $$\mathcal{L}(D,h_{\epsilon})=\epsilon$$ with $$h_{\epsilon}$$ the corresponding solution. Therefore any hypothesis corresponding to a radius less than $$R_{\epsilon}$$ leads to a generalisation error larger than $$\epsilon$$. The probability of sampling a point and falling in the region between $$R_{\epsilon}$$ and $$R$$ is precisely $$\epsilon$$. Conversely the probability of falling outside that region is $$1-\epsilon$$. It is then easy to see that the probability that we need equals
 
-$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)=(1-\epsilon)^m $$
+$$\mathbb{P}_{S \sim D^m(x)}(\mathcal{L}(D,h_S)>\epsilon)=(1-\epsilon)^m$$
 
 Using the bound $$1-\epsilon<e^{-\epsilon}$$ we can choose $$\delta=e^{-\epsilon m}$$, and thus equivalently $$\epsilon=\frac{1}{m}\ln\left(\frac{1}{\delta}\right)$$. Hence using equation \eqref{eq2}, we have
 
@@ -77,7 +77,7 @@ with probability $$1-\delta$$.
 
 Let us assume that we have a finite hypothesis class with $$N$$ hypothesis, that is, $$\mathcal{H}_N=\{h_1,\ldots,h_N\}$$, and that this class is realisable, meaning that it contains a $$h^\star$$ for which $$L_S(h^\star)=0\;\forall S$$. We want to upper bound the generalisation error of a hypothesis $$h_S$$ obtained using empirical risk minimisation, that is, we want to find a bound of the form
 
-$$\mathbb{P}_{x\sim D(x)}(S: L(D,h_S)>\epsilon)<\delta$$
+$$\mathbb{P}_{x\sim D(x)}(S: L(D,h_S)>\epsilon)<\delta\tag{3}\label{eq3}$$
 
 Define $$\mathcal{H}_B$$ as the set of hypotheses that have generalisation error larger than $$\epsilon$$ (it does not necessarily minimise the emprirical risk). We call this the set of bad hypotheses
 
@@ -86,6 +86,18 @@ $$\mathcal{H}_B=\{h\in \mathcal{H}_N: L(D,h)>\epsilon\}$$
 Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $$h_S\in \mathcal{H}_B$$ with $$L_S(h_S)=0$$. That is,
 
 $$M=\{S: h\exists \mathcal{H}_B, L_S(h)=0\}$$
+
+Since we assume the class is realisable, the hypothesis $$h_S$$ in equation $$\eqref{eq3}$$ must have $$L_S(h_S)=0$$, and therefore the sample data is a misleading dataset. So we need the probability of sampling a misleading dataset $$S\in M$$. Using
+
+$$\begin{align}
+M=\cup_{h\in \mathcal{H}_B} \{S: L_S(h)=0\}
+\end{align}$$
+
+and the property $$\mathbb{P}(A\cup B)<\mathbb{P}(A)+\mathbb{P}(B)$$, we have
+
+$$\begin{align}
+\mathbb{P}(S\in M)\leq \sum_{h\in \mathcal{H}_B} \mathbb{P}(S: L_S(h)=0)
+\end{align}$$
 
 <a name="agnostic"></a>
 ### 3. Agnostic learning
