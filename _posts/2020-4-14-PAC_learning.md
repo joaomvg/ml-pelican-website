@@ -111,7 +111,7 @@ $$\begin{align}
 
 Setting $$\delta=\mid\mathcal{H}\mid e^{-\epsilon m}$$, we have with a probability of at least $$1-\delta$$ that
 
-$$\mathcal{L}(D,h_S)\leq \frac{1}{m}\ln\left(\frac{\mathcal{H}}{\delta}\right)$$
+$$\mathcal{L}(D,h_S)\leq \frac{1}{m}\ln\left(\frac{\mid\mathcal{H}\mid}{\delta}\right)$$
 
 <a name="agnostic"></a>
 ### 3. Agnostic learning
