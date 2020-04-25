@@ -14,7 +14,8 @@ classes: wide
 
 ## Table of Contents
 1. [PAC learning](#pac)
-2. [Proof](#proof)
+2. [Proof for finite classes](#proof)
+3. [Agnostic case](# agnostic)
 
 <a name="pac"></a>
 ### 1. The learning problem
@@ -74,14 +75,17 @@ with probability $$1-\delta$$.
 <a name="proof"></a>
 ### 2. Finite hypothesis classes are PAC learnable
 
-Let us assume that we have a finite hypothesis class with $$M$$ hypothesis, that is, $$\mathcal{H}_N=\{h_1,\ldots,h_N\}$$, and that this class is realisable, meaning that it contains a $$h^\star$$ for which $L_S(h^\star)=0$ for all training sets. We want to upper bound the generalisation error of a hypothesis $$h_S$$ obtained using empirical risk minimisation, that is,
+Let us assume that we have a finite hypothesis class with $$N$$ hypothesis, that is, $$\mathcal{H}_N=\{h_1,\ldots,h_N\}$$, and that this class is realisable, meaning that it contains a $$h^\star$$ for which $$L_S(h^\star)=0\;\forall S$$. We want to upper bound the generalisation error of a hypothesis $$h_S$$ obtained using empirical risk minimisation, that is, we want to find a bound of the form
 
 $$\mathbb{P}_{x\sim D(x)}(S: L(D,h_S)>\epsilon)<\delta$$
 
-Define a bad hypothesis as a hypothesis that has generalization error bigger than $$\epsilon$$ (does not necessarily minimize the emprirical risk). Then the set of bad hypothesis is
+Define $$\mathcal{H}_B$$ as the set of hypotheses that have generalisation error larger than $$\epsilon$$ (it does not necessarily minimise the emprirical risk). We call this the set of bad hypotheses
 
 $$\mathcal{H}_B=\{h\in \mathcal{H}_N: L(D,h)>\epsilon\}$$
 
-Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $h_S$ with $L_S(h_S)=0$ but a generalisation error larger than $$\epsilon$$. In other words, the the datasets that can be overfitted,
+Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $h_S\in \mathcal{H}_B$ with $L_S(h_S)=0$. That is,
 
 $$M=\{S: h\exists \mathcal{H}_B, L_S(h)=0\}$$
+
+<a name="agnostic"></a>
+### 3. Agnostic learning
