@@ -12,10 +12,10 @@ mathjax: true
 classes: wide
 ---
 
-## Table of Contents
+### Table of Contents
 1. [PAC learning](#pac)
 2. [Proof for finite classes](#proof)
-3. [Agnostic case](# agnostic)
+3. [Agnostic case](#agnostic)
 
 <a name="pac"></a>
 ### 1. The learning problem
@@ -83,9 +83,10 @@ Define $$\mathcal{H}_B$$ as the set of hypotheses that have generalisation error
 
 $$\mathcal{H}_B=\{h\in \mathcal{H}_N: L(D,h)>\epsilon\}$$
 
-Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $h_S\in \mathcal{H}_B$ with $L_S(h_S)=0$. That is,
+Similarly one can define the set of misleading training sets, as those that lead to a hypothesis $$h_S\in \mathcal{H}_B$$ with $$L_S(h_S)=0$$. That is,
 
 $$M=\{S: h\exists \mathcal{H}_B, L_S(h)=0\}$$
 
 <a name="agnostic"></a>
 ### 3. Agnostic learning
+aasd
