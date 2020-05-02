@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Bayes Optimal Classifier" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Bayes Optimal Classifier"; Date: 2020-04-26; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Bayes Optimal Classifier"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-04-26T00:00:00+02:00" itemprop="datePublished">Sun 26 April 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><h3><strong>Table of contents</strong></h3>
+<ol>
+<li><a href="#bayes">Optimal classifier</a></li>
+<li><a href="#multiclass">Multiple classes</a></li>
+</ol>
+<p><a name="bayes"></a></p>
+<h3><span style="color:dark"> <strong>1. Optimal classifier</strong> </span></h3>
+<p><br/>
+The Bayes optimal classifier is a binary predictor which has the lowest generalisation error. That is, for any other predictor <span class="math">\(g\)</span> we always have</p>
+<div class="math">$$L(D,h_{\text{Bayes}})\leq L(D,g)$$</div>
+<p>The Bayes predictor is defined as follows:</p>
+<div class="math">\begin{equation}
+h_{\text{Bayes}}=\text{argmax}_{y}P(y|x)
+\end{equation}</div>
+<p><em>Proof:</em></p>
+<div class="math">\begin{equation}
+L(D,g)=\sum_{x}\mathbb{1}\left[g(x)\neq y(x)\right]D(x,y)
+\end{equation}</div>
+<p>Use the Bayes property <span class="math">\(D(x,y)=D(y|x)D(x)\)</span> and the fact that we have only two classes, say <span class="math">\(y=0,1\)</span>, then</p>
+<div class="math">\begin{equation}
+L(D,g)=\sum_{x:g(x)=0}D(y=1|x)D(x)+\sum_{x:g(x)=1}D(y=0|x)D(x)\\
+\end{equation}</div>
+<p>
+Use the property that <span class="math">\(a\geq \text{Min}(a,b)\)</span> and write</p>
+<div class="math">\begin{eqnarray}
+L(D,g)\geq&amp;&amp;\sum_{x:g(x)=0}\text{Min}\big(D(y=1|x),D(y=0|x)\big)D(x)+\sum_{x:g(x)=1}\text{Min}\big(D(y=1|x),D(y=0|x)\big)D(x)\\
+&amp;&amp;=\sum_{x}\text{Min}\big(D(y=1|x),D(y=0|x)\big)D(x)
+\end{eqnarray}</div>
+<p>
+Note that the r.h.s is precisely the loss of the Bayes classifier. That  is,</p>
+<div class="math">\begin{eqnarray}
+L(D,h_{\text{Bayes}})&amp;=&amp;\sum_{x:h(x)=0}D(y=1|x)D(x)+\sum_{x:h(x)=1}D(y=0|x)D(x)\\
+&amp;=&amp;\sum_{D(y=1|x)&lt;D(y=0|x)}D(y=1|x)D(x)+\sum_{D(y=1|x)&gt;D(y=0|x)}D(y=0|x)D(x)
+\end{eqnarray}</div>
+<p><a name="multiclass"></a></p>
+<h3><span style="color:dark"> <strong>2. Multiple classes</strong> </span></h3>
+<p><br/>
+Can we generalise this to multi-classes? We can use <span class="math">\(a\geq \text{Min}(a,b,c,\ldots)\)</span> to write</p>
+<div class="math">\begin{equation}\label{eq1}
+L(D,g)\geq \sum_{x:g(x)\neq y_1}\text{Min}\big(D(y_1|x),D(y_2|x),\ldots\big)D(x)+\sum_{x:g(x)\neq y_2}\text{Min}\big(D(y_1|x),D(y_2|x),\ldots\big)D(x)+\ldots \tag{1}
+\end{equation}</div>
+<p>Suppose we extend the Bayes optimal classifier to more classes by predicting the class that has higher probability. Then we have</p>
+<div class="math">\begin{equation}
+L(D,h)=\sum_{x:h(x)=y_1\cup h(x)=y_2\ldots}D(y_0|x)D(x)+\sum_{x:h(x)=y_0\cup h(x)=y_2\ldots}D(y_1|x)D(x)+\ldots\\
+\end{equation}</div>
+<p>Since <span class="math">\(h(x)\)</span> is a predictor the sets <span class="math">\(S_i=\{x:h(x)=y_i\}\)</span> are disjoint and so we can simplify the sums above. For example</p>
+<div class="math">$$\sum_{x:h(x)=y_1\cup h(x)=y_2\ldots}D(y_0|x)D(x)=\sum_{x:h(x)=y_1}D(y_0|x)D(x)+\sum_{x:h(x)=y_2\ldots}D(y_0|x)D(x)+\ldots$$</div>
+<p>The issue we face now is that since we have multiple classes the maximum value does not determine uniquely the minimum value, and vice-versa, and hence we cannot apply the reasoning used in the binary case. Following similar steps as before, one can show that the multi-class Bayes classifier does not saturate the bound \eqref{eq1}. As a matter of fact there is no classifier that saturates the bound \eqref{eq1}. For that to happen we would need a classifier <span class="math">\(h(x)\)</span> such that when <span class="math">\(h(x)=y_i\)</span> we have <span class="math">\(\text{Min}\big(D(y_1|x),D(y_2|x),\ldots\big)=D(y_{k\neq i}|x)\,\forall i,k\)</span>. This means that for a fixed <span class="math">\(i\)</span> we have <span class="math">\(D(y_{k\neq i}|x)=D(y_{j\neq i}|x)\, \forall k,j\neq i\)</span>. It is then easy to see that this implies that <span class="math">\(D(y_i|x)\)</span> is a constant, independent of <span class="math">\(x\)</span>, contradicting our assumption.</p>
+<h3><strong>Python implementation</strong></h3>
+<p><br/></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
+</pre></div>
+
+
+<p>We compare three different hypotheses:</p>
+<ol>
+<li>Optimal Bayes: <span class="math">\(h_{\text{Bayes}}\)</span></li>
+<li>Circumference hypothesis: <span class="math">\(h\)</span></li>
+<li>Gaussian Naive Bayes: <span class="math">\(h_{GNB}\)</span></li>
+</ol>
+<div class="highlight"><pre><span></span><span class="c1">#P(y|x) definition</span>
+<span class="k">def</span> <span class="nf">prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">q</span><span class="o">=</span><span class="mf">0.3</span><span class="p">):</span> <span class="c1">#prob of y=1</span>
+
+    <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">p</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">q</span>
+
+<span class="c1">#coloring function</span>
+<span class="k">def</span> <span class="nf">color</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span><span class="o">&lt;=</span><span class="n">prob</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;blue&#39;</span> <span class="c1">#y=1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;red&#39;</span> <span class="c1">#y=0</span>
+</pre></div>
+
+
+<p>The code that defines the various hypotheses:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">r</span><span class="o">=</span><span class="mf">1.2</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">&gt;=</span><span class="n">r</span><span class="p">:</span> <span class="c1">#if r=1 then h(x)=bayes(x)</span>
+        <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
+
+<span class="k">def</span> <span class="nf">bayes</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">prob</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;blue&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;red&#39;</span>
+
+<span class="k">def</span> <span class="nf">GNB</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">GaussianNB</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]],</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">])</span>
+    <span class="n">ypred</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">ypred</span>
+</pre></div>
+
+
+<div class="highlight"><pre><span></span><span class="n">errors</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span> <span class="c1">#draw multiple samples from multivariate_normal</span>
+    <span class="n">sample</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="n">class_y</span><span class="o">=</span><span class="p">[</span><span class="n">color</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">]</span>
+    <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;y&quot;</span><span class="p">])</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">class_y</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;h_bayes&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">bayes</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;GNB&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">GNB</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+    <span class="n">error_GNB</span><span class="o">=</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span><span class="o">!=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;GNB&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">error_bayes</span><span class="o">=</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span><span class="o">!=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;h_bayes&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">error_h</span><span class="o">=</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">]</span><span class="o">!=</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">error_h</span><span class="p">,</span><span class="n">error_GNB</span><span class="p">,</span><span class="n">error_bayes</span><span class="p">])</span>
+</pre></div>
+
+
+<p>then check whether the other hypotheses have smaller error:</p>
+<div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errors</span> <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">or</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+</pre></div>
+
+
+<p>Note that these are the sample errors. Therefore, it is possible to find an error smaller than the Bayes error. However, if we take large samples it becomes almost improbable for that to happen.</p>
+<p>Some plots:</p>
+<p><img alt="" height="600" src="/images/bayes_sample.png" style="display: block; margin: 0 auto" width="600">
+<img alt="" height="600" src="/images/optimal_bayes.png" style="display: block; margin: 0 auto" width="600">
+<img alt="" height="600" src="/images/optimal_bayes_GNB.png" style="display: block; margin: 0 auto" width="600"></p>
+<h3><strong>References</strong></h3>
+<p><br/>
+[1] <em>Understanding Machine Learning: from Theory to Algorithms</em>, Shai Ben-David and Shai Shalev-Shwartz</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/machine-learning.html">Machine Learning (3)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
