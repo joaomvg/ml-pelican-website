@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Data Science and Machine Learning</title>
-	<meta name="description" content="Coding, scientific development, finance, data analysis, visualization, statistics, and machine learning">
+	<title>"Hoeffding's inequality" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Hoeffding's inequality"; Date: 2020-05-05; Author: Joao Gomes">
 	<meta name="author" content="Joao Gomes">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -25,55 +25,60 @@
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/hoeffdings-inequality.html">
-		<h2 itemprop="name headline">"Hoeffding's inequality"</h2>
-	</a>
-	<time datetime="2020-05-05T00:00:00+02:00" itemprop="datePublished">Tue 05 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.</p></div>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/statistics.html" rel="category">Statistics</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/machine-learning.html" rel="tag">machine learning</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/the-rademacher-complexity.html">
-		<h2 itemprop="name headline">"The Rademacher complexity"</h2>
-	</a>
-	<time datetime="2020-05-02T00:00:00+02:00" itemprop="datePublished">Sat 02 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.</p></div>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/hyperplanes-and-classification.html">
-		<h2 itemprop="name headline">"Hyperplanes and classification"</h2>
-	</a>
-	<time datetime="2020-05-01T00:00:00+02:00" itemprop="datePublished">Fri 01 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We study the <span class="math">\(\{0,1\}\)</span> classification problem in <span class="math">\(\mathbb{R}^d\)</span> using hyperplanes. We show that the VC dimension is <span class="math">\(d+1\)</span>.</p>
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Hoeffding's inequality"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-05-05T00:00:00+02:00" itemprop="datePublished">Tue 05 May 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/statistics.html" rel="category">Statistics</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/machine-learning.html" rel="tag">machine learning</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><h3><strong>Hoeffding's inequality</strong></h3>
+<p><br/>
+Let <span class="math">\(X_1,\ldots,X_m\)</span> be <span class="math">\(m\)</span> independent random variables (not necessarily identically distributed). All <span class="math">\(X_i\)</span> takes values in <span class="math">\([a_i,b_i]\)</span>. Then for any <span class="math">\(\epsilon&gt;0\)</span> we have</p>
+<div class="math">$$\mathbb{P}(|S_m-E(S_m)|\geq\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2},\;S_m=\sum_{i=1}^mX_i$$</div>
+<p>If we have <span class="math">\(a_i=a_j=a\)</span> and <span class="math">\(b_i=b_j=b\)</span> for <span class="math">\(\forall i,j\)</span> then we have a version of the Hoeffding's inequality which is most known</p>
+<div class="math">$$\mathbb{P}(|\hat{X}_m-E(\hat{X}_m)|\geq\epsilon)\leq e^{-2m\epsilon^2/(b-a)^2},\; \hat{X}_m=\frac{1}{m}\sum_{i=1}^mX_i$$</div>
+<p>First we show that for <span class="math">\(t&gt;0\)</span> we have
+</p>
+<div class="math">$$\mathbb{P}(x\geq y)\leq e^{-ty}E(e^{t x})\label{eq1}\tag{1}$$</div>
+<p>Note that
+</p>
+<div class="math">$$e^{-ty}E(e^{tx})=\sum_{x\in X}e^{t(x-y)}P(x)$$</div>
+<p>
+with <span class="math">\(\sum_{x\in X}P(x)=1\)</span>. We expand the r.h.s as
+</p>
+<div class="math">\begin{eqnarray}\sum_{x\in X}e^{t(x-y)}P(x)&amp;=&amp;\sum_{x\geq y}e^{t(x-y)}P(x)+\sum_{x&lt;y}e^{t(x-y)}P(x)\\
+&amp;\geq &amp;\sum_{x\geq y}e^{t(x-y)}P(x)\\
+&amp;\geq &amp; \sum_{x\geq y}e^{t(x-y)}P(x)=\sum_{x\geq y}P(x)=P(x\geq y)\end{eqnarray}</div>
+<p>Then we use the auxiliary distribution <span class="math">\(P'(a)=(b-x)/(b-a)\)</span> and <span class="math">\(P'(b)=(x-a)/(b-a)\)</span> with <span class="math">\(a\leq x\leq b\)</span> and <span class="math">\(P'(a)+P'(b)=1\)</span>, to show that
+</p>
+<div class="math">$$e^{tx}\leq \frac{b-x}{b-a}e^{ta}+\frac{x-a}{b-a}e^{tb}$$</div>
+<p>
+because of the convexity of <span class="math">\(e^{tx}\)</span>. Assuming that <span class="math">\(E(x)=0\)</span> (this implies that <span class="math">\(a&lt;0\)</span> and <span class="math">\(b&gt;0\)</span>), we take the average on <span class="math">\(x\)</span> on both sides of the above equation to get</p>
+<div class="math">$$E(e^{tx})\leq \frac{b}{b-a}e^{ta}-\frac{a}{b-a}e^{tb}=\frac{e^{\phi(t)}}{b-a}$$</div>
+<p>with <span class="math">\(\phi(t)=\ln(be^{ta}-ae^{tb})\)</span>. We can show that <span class="math">\(\phi(t)\)</span> is a convex function of <span class="math">\(t\)</span> with <span class="math">\(\phi''(t)\leq (b-a)^2/4\)</span> (essentially we need to show that <span class="math">\(\phi''(t)\)</span> has a maximum equal to <span class="math">\((b-a)^2/4\)</span>). Using that <span class="math">\(\phi'(t=0)=0\)</span> we also have <span class="math">\(\phi'(t)\leq (b-a)^2t/4\)</span>. Then integrating again we have <span class="math">\(\phi(t)\leq \phi(0)+(b-a)^2t^2/8\)</span>. This gives us</p>
+<div class="math">$$E(e^{tx})\leq e^{t^2(b-a)^2/8}\label{eq2}\tag{2}$$</div>
+<p>Using inequalities \eqref{eq1} and \eqref{eq2}, we calculate
+</p>
+<div class="math">\begin{eqnarray}P(\hat{X}_m-E(\hat{X}_m)&gt;\epsilon)&amp;\leq&amp; e^{-t\epsilon}E(e^{t(\hat{X}_m-E(\hat{X}_m))})\\
+&amp;=&amp;e^{-t\epsilon}\prod_iE(e^{t(X_i-E(X))})\\
+&amp;\leq&amp; e^{-t\epsilon} e^{t^2\sum_i(b_i-a_i)^2/8}\end{eqnarray}</div>
+<p>We can choose <span class="math">\(t\)</span> such that the bound is optimal (this corresponds to the minimum of the exponent). We obtain
+</p>
+<div class="math">$$P(\hat{X}_m-E(\hat{X}_m)&gt;\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2}$$</div>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -136,79 +141,10 @@
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
 </script></div>
-	Cover:
-	<span>
-	    <img src="/images/hyperplanes.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
+	<hr>
+	<h2>Comments</h2>
 </div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/vc-dimension.html">
-		<h2 itemprop="name headline">"VC dimension"</h2>
-	</a>
-	<time datetime="2020-04-30T00:00:00+02:00" itemprop="datePublished">Thu 30 April 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.</p></div>
-	Cover:
-	<span>
-	    <img src="/images/hyperplane_dichotomies.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/bayes-optimal-classifier.html">
-		<h2 itemprop="name headline">"Bayes Optimal Classifier"</h2>
-	</a>
-	<time datetime="2020-04-26T00:00:00+02:00" itemprop="datePublished">Sun 26 April 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>I explain the Bayes optimal classifier and provide some numerical examples.</p></div>
-	Cover:
-	<span>
-	    <img src="images/optimal_bayes.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
- <div class="pagination">
-<ul>
-    <li class="prev disabled"><a href="#">&larr; Previous</a></li>
-
-    <li class="active"><a href="/index.html">1</a></li>
-    <li class=""><a href="/index2.html">2</a></li>
-
-    <li class="next"><a href="/index2.html">Next &rarr;</a></li>
-
-</ul>
-</div> 		</div>
+		</div>
 	</div> 	<!-- <hr> -->
 </div> <!-- /container -->
 <footer class="aw-footer bg-danger">

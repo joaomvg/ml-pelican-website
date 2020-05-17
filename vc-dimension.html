@@ -46,9 +46,13 @@
 		</span>
 	</div>
 	<div itemprop="articleBody" class="article-body"><h3><strong>Table of contents</strong></h3>
-<p>1.<a href="#VC">VC dimension</a></p>
+<ol>
+<li><a href="#VC">VC dimension</a></li>
+<li><a href="#growth">Growth function</a></li>
+<li><a href="#genbounds">Generalisation bounds</a></li>
+</ol>
 <p><a name="VC"></a></p>
-<h3><strong>1. VC dimension and PAC learnability</strong></h3>
+<h3><strong>1. VC dimension</strong></h3>
 <p><br/>
 VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension of <span class="math">\(\mathcal{H}\)</span>, when <span class="math">\(\mathcal{H}\)</span> has infinite number of hypotheses. In the post on <a href="/probably-approximately-correct-pac.html">PAC learnability</a> we have shown that the circumference hypothesis is PAC learnable despite the class being infinite since each circumference is parametrised by a continuous parameter, the radius <span class="math">\(R\)</span>. One can find several other examples which depend on continuous parameters but they are nevertheless learnable. In this post we analyse necessary conditions for infinite classes to be PAC learnable.</p>
 <p>To do this, first we need to understand the concept of <em>shattering</em>. Say we have  a set of hypotheses <span class="math">\(\mathcal{H}=\{h_a(x)\}\)</span> from a domain <span class="math">\(\chi\)</span> to <span class="math">\(\{0,1\}\)</span>. Here <span class="math">\(a\)</span> is(are) a continuous parameter(s). Consider a subset <span class="math">\(C\subset \chi\)</span> consisting of a number of points <span class="math">\(C=\{c_1,c_2,\ldots,c_n\}\)</span>. The restriction of a hypothesis <span class="math">\(h_a(x)\in\mathcal{H}\)</span> to <span class="math">\(C\)</span> is <span class="math">\(\{h_a(c_1),h_a(c_2),\dots,h_a(c_n)\}\)</span>. By dialling the continuous parameter <span class="math">\(a\)</span> we generate images of the restriction <span class="math">\((h_a(c_1),h_a(c_2),\dots,h_a(c_n))=(1,0,1,\ldots),(0,0,1,\ldots),\ldots\)</span>. Depending on the set <span class="math">\(C\)</span> we may or not generate all the possible images, which total to <span class="math">\(2^n\)</span>. When it generates all possible images we say that <span class="math">\(\mathcal{H}\)</span> <em>shatters</em> <span class="math">\(C\)</span>. <em>The VC dimension is the dimension of the largest set <span class="math">\(C\)</span> that can be shattered.</em></p>
@@ -61,11 +65,48 @@ VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension 
 <p>Set of intervals <span class="math">\(h_{a,b}(x)=\mathbb{1}_{a\leq x\leq b}\)</span>, which returns one for a point inside the interval <span class="math">\([a,b]\)</span> and zero otherwise. Clearly <span class="math">\(h_{a,b}\)</span> shatters a single point. We can easily see that two points can also be shattered. However, a set with three points cannot be shattered. In the case we have <span class="math">\(h_{a,b}(c_1)=1\)</span> and <span class="math">\(h_{a,b}(c_2)=0\)</span> with <span class="math">\(c_2&gt;c_1\)</span> a third point <span class="math">\(c_3&gt;c_2\)</span> cannot have <span class="math">\(h_{a,b}(c_3)=1\)</span>. Therefore the VC dimension is <span class="math">\(VC_{\text{dim}}=2\)</span>.</p>
 </li>
 <li>
-<p>Set of hyperplanes in <span class="math">\(\mathbb{R}^2\)</span>. If a point lies on one side of the hyperplane it has value <span class="math">\(1\)</span>, and <span class="math">\(0\)</span> otherwise. We may have two different hypotheses consisting of the same hyperplane but labelling the points in an opposite way. It is easy to see that one and two point set can be shattered. Consider now a set of three non-collinear points (if they are collinear then we go back to the example of two-point set). The dichotomies with two ones and one zero, like <span class="math">\((1,1,0)\)</span>, and two zeros and one one, such as <span class="math">\((0,0,1)\)</span> can be easily generate. To obtain the remaining dichotomies <span class="math">\((0,0,0)\)</span> and <span class="math">\((1,1,1)\)</span> we take a hyperplane which has all points on one side or the other. Consider now four points. Take three non-collinear points. These form a triangle. If the fourth point is inside the triangle then the set cannot be shattered, since if the the three triangle vertices have the same value, say <span class="math">\(1\)</span>, then this implies that any point inside will also have the same value (<a name="fig1"></a>). If the fourth point is outside, then the four-polygon is convex, otherwise we fall back in the previous case.</p>
+<p>Set of hyperplanes in <span class="math">\(\mathbb{R}^2\)</span>. The hyperplane divides the space in two regions. A point falling on one side will have class zero, while if it falls on the other, will have class one. The same hyperplane can give rise to two different hypotheses by interchanging the labels between the sides. It is easy to see that one and two point set can be shattered. Consider now a three-point set. If they are collinear then there's always two combinations <span class="math">\((1,0,1)\)</span> and <span class="math">\((0,1,0)\)</span> that cannot be shattered. If they are not collinear, then the dichotomies with two ones and one zero, like <span class="math">\((1,1,0)\)</span>, and two zeros and one one, such as <span class="math">\((0,0,1)\)</span> can be generated. The remaining dichotomies <span class="math">\((0,0,0)\)</span> and <span class="math">\((1,1,1)\)</span> are generated by interchanging the sides. Therefore the set of three non-collinear points can be shattered. Consider now a set of four points and assume that three are non-collinear (if they are collinear then we fall back in the previous situation). The dichotomies depicted in the figure below (<a href="#dichotomies">Fig.1</a>) show two examples that cannot be generated. Thus showing that there is no four-point set that can be shattered. The VC dimension is therefore <span class="math">\(VC_{\text{dim}}=3\)</span>.</p>
+</li>
+<li>
+<p>Hyperplanes in <span class="math">\(\mathbb{R}^d\)</span>. One can show that the VC dimension is <span class="math">\(VC_{\text{dim}}=d+1\)</span>. The demonstration can be found in the post <a href="/hyperplanes-and-classification.html">Hyperplanes and classification</a>. This will be very useful when studying support-vector-machines.</p>
 </li>
 </ol>
-<p><img alt="fig1" height="400" src="/images/hyperplane_dichotomies.png" style="display: block; margin: 0 auto" title="Dichotomies" width="400">
-<em>Fig.1 Dichotomies that cannot be realised. a) Th fourth point is in the interior of the triangle. b) The set forms a convex four-polygon.</em> </p>
+<p><a name="dichotomies"></a>
+<img alt="dichotomies" height="400" src="/images/hyperplane_dichotomies.png" style="display: block; margin: 0 auto" width="400">
+  <em>Fig.1 Dichotomies that cannot be realised. a) The fourth point is in the interior of the triangle. b) The set forms a convex four-polygon.</em></p>
+<p>The VC dimension provides a measure of how complex a hypothesis class can be. If the class is increasingly complex it allows for larger sets to be shattered. This measure is purely combinatorial and does not rely on which distribution the points are sampled from.  </p>
+<p><a name="growth"></a></p>
+<h3><strong>2. The growth function</strong></h3>
+<p><br/>
+The growth function counts how many ways we can classify a set of fixed size using a hypothesis class. The proper definition is</p>
+<div class="math">$$\Pi(m)=\text{max}_{\substack{x_1,\ldots,x_m \subseteq X}}|(h(x_1),\ldots,h(x_m)),h:\mathcal{H}|$$</div>
+<p>When the set <span class="math">\(x_1,\ldots,x_m\)</span> is shattered by <span class="math">\(\mathcal{H}\)</span> one has <span class="math">\(\Pi(m)=2^m\)</span>. If in addition this is the largest shattered set, then <span class="math">\(\Pi(m)=2^{VC_{\text{dim}}}\)</span>.</p>
+<p>One of the most important aspects of the growth function is that for <span class="math">\(m&gt;VC_{\text{dim}}\)</span>, <span class="math">\(\Pi(m)\)</span> always has polynomial growth rather than exponential. This is demonstrated using the following statement:</p>
+<p><strong>Sauer's Lemma:</strong></p>
+<p><em>Let <span class="math">\(VC_{\text{dim}}=d\)</span>. Then for all <span class="math">\(m\)</span></em>
+</p>
+<div class="math">$$ \Pi(m)\leq \sum_{i=0}^{d}\left(\begin{array}{c}m \\ i\end{array}\right)$$</div>
+<p>For <span class="math">\(t\leq m\)</span> we have</p>
+<div class="math">$$\sum_{i=0}^{d}\left(\begin{array}{c}m \\ i\end{array}\right)\leq \sum_{i=0}^{m}\left(\begin{array}{c}m \\ i\end{array}\right)\left(\frac{m}{t}\right)^{d-i}=\left(\frac{m}{t}\right)^d\left(1+\frac{t}{m}\right)^m$$</div>
+<p>Using that <span class="math">\(1+x\leq e^x, \forall x\)</span>, we get
+</p>
+<div class="math">$$\left(\frac{m}{t}\right)^d\left(1+\frac{t}{m}\right)^m\leq \left(\frac{m}{t}\right)^d e^t$$</div>
+<p>Now we can set <span class="math">\(t=d\)</span> for which the bound becomes optimal, that is, <span class="math">\(t^{-d} e^t\geq d^{-d}e^d\)</span> (we can do this by finding the minimum of <span class="math">\(t-d\ln(t)\)</span>). Hence we obtain</p>
+<div class="math">$$\Pi(m)\leq \left(\frac{m}{d}\right)^d e^d$$</div>
+<p>
+<a name="genbounds"></a></p>
+<h3><strong>3. The generalisation bound for infinite classes</strong></h3>
+<p><br/>
+The Vapnik-Chervonenkis theorem (1971) states that, for any <span class="math">\(\epsilon\)</span>,</p>
+<div class="math">$$\mathbb{P}(\text{sup}_{h\in \mathcal{H}}|L_S(h)-L_D(h)|&gt;\epsilon)\leq 8\Pi(m)e^{-m\epsilon^2/32} \label{eq3}\tag{3}$$</div>
+<p>We can now understand the importance of the VC dimension. We have learnt that if VC dimension is finite than the growth function <span class="math">\(\Pi(m)\)</span> grows polynomially for <span class="math">\(m&gt;VC_{\text{dim}}\)</span>. This implies from the inequality \eqref{eq3} that</p>
+<div class="math">$$m\rightarrow \infty,\;|L_S(h)-L_D(h)|\rightarrow 0,\;\text{in propability}$$</div>
+<p>which means that we can find arbitrary <span class="math">\(\epsilon\)</span> and <span class="math">\(\delta\)</span> such that for <span class="math">\(m\geq m_{\mathcal{H}}\)</span>, the sample complexity, the problem is PAC learnable.</p>
+<h3><strong>References</strong></h3>
+<p><br/>
+[1] <em>Understanding Machine Learning: from Theory to Algorithms</em>, Shai Ben-David and Shai Shalev-Shwartz</p>
+<p>[2] <em>A probabilistic theory of pattern recognition</em>, Luc Devroye, Laszlo Gyorfi, Gabor Lugosi</p>
+<p>[3] <em>Foundations of machine learning</em>, M. Mohri, A. Rostamizadeh, A. Talwalkar</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -157,7 +198,8 @@ VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension 
 					<div class="col-md-3">
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
-							<li><a href="/category/machine-learning.html">Machine Learning (3)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (5)</a></li>
+							<li><a href="/category/statistics.html">Statistics (1)</a></li>
 						</ul>
 					</div>
 					<div class="col-md-3">

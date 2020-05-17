@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Statistics</title><link href="/" rel="alternate"></link><link href="/feeds/statistics.atom.xml" rel="self"></link><id>/</id><updated>2020-05-05T00:00:00+02:00</updated><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+Let &lt;span class="math"&gt;\(X_1,\ldots,X_m\)&lt;/span&gt; be &lt;span class="math"&gt;\(m\)&lt;/span&gt; independent random variables (not necessarily identically distributed). All &lt;span class="math"&gt;\(X_i\)&lt;/span&gt; takes values in &lt;span class="math"&gt;\([a_i,b_i]\)&lt;/span&gt;. Then for any &lt;span class="math"&gt;\(\epsilon&amp;gt;0\)&lt;/span&gt; we have&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(|S_m-E(S_m)|\geq\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2},\;S_m=\sum_{i=1}^mX_i$$&lt;/div&gt;
+&lt;p&gt;If we have &lt;span class="math"&gt;\(a_i=a_j=a\)&lt;/span&gt; and &lt;span class="math"&gt;\(b_i=b_j=b\)&lt;/span&gt; for &lt;span class="math"&gt;\(\forall i,j\)&lt;/span&gt; then we have a version of the Hoeffding's inequality which is most known&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(|\hat{X}_m-E(\hat{X}_m)|\geq\epsilon)\leq e^{-2m\epsilon^2/(b-a)^2},\; \hat{X}_m=\frac{1}{m}\sum_{i=1}^mX_i$$&lt;/div&gt;
+&lt;p&gt;First we show that for &lt;span class="math"&gt;\(t&amp;gt;0\)&lt;/span&gt; we have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(x\geq y)\leq e^{-ty}E(e^{t x})\label{eq1}\tag{1}$$&lt;/div&gt;
+&lt;p&gt;Note that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-ty}E(e^{tx})=\sum_{x\in X}e^{t(x-y)}P(x)$$&lt;/div&gt;
+&lt;p&gt;
+with &lt;span class="math"&gt;\(\sum_{x\in X}P(x)=1\)&lt;/span&gt;. We expand the r.h.s as
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{eqnarray}\sum_{x\in X}e^{t(x-y)}P(x)&amp;amp;=&amp;amp;\sum_{x\geq y}e^{t(x-y)}P(x)+\sum_{x&amp;lt;y}e^{t(x-y)}P(x)\\
+&amp;amp;\geq &amp;amp;\sum_{x\geq y}e^{t(x-y)}P(x)\\
+&amp;amp;\geq &amp;amp; \sum_{x\geq y}e^{t(x-y)}P(x)=\sum_{x\geq y}P(x)=P(x\geq y)\end{eqnarray}&lt;/div&gt;
+&lt;p&gt;Then we use the auxiliary distribution &lt;span class="math"&gt;\(P'(a)=(b-x)/(b-a)\)&lt;/span&gt; and &lt;span class="math"&gt;\(P'(b)=(x-a)/(b-a)\)&lt;/span&gt; with &lt;span class="math"&gt;\(a\leq x\leq b\)&lt;/span&gt; and &lt;span class="math"&gt;\(P'(a)+P'(b)=1\)&lt;/span&gt;, to show that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{tx}\leq \frac{b-x}{b-a}e^{ta}+\frac{x-a}{b-a}e^{tb}$$&lt;/div&gt;
+&lt;p&gt;
+because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. Assuming that &lt;span class="math"&gt;\(E(x)=0\)&lt;/span&gt; (this implies that &lt;span class="math"&gt;\(a&amp;lt;0\)&lt;/span&gt; and &lt;span class="math"&gt;\(b&amp;gt;0\)&lt;/span&gt;), we take the average on &lt;span class="math"&gt;\(x\)&lt;/span&gt; on both sides of the above equation to get&lt;/p&gt;
+&lt;div class="math"&gt;$$E(e^{tx})\leq \frac{b}{b-a}e^{ta}-\frac{a}{b-a}e^{tb}=\frac{e^{\phi(t)}}{b-a}$$&lt;/div&gt;
+&lt;p&gt;with &lt;span class="math"&gt;\(\phi(t)=\ln(be^{ta}-ae^{tb})\)&lt;/span&gt;. We can show that &lt;span class="math"&gt;\(\phi(t)\)&lt;/span&gt; is a convex function of &lt;span class="math"&gt;\(t\)&lt;/span&gt; with &lt;span class="math"&gt;\(\phi''(t)\leq (b-a)^2/4\)&lt;/span&gt; (essentially we need to show that &lt;span class="math"&gt;\(\phi''(t)\)&lt;/span&gt; has a maximum equal to &lt;span class="math"&gt;\((b-a)^2/4\)&lt;/span&gt;). Using that &lt;span class="math"&gt;\(\phi'(t=0)=0\)&lt;/span&gt; we also have &lt;span class="math"&gt;\(\phi'(t)\leq (b-a)^2t/4\)&lt;/span&gt;. Then integrating again we have &lt;span class="math"&gt;\(\phi(t)\leq \phi(0)+(b-a)^2t^2/8\)&lt;/span&gt;. This gives us&lt;/p&gt;
+&lt;div class="math"&gt;$$E(e^{tx})\leq e^{t^2(b-a)^2/8}\label{eq2}\tag{2}$$&lt;/div&gt;
+&lt;p&gt;Using inequalities \eqref{eq1} and \eqref{eq2}, we calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{eqnarray}P(\hat{X}_m-E(\hat{X}_m)&amp;gt;\epsilon)&amp;amp;\leq&amp;amp; e^{-t\epsilon}E(e^{t(\hat{X}_m-E(\hat{X}_m))})\\
+&amp;amp;=&amp;amp;e^{-t\epsilon}\prod_iE(e^{t(X_i-E(X))})\\
+&amp;amp;\leq&amp;amp; e^{-t\epsilon} e^{t^2\sum_i(b_i-a_i)^2/8}\end{eqnarray}&lt;/div&gt;
+&lt;p&gt;We can choose &lt;span class="math"&gt;\(t\)&lt;/span&gt; such that the bound is optimal (this corresponds to the minimum of the exponent). We obtain
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(\hat{X}_m-E(\hat{X}_m)&amp;gt;\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2}$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry></feed>

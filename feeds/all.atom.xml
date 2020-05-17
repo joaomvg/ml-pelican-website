@@ -1,25 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-04-30T00:00:00+02:00</updated><entry><title>"VC dimension"</title><link href="/vc-dimension.html" rel="alternate"></link><published>2020-04-30T00:00:00+02:00</published><updated>2020-04-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-30:/vc-dimension.html</id><summary type="html">&lt;p&gt;I explain VC dimension.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;1.&lt;a href="#VC"&gt;VC dimension&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a name="VC"&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;h3&gt;&lt;strong&gt;1. VC dimension and PAC learnability&lt;/strong&gt;&lt;/h3&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-05-05T00:00:00+02:00</updated><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;&lt;br/&gt;
-VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension of &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;, when &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt; has infinite number of hypotheses. In the post on &lt;a href="/probably-approximately-correct-pac.html"&gt;PAC learnability&lt;/a&gt; we have shown that the circumference hypothesis is PAC learnable despite the class being infinite since each circumference is parametrised by a continuous parameter, the radius &lt;span class="math"&gt;\(R\)&lt;/span&gt;. One can find several other examples which depend on continuous parameters but they are nevertheless learnable. In this post we analyse necessary conditions for infinite classes to be PAC learnable.&lt;/p&gt;
-&lt;p&gt;To do this, first we need to understand the concept of &lt;em&gt;shattering&lt;/em&gt;. Say we have  a set of hypotheses &lt;span class="math"&gt;\(\mathcal{H}=\{h_a(x)\}\)&lt;/span&gt; from a domain &lt;span class="math"&gt;\(\chi\)&lt;/span&gt; to &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt;. Here &lt;span class="math"&gt;\(a\)&lt;/span&gt; is(are) a continuous parameter(s). Consider a subset &lt;span class="math"&gt;\(C\subset \chi\)&lt;/span&gt; consisting of a number of points &lt;span class="math"&gt;\(C=\{c_1,c_2,\ldots,c_n\}\)&lt;/span&gt;. The restriction of a hypothesis &lt;span class="math"&gt;\(h_a(x)\in\mathcal{H}\)&lt;/span&gt; to &lt;span class="math"&gt;\(C\)&lt;/span&gt; is &lt;span class="math"&gt;\(\{h_a(c_1),h_a(c_2),\dots,h_a(c_n)\}\)&lt;/span&gt;. By dialling the continuous parameter &lt;span class="math"&gt;\(a\)&lt;/span&gt; we generate images of the restriction &lt;span class="math"&gt;\((h_a(c_1),h_a(c_2),\dots,h_a(c_n))=(1,0,1,\ldots),(0,0,1,\ldots),\ldots\)&lt;/span&gt;. Depending on the set &lt;span class="math"&gt;\(C\)&lt;/span&gt; we may or not generate all the possible images, which total to &lt;span class="math"&gt;\(2^n\)&lt;/span&gt;. When it generates all possible images we say that &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt; &lt;em&gt;shatters&lt;/em&gt; &lt;span class="math"&gt;\(C\)&lt;/span&gt;. &lt;em&gt;The VC dimension is the dimension of the largest set &lt;span class="math"&gt;\(C\)&lt;/span&gt; that can be shattered.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Examples:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;Set of thresholds &lt;span class="math"&gt;\(h_a(x)=\mathbb{1}_{x\geq a}\)&lt;/span&gt;, which returns &lt;span class="math"&gt;\(1\)&lt;/span&gt; for &lt;span class="math"&gt;\(x\geq a\)&lt;/span&gt; and &lt;span class="math"&gt;\(0\)&lt;/span&gt; otherwise. Clearly for any &lt;span class="math"&gt;\(c_1\)&lt;/span&gt;, &lt;span class="math"&gt;\(h_a(c_1)\)&lt;/span&gt; spans &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt;. However, if we have an additional point &lt;span class="math"&gt;\(c_2&amp;gt;c_1\)&lt;/span&gt; then we cannot generate the image &lt;span class="math"&gt;\((h(c_1),h(c_2))=(1,0)\)&lt;/span&gt;. In fact generalising for arbitrary number of points with &lt;span class="math"&gt;\(c_1&amp;lt;c_2&amp;lt;\ldots&amp;lt;c_n\)&lt;/span&gt; we always have that if &lt;span class="math"&gt;\(h_(c_1)=1\)&lt;/span&gt; then all the reamining images are &lt;span class="math"&gt;\(h(c_2),\ldots,h(c_n)=1\)&lt;/span&gt;. Therefore the VC dimension is &lt;span class="math"&gt;\(VC_{\text{dim}}=1\)&lt;/span&gt;. Note that this the same set of hypothesis in the cirumference case &lt;a href="/probably-approximately-correct-pac.html"&gt;PAC learnability&lt;/a&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Set of intervals &lt;span class="math"&gt;\(h_{a,b}(x)=\mathbb{1}_{a\leq x\leq b}\)&lt;/span&gt;, which returns one for a point inside the interval &lt;span class="math"&gt;\([a,b]\)&lt;/span&gt; and zero otherwise. Clearly &lt;span class="math"&gt;\(h_{a,b}\)&lt;/span&gt; shatters a single point. We can easily see that two points can also be shattered. However, a set with three points cannot be shattered. In the case we have &lt;span class="math"&gt;\(h_{a,b}(c_1)=1\)&lt;/span&gt; and &lt;span class="math"&gt;\(h_{a,b}(c_2)=0\)&lt;/span&gt; with &lt;span class="math"&gt;\(c_2&amp;gt;c_1\)&lt;/span&gt; a third point &lt;span class="math"&gt;\(c_3&amp;gt;c_2\)&lt;/span&gt; cannot have &lt;span class="math"&gt;\(h_{a,b}(c_3)=1\)&lt;/span&gt;. Therefore the VC dimension is &lt;span class="math"&gt;\(VC_{\text{dim}}=2\)&lt;/span&gt;.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Set of hyperplanes in &lt;span class="math"&gt;\(\mathbb{R}^2\)&lt;/span&gt;. If a point lies on one side of the hyperplane it has value &lt;span class="math"&gt;\(1\)&lt;/span&gt;, and &lt;span class="math"&gt;\(0\)&lt;/span&gt; otherwise. We may have two different hypotheses consisting of the same hyperplane but labelling the points in an opposite way. It is easy to see that one and two point set can be shattered. Consider now a set of three non-collinear points (if they are collinear then we go back to the example of two-point set). The dichotomies with two ones and one zero, like &lt;span class="math"&gt;\((1,1,0)\)&lt;/span&gt;, and two zeros and one one, such as &lt;span class="math"&gt;\((0,0,1)\)&lt;/span&gt; can be easily generate. To obtain the remaining dichotomies &lt;span class="math"&gt;\((0,0,0)\)&lt;/span&gt; and &lt;span class="math"&gt;\((1,1,1)\)&lt;/span&gt; we take a hyperplane which has all points on one side or the other. Consider now four points. Take three non-collinear points. These form a triangle. If the fourth point is inside the triangle then the set cannot be shattered, since if the the three triangle vertices have the same value, say &lt;span class="math"&gt;\(1\)&lt;/span&gt;, then this implies that any point inside will also have the same value (&lt;a name="fig1"&gt;&lt;/a&gt;). If the fourth point is outside, then the four-polygon is convex, otherwise we fall back in the previous case.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;&lt;img alt="fig1" height="400" src="/images/hyperplane_dichotomies.png" style="display: block; margin: 0 auto" title="Dichotomies" width="400"&gt;
-&lt;em&gt;Fig.1 Dichotomies that cannot be realised. a) Th fourth point is in the interior of the triangle. b) The set forms a convex four-polygon.&lt;/em&gt; &lt;/p&gt;
+Let &lt;span class="math"&gt;\(X_1,\ldots,X_m\)&lt;/span&gt; be &lt;span class="math"&gt;\(m\)&lt;/span&gt; independent random variables (not necessarily identically distributed). All &lt;span class="math"&gt;\(X_i\)&lt;/span&gt; takes values in &lt;span class="math"&gt;\([a_i,b_i]\)&lt;/span&gt;. Then for any &lt;span class="math"&gt;\(\epsilon&amp;gt;0\)&lt;/span&gt; we have&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(|S_m-E(S_m)|\geq\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2},\;S_m=\sum_{i=1}^mX_i$$&lt;/div&gt;
+&lt;p&gt;If we have &lt;span class="math"&gt;\(a_i=a_j=a\)&lt;/span&gt; and &lt;span class="math"&gt;\(b_i=b_j=b\)&lt;/span&gt; for &lt;span class="math"&gt;\(\forall i,j\)&lt;/span&gt; then we have a version of the Hoeffding's inequality which is most known&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(|\hat{X}_m-E(\hat{X}_m)|\geq\epsilon)\leq e^{-2m\epsilon^2/(b-a)^2},\; \hat{X}_m=\frac{1}{m}\sum_{i=1}^mX_i$$&lt;/div&gt;
+&lt;p&gt;First we show that for &lt;span class="math"&gt;\(t&amp;gt;0\)&lt;/span&gt; we have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(x\geq y)\leq e^{-ty}E(e^{t x})\label{eq1}\tag{1}$$&lt;/div&gt;
+&lt;p&gt;Note that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-ty}E(e^{tx})=\sum_{x\in X}e^{t(x-y)}P(x)$$&lt;/div&gt;
+&lt;p&gt;
+with &lt;span class="math"&gt;\(\sum_{x\in X}P(x)=1\)&lt;/span&gt;. We expand the r.h.s as
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{eqnarray}\sum_{x\in X}e^{t(x-y)}P(x)&amp;amp;=&amp;amp;\sum_{x\geq y}e^{t(x-y)}P(x)+\sum_{x&amp;lt;y}e^{t(x-y)}P(x)\\
+&amp;amp;\geq &amp;amp;\sum_{x\geq y}e^{t(x-y)}P(x)\\
+&amp;amp;\geq &amp;amp; \sum_{x\geq y}e^{t(x-y)}P(x)=\sum_{x\geq y}P(x)=P(x\geq y)\end{eqnarray}&lt;/div&gt;
+&lt;p&gt;Then we use the auxiliary distribution &lt;span class="math"&gt;\(P'(a)=(b-x)/(b-a)\)&lt;/span&gt; and &lt;span class="math"&gt;\(P'(b)=(x-a)/(b-a)\)&lt;/span&gt; with &lt;span class="math"&gt;\(a\leq x\leq b\)&lt;/span&gt; and &lt;span class="math"&gt;\(P'(a)+P'(b)=1\)&lt;/span&gt;, to show that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{tx}\leq \frac{b-x}{b-a}e^{ta}+\frac{x-a}{b-a}e^{tb}$$&lt;/div&gt;
+&lt;p&gt;
+because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. Assuming that &lt;span class="math"&gt;\(E(x)=0\)&lt;/span&gt; (this implies that &lt;span class="math"&gt;\(a&amp;lt;0\)&lt;/span&gt; and &lt;span class="math"&gt;\(b&amp;gt;0\)&lt;/span&gt;), we take the average on &lt;span class="math"&gt;\(x\)&lt;/span&gt; on both sides of the above equation to get&lt;/p&gt;
+&lt;div class="math"&gt;$$E(e^{tx})\leq \frac{b}{b-a}e^{ta}-\frac{a}{b-a}e^{tb}=\frac{e^{\phi(t)}}{b-a}$$&lt;/div&gt;
+&lt;p&gt;with &lt;span class="math"&gt;\(\phi(t)=\ln(be^{ta}-ae^{tb})\)&lt;/span&gt;. We can show that &lt;span class="math"&gt;\(\phi(t)\)&lt;/span&gt; is a convex function of &lt;span class="math"&gt;\(t\)&lt;/span&gt; with &lt;span class="math"&gt;\(\phi''(t)\leq (b-a)^2/4\)&lt;/span&gt; (essentially we need to show that &lt;span class="math"&gt;\(\phi''(t)\)&lt;/span&gt; has a maximum equal to &lt;span class="math"&gt;\((b-a)^2/4\)&lt;/span&gt;). Using that &lt;span class="math"&gt;\(\phi'(t=0)=0\)&lt;/span&gt; we also have &lt;span class="math"&gt;\(\phi'(t)\leq (b-a)^2t/4\)&lt;/span&gt;. Then integrating again we have &lt;span class="math"&gt;\(\phi(t)\leq \phi(0)+(b-a)^2t^2/8\)&lt;/span&gt;. This gives us&lt;/p&gt;
+&lt;div class="math"&gt;$$E(e^{tx})\leq e^{t^2(b-a)^2/8}\label{eq2}\tag{2}$$&lt;/div&gt;
+&lt;p&gt;Using inequalities \eqref{eq1} and \eqref{eq2}, we calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;\begin{eqnarray}P(\hat{X}_m-E(\hat{X}_m)&amp;gt;\epsilon)&amp;amp;\leq&amp;amp; e^{-t\epsilon}E(e^{t(\hat{X}_m-E(\hat{X}_m))})\\
+&amp;amp;=&amp;amp;e^{-t\epsilon}\prod_iE(e^{t(X_i-E(X))})\\
+&amp;amp;\leq&amp;amp; e^{-t\epsilon} e^{t^2\sum_i(b_i-a_i)^2/8}\end{eqnarray}&lt;/div&gt;
+&lt;p&gt;We can choose &lt;span class="math"&gt;\(t\)&lt;/span&gt; such that the bound is optimal (this corresponds to the minimum of the exponent). We obtain
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(\hat{X}_m-E(\hat{X}_m)&amp;gt;\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2}$$&lt;/div&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -81,7 +94,193 @@ VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension 
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Bayes Optimal Classifier"</title><link href="/bayes-optimal-classifier.html" rel="alternate"></link><published>2020-04-26T00:00:00+02:00</published><updated>2020-04-26T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-26:/bayes-optimal-classifier.html</id><summary type="html">&lt;p&gt;I explain what is the Bayes optimal classifier and provide a simple numerical example.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"The Rademacher complexity"</title><link href="/the-rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/the-rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html"></content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Hyperplanes and classification"</title><link href="/hyperplanes-and-classification.html" rel="alternate"></link><published>2020-05-01T00:00:00+02:00</published><updated>2020-05-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-01:/hyperplanes-and-classification.html</id><summary type="html">&lt;p&gt;We study the &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt; classification problem in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; using hyperplanes. We show that the VC dimension is &lt;span class="math"&gt;\(d+1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><content type="html">&lt;hr&gt;
+&lt;p&gt;sdf&lt;/p&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"VC dimension"</title><link href="/vc-dimension.html" rel="alternate"></link><published>2020-04-30T00:00:00+02:00</published><updated>2020-04-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-30:/vc-dimension.html</id><summary type="html">&lt;p&gt;The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#VC"&gt;VC dimension&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#growth"&gt;Growth function&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#genbounds"&gt;Generalisation bounds&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="VC"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. VC dimension&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+VC stands for Vapnik-Chervonenkis. The VC dimension plays the role of dimension of &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;, when &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt; has infinite number of hypotheses. In the post on &lt;a href="/probably-approximately-correct-pac.html"&gt;PAC learnability&lt;/a&gt; we have shown that the circumference hypothesis is PAC learnable despite the class being infinite since each circumference is parametrised by a continuous parameter, the radius &lt;span class="math"&gt;\(R\)&lt;/span&gt;. One can find several other examples which depend on continuous parameters but they are nevertheless learnable. In this post we analyse necessary conditions for infinite classes to be PAC learnable.&lt;/p&gt;
+&lt;p&gt;To do this, first we need to understand the concept of &lt;em&gt;shattering&lt;/em&gt;. Say we have  a set of hypotheses &lt;span class="math"&gt;\(\mathcal{H}=\{h_a(x)\}\)&lt;/span&gt; from a domain &lt;span class="math"&gt;\(\chi\)&lt;/span&gt; to &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt;. Here &lt;span class="math"&gt;\(a\)&lt;/span&gt; is(are) a continuous parameter(s). Consider a subset &lt;span class="math"&gt;\(C\subset \chi\)&lt;/span&gt; consisting of a number of points &lt;span class="math"&gt;\(C=\{c_1,c_2,\ldots,c_n\}\)&lt;/span&gt;. The restriction of a hypothesis &lt;span class="math"&gt;\(h_a(x)\in\mathcal{H}\)&lt;/span&gt; to &lt;span class="math"&gt;\(C\)&lt;/span&gt; is &lt;span class="math"&gt;\(\{h_a(c_1),h_a(c_2),\dots,h_a(c_n)\}\)&lt;/span&gt;. By dialling the continuous parameter &lt;span class="math"&gt;\(a\)&lt;/span&gt; we generate images of the restriction &lt;span class="math"&gt;\((h_a(c_1),h_a(c_2),\dots,h_a(c_n))=(1,0,1,\ldots),(0,0,1,\ldots),\ldots\)&lt;/span&gt;. Depending on the set &lt;span class="math"&gt;\(C\)&lt;/span&gt; we may or not generate all the possible images, which total to &lt;span class="math"&gt;\(2^n\)&lt;/span&gt;. When it generates all possible images we say that &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt; &lt;em&gt;shatters&lt;/em&gt; &lt;span class="math"&gt;\(C\)&lt;/span&gt;. &lt;em&gt;The VC dimension is the dimension of the largest set &lt;span class="math"&gt;\(C\)&lt;/span&gt; that can be shattered.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Examples:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Set of thresholds &lt;span class="math"&gt;\(h_a(x)=\mathbb{1}_{x\geq a}\)&lt;/span&gt;, which returns &lt;span class="math"&gt;\(1\)&lt;/span&gt; for &lt;span class="math"&gt;\(x\geq a\)&lt;/span&gt; and &lt;span class="math"&gt;\(0\)&lt;/span&gt; otherwise. Clearly for any &lt;span class="math"&gt;\(c_1\)&lt;/span&gt;, &lt;span class="math"&gt;\(h_a(c_1)\)&lt;/span&gt; spans &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt;. However, if we have an additional point &lt;span class="math"&gt;\(c_2&amp;gt;c_1\)&lt;/span&gt; then we cannot generate the image &lt;span class="math"&gt;\((h(c_1),h(c_2))=(1,0)\)&lt;/span&gt;. In fact generalising for arbitrary number of points with &lt;span class="math"&gt;\(c_1&amp;lt;c_2&amp;lt;\ldots&amp;lt;c_n\)&lt;/span&gt; we always have that if &lt;span class="math"&gt;\(h_(c_1)=1\)&lt;/span&gt; then all the reamining images are &lt;span class="math"&gt;\(h(c_2),\ldots,h(c_n)=1\)&lt;/span&gt;. Therefore the VC dimension is &lt;span class="math"&gt;\(VC_{\text{dim}}=1\)&lt;/span&gt;. Note that this the same set of hypothesis in the cirumference case &lt;a href="/probably-approximately-correct-pac.html"&gt;PAC learnability&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Set of intervals &lt;span class="math"&gt;\(h_{a,b}(x)=\mathbb{1}_{a\leq x\leq b}\)&lt;/span&gt;, which returns one for a point inside the interval &lt;span class="math"&gt;\([a,b]\)&lt;/span&gt; and zero otherwise. Clearly &lt;span class="math"&gt;\(h_{a,b}\)&lt;/span&gt; shatters a single point. We can easily see that two points can also be shattered. However, a set with three points cannot be shattered. In the case we have &lt;span class="math"&gt;\(h_{a,b}(c_1)=1\)&lt;/span&gt; and &lt;span class="math"&gt;\(h_{a,b}(c_2)=0\)&lt;/span&gt; with &lt;span class="math"&gt;\(c_2&amp;gt;c_1\)&lt;/span&gt; a third point &lt;span class="math"&gt;\(c_3&amp;gt;c_2\)&lt;/span&gt; cannot have &lt;span class="math"&gt;\(h_{a,b}(c_3)=1\)&lt;/span&gt;. Therefore the VC dimension is &lt;span class="math"&gt;\(VC_{\text{dim}}=2\)&lt;/span&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Set of hyperplanes in &lt;span class="math"&gt;\(\mathbb{R}^2\)&lt;/span&gt;. The hyperplane divides the space in two regions. A point falling on one side will have class zero, while if it falls on the other, will have class one. The same hyperplane can give rise to two different hypotheses by interchanging the labels between the sides. It is easy to see that one and two point set can be shattered. Consider now a three-point set. If they are collinear then there's always two combinations &lt;span class="math"&gt;\((1,0,1)\)&lt;/span&gt; and &lt;span class="math"&gt;\((0,1,0)\)&lt;/span&gt; that cannot be shattered. If they are not collinear, then the dichotomies with two ones and one zero, like &lt;span class="math"&gt;\((1,1,0)\)&lt;/span&gt;, and two zeros and one one, such as &lt;span class="math"&gt;\((0,0,1)\)&lt;/span&gt; can be generated. The remaining dichotomies &lt;span class="math"&gt;\((0,0,0)\)&lt;/span&gt; and &lt;span class="math"&gt;\((1,1,1)\)&lt;/span&gt; are generated by interchanging the sides. Therefore the set of three non-collinear points can be shattered. Consider now a set of four points and assume that three are non-collinear (if they are collinear then we fall back in the previous situation). The dichotomies depicted in the figure below (&lt;a href="#dichotomies"&gt;Fig.1&lt;/a&gt;) show two examples that cannot be generated. Thus showing that there is no four-point set that can be shattered. The VC dimension is therefore &lt;span class="math"&gt;\(VC_{\text{dim}}=3\)&lt;/span&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hyperplanes in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. One can show that the VC dimension is &lt;span class="math"&gt;\(VC_{\text{dim}}=d+1\)&lt;/span&gt;. The demonstration can be found in the post &lt;a href="/hyperplanes-and-classification.html"&gt;Hyperplanes and classification&lt;/a&gt;. This will be very useful when studying support-vector-machines.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="dichotomies"&gt;&lt;/a&gt;
+&lt;img alt="dichotomies" height="400" src="/images/hyperplane_dichotomies.png" style="display: block; margin: 0 auto" width="400"&gt;
+  &lt;em&gt;Fig.1 Dichotomies that cannot be realised. a) The fourth point is in the interior of the triangle. b) The set forms a convex four-polygon.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;The VC dimension provides a measure of how complex a hypothesis class can be. If the class is increasingly complex it allows for larger sets to be shattered. This measure is purely combinatorial and does not rely on which distribution the points are sampled from.  &lt;/p&gt;
+&lt;p&gt;&lt;a name="growth"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. The growth function&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+The growth function counts how many ways we can classify a set of fixed size using a hypothesis class. The proper definition is&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi(m)=\text{max}_{\substack{x_1,\ldots,x_m \subseteq X}}|(h(x_1),\ldots,h(x_m)),h:\mathcal{H}|$$&lt;/div&gt;
+&lt;p&gt;When the set &lt;span class="math"&gt;\(x_1,\ldots,x_m\)&lt;/span&gt; is shattered by &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt; one has &lt;span class="math"&gt;\(\Pi(m)=2^m\)&lt;/span&gt;. If in addition this is the largest shattered set, then &lt;span class="math"&gt;\(\Pi(m)=2^{VC_{\text{dim}}}\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;One of the most important aspects of the growth function is that for &lt;span class="math"&gt;\(m&amp;gt;VC_{\text{dim}}\)&lt;/span&gt;, &lt;span class="math"&gt;\(\Pi(m)\)&lt;/span&gt; always has polynomial growth rather than exponential. This is demonstrated using the following statement:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sauer's Lemma:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Let &lt;span class="math"&gt;\(VC_{\text{dim}}=d\)&lt;/span&gt;. Then for all &lt;span class="math"&gt;\(m\)&lt;/span&gt;&lt;/em&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$ \Pi(m)\leq \sum_{i=0}^{d}\left(\begin{array}{c}m \\ i\end{array}\right)$$&lt;/div&gt;
+&lt;p&gt;For &lt;span class="math"&gt;\(t\leq m\)&lt;/span&gt; we have&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=0}^{d}\left(\begin{array}{c}m \\ i\end{array}\right)\leq \sum_{i=0}^{m}\left(\begin{array}{c}m \\ i\end{array}\right)\left(\frac{m}{t}\right)^{d-i}=\left(\frac{m}{t}\right)^d\left(1+\frac{t}{m}\right)^m$$&lt;/div&gt;
+&lt;p&gt;Using that &lt;span class="math"&gt;\(1+x\leq e^x, \forall x\)&lt;/span&gt;, we get
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\left(\frac{m}{t}\right)^d\left(1+\frac{t}{m}\right)^m\leq \left(\frac{m}{t}\right)^d e^t$$&lt;/div&gt;
+&lt;p&gt;Now we can set &lt;span class="math"&gt;\(t=d\)&lt;/span&gt; for which the bound becomes optimal, that is, &lt;span class="math"&gt;\(t^{-d} e^t\geq d^{-d}e^d\)&lt;/span&gt; (we can do this by finding the minimum of &lt;span class="math"&gt;\(t-d\ln(t)\)&lt;/span&gt;). Hence we obtain&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi(m)\leq \left(\frac{m}{d}\right)^d e^d$$&lt;/div&gt;
+&lt;p&gt;
+&lt;a name="genbounds"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;3. The generalisation bound for infinite classes&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+The Vapnik-Chervonenkis theorem (1971) states that, for any &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt;,&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{P}(\text{sup}_{h\in \mathcal{H}}|L_S(h)-L_D(h)|&amp;gt;\epsilon)\leq 8\Pi(m)e^{-m\epsilon^2/32} \label{eq3}\tag{3}$$&lt;/div&gt;
+&lt;p&gt;We can now understand the importance of the VC dimension. We have learnt that if VC dimension is finite than the growth function &lt;span class="math"&gt;\(\Pi(m)\)&lt;/span&gt; grows polynomially for &lt;span class="math"&gt;\(m&amp;gt;VC_{\text{dim}}\)&lt;/span&gt;. This implies from the inequality \eqref{eq3} that&lt;/p&gt;
+&lt;div class="math"&gt;$$m\rightarrow \infty,\;|L_S(h)-L_D(h)|\rightarrow 0,\;\text{in propability}$$&lt;/div&gt;
+&lt;p&gt;which means that we can find arbitrary &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; and &lt;span class="math"&gt;\(\delta\)&lt;/span&gt; such that for &lt;span class="math"&gt;\(m\geq m_{\mathcal{H}}\)&lt;/span&gt;, the sample complexity, the problem is PAC learnable.&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+[1] &lt;em&gt;Understanding Machine Learning: from Theory to Algorithms&lt;/em&gt;, Shai Ben-David and Shai Shalev-Shwartz&lt;/p&gt;
+&lt;p&gt;[2] &lt;em&gt;A probabilistic theory of pattern recognition&lt;/em&gt;, Luc Devroye, Laszlo Gyorfi, Gabor Lugosi&lt;/p&gt;
+&lt;p&gt;[3] &lt;em&gt;Foundations of machine learning&lt;/em&gt;, M. Mohri, A. Rostamizadeh, A. Talwalkar&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Bayes Optimal Classifier"</title><link href="/bayes-optimal-classifier.html" rel="alternate"></link><published>2020-04-26T00:00:00+02:00</published><updated>2020-04-26T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-26:/bayes-optimal-classifier.html</id><summary type="html">&lt;p&gt;I explain the Bayes optimal classifier and provide some numerical examples.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;a href="#bayes"&gt;Optimal classifier&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#multiclass"&gt;Multiple classes&lt;/a&gt;&lt;/li&gt;
