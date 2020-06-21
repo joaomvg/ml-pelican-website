@@ -94,7 +94,7 @@ because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. As
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"The Rademacher complexity"</title><link href="/the-rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/the-rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html"></content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Hyperplanes and classification"</title><link href="/hyperplanes-and-classification.html" rel="alternate"></link><published>2020-05-01T00:00:00+02:00</published><updated>2020-05-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-01:/hyperplanes-and-classification.html</id><summary type="html">&lt;p&gt;We study the &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt; classification problem in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; using hyperplanes. We show that the VC dimension is &lt;span class="math"&gt;\(d+1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html"></content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Hyperplanes and classification"</title><link href="/hyperplanes-and-classification.html" rel="alternate"></link><published>2020-05-01T00:00:00+02:00</published><updated>2020-05-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-01:/hyperplanes-and-classification.html</id><summary type="html">&lt;p&gt;We study the &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt; classification problem in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; using hyperplanes. We show that the VC dimension is &lt;span class="math"&gt;\(d+1\)&lt;/span&gt;.&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -157,7 +157,74 @@ because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. As
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
 &lt;/script&gt;</summary><content type="html">&lt;hr&gt;
-&lt;p&gt;sdf&lt;/p&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"VC dimension"</title><link href="/vc-dimension.html" rel="alternate"></link><published>2020-04-30T00:00:00+02:00</published><updated>2020-04-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-30:/vc-dimension.html</id><summary type="html">&lt;p&gt;The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+&lt;h3&gt;&lt;strong&gt;1. Hyperplanes&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Consider a set of &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d}\)&lt;/span&gt; dimensions. Assume that no set of three points is collinear- this way any set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points forms a hyperplane. Firstly, we shall demonstrate that if a set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points is shattered in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; dimensions then &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points are also shattered in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. We can use this to reduce the problem to two dimensions, where we have seen that &lt;span class="math"&gt;\(VC_{\text{dim}}=3\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Consider the representation in the picture below. Choose &lt;span class="math"&gt;\(d\)&lt;/span&gt; points and take the hyperplane formed by these. If the remaining point belongs to the hyperplane then we can consider the projection to &lt;span class="math"&gt;\(d-1\)&lt;/span&gt; dimensions, and we are left with the case of &lt;span class="math"&gt;\((d-1)+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt;, which we shall analyse later. If this is not the case, then we can show that if the &lt;span class="math"&gt;\(d\)&lt;/span&gt; points on the hyperplane are separable then we can always find a hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; that separates all the points. In the figure below the dashed line on the hyperplane &lt;span class="math"&gt;\(H_d\)&lt;/span&gt; represents the hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; that separates the set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points. It is easy to see that any hyperplane that contains the remaining point and the dashed line (hyperplane in one lower dimension) is the solution to this problem.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="300" src="/images/hyperplanes_dplus1.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;p&gt;We shall consider now the case of &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. Suppose for the moment that &lt;span class="math"&gt;\(d\)&lt;/span&gt; points are red and two are blue as depicted in the figure below. In &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;, &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; non-collinear points always form a convex polygon. If the blue point is inside this convex then the problem is not separable- if it is outside then it is separable. Let's say this is the case and change one red point into blue. We have &lt;span class="math"&gt;\(d-1\)&lt;/span&gt; red and one blue points forming a convex, and an additional blue point living outside.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="300" src="/images/hyperplanes_convex.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"VC dimension"</title><link href="/vc-dimension.html" rel="alternate"></link><published>2020-04-30T00:00:00+02:00</published><updated>2020-04-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-04-30:/vc-dimension.html</id><summary type="html">&lt;p&gt;The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;a href="#VC"&gt;VC dimension&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#growth"&gt;Growth function&lt;/a&gt;&lt;/li&gt;
