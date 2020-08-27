@@ -94,7 +94,77 @@ because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. As
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html"></content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Hyperplanes and classification"</title><link href="/hyperplanes-and-classification.html" rel="alternate"></link><published>2020-05-01T00:00:00+02:00</published><updated>2020-05-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-01:/hyperplanes-and-classification.html</id><summary type="html">&lt;p&gt;We study the &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt; classification problem in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; using hyperplanes. We show that the VC dimension is &lt;span class="math"&gt;\(d+1\)&lt;/span&gt;.&lt;/p&gt;
+&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The empirical Rademacher complexity of a hypothesis class &lt;span class="math"&gt;\(G=\{g\}\)&lt;/span&gt; is defined as an average over the training set &lt;span class="math"&gt;\(S=(z_1,\ldots,z_m)\)&lt;/span&gt; in the following way:&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{\mathcal{R}}(G)=E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]$$&lt;/div&gt;
+&lt;p&gt;where &lt;span class="math"&gt;\(\sigma_i\)&lt;/span&gt; are &lt;span class="math"&gt;\(m\)&lt;/span&gt; independently and uniformly distributed random variables in the interval &lt;span class="math"&gt;\([-1,1]\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(E(\sigma)=0\)&lt;/span&gt;, we see that the above average is the correlation between &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; and &lt;span class="math"&gt;\(g(z)\)&lt;/span&gt;. The Rademacher complexity therefore measures how well a hypothesis class correlates with noise. If a class has enough complexity, it will have better ability to correlate with noise and hence have higher rademacher complexity.&lt;/p&gt;
+&lt;p&gt;The Rademacher complexity, rather than the empirical one, is in turn defined as the statistical average over the true distribution &lt;span class="math"&gt;\(D(z)\)&lt;/span&gt;:&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{R}(G)=E_{\sim D^m}(\hat{\mathcal{R}}(G))$$&lt;/div&gt;
+&lt;p&gt;One can determine several bounds on the Rademacher complexity. One of particular interest considers the growth function. Remember that the growth function &lt;span class="math"&gt;\(\Pi(m)\)&lt;/span&gt; is the maximal number of distinct ways of classifying a set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; points &lt;span class="math"&gt;\(z_1,\ldots,z_m\)&lt;/span&gt; using an hypothesis class &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;. In order to calculate this bound we need the following lemma:&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Massart's Lemma: let &lt;span class="math"&gt;\(A\subset \mathbb{R}^m\)&lt;/span&gt; be a finite set, and &lt;span class="math"&gt;\(r=\text{max}_{x\in A}\|x\|_2\)&lt;/span&gt;, then&lt;/em&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$E_{\sigma}\left[\frac{1}{m}\text{sup}_{x\in A}\sum_i \sigma_ix_i\right]\leq \frac{r\sqrt{2\ln|A|}}{m}$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Hyperplanes and classification"</title><link href="/hyperplanes-and-classification.html" rel="alternate"></link><published>2020-05-01T00:00:00+02:00</published><updated>2020-05-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-01:/hyperplanes-and-classification.html</id><summary type="html">&lt;p&gt;We study the &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt; classification problem in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; using hyperplanes. We show that the VC dimension is &lt;span class="math"&gt;\(d+1\)&lt;/span&gt;.&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
