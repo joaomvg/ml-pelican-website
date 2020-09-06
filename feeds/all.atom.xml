@@ -94,15 +94,51 @@ because of the convexity of &lt;span class="math"&gt;\(e^{tx}\)&lt;/span&gt;. As
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html">&lt;p&gt;The empirical Rademacher complexity of a hypothesis class &lt;span class="math"&gt;\(G=\{g\}\)&lt;/span&gt; is defined as an average over the training set &lt;span class="math"&gt;\(S=(z_1,\ldots,z_m)\)&lt;/span&gt; in the following way:&lt;/p&gt;
+&lt;/script&gt;</content><category term="Statistics"></category><category term="machine learning"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#def"&gt;Definition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#bounds"&gt;Bounds&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Definition&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;The empirical Rademacher complexity of a hypothesis class &lt;span class="math"&gt;\(G=\{g\}\)&lt;/span&gt; is defined as an average over the training set &lt;span class="math"&gt;\(S=(z_1,\ldots,z_m)\)&lt;/span&gt; in the following way:&lt;/p&gt;
 &lt;div class="math"&gt;$$\hat{\mathcal{R}}(G)=E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]$$&lt;/div&gt;
-&lt;p&gt;where &lt;span class="math"&gt;\(\sigma_i\)&lt;/span&gt; are &lt;span class="math"&gt;\(m\)&lt;/span&gt; independently and uniformly distributed random variables in the interval &lt;span class="math"&gt;\([-1,1]\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(E(\sigma)=0\)&lt;/span&gt;, we see that the above average is the correlation between &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; and &lt;span class="math"&gt;\(g(z)\)&lt;/span&gt;. The Rademacher complexity therefore measures how well a hypothesis class correlates with noise. If a class has enough complexity, it will have better ability to correlate with noise and hence have higher rademacher complexity.&lt;/p&gt;
-&lt;p&gt;The Rademacher complexity, rather than the empirical one, is in turn defined as the statistical average over the true distribution &lt;span class="math"&gt;\(D(z)\)&lt;/span&gt;:&lt;/p&gt;
-&lt;div class="math"&gt;$$\mathcal{R}(G)=E_{\sim D^m}(\hat{\mathcal{R}}(G))$$&lt;/div&gt;
-&lt;p&gt;One can determine several bounds on the Rademacher complexity. One of particular interest considers the growth function. Remember that the growth function &lt;span class="math"&gt;\(\Pi(m)\)&lt;/span&gt; is the maximal number of distinct ways of classifying a set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; points &lt;span class="math"&gt;\(z_1,\ldots,z_m\)&lt;/span&gt; using an hypothesis class &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;. In order to calculate this bound we need the following lemma:&lt;/p&gt;
+&lt;p&gt;where &lt;span class="math"&gt;\(\sigma_i\)&lt;/span&gt; are &lt;span class="math"&gt;\(m\)&lt;/span&gt; independently and uniformly distributed random variables in the interval &lt;span class="math"&gt;\([-1,1]\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(E(\sigma)=0\)&lt;/span&gt;, we see that the above average is the correlation between &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; and &lt;span class="math"&gt;\(g(z)\)&lt;/span&gt;. The Rademacher complexity therefore measures how well a hypothesis class correlates with noise. If a class has enough complexity, it will correlate more easily with noise and hence have higher rademacher complexity.&lt;/p&gt;
+&lt;p&gt;The Rademacher complexity, rather than the empirical one, is in turn defined as the statistical average over the true distribution &lt;span class="math"&gt;\(D(z)^m\)&lt;/span&gt; on all the possible sets of size &lt;span class="math"&gt;\(m\)&lt;/span&gt;:&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{R}_m(G)=E_{\sim D^m}(\hat{\mathcal{R}}(G))$$&lt;/div&gt;
+&lt;p&gt;Note that this definition is explicitly dependent on &lt;span class="math"&gt;\(m\)&lt;/span&gt; because one cannot move the expectation in &lt;span class="math"&gt;\(z\)&lt;/span&gt; over to &lt;span class="math"&gt;\(g(z)\)&lt;/span&gt; inside the definition of the empirical Rademacher complexity.&lt;/p&gt;
+&lt;p&gt;Example: suppose we have a linear classifier in two dimensions &lt;span class="math"&gt;\(g(x\in \mathbb{R}^2)\)&lt;/span&gt;, which is a line that classifies points as &lt;span class="math"&gt;\(\{-1,1\}\)&lt;/span&gt; depending on whether the point is above or below the line. If we have up to three points one can always choose a line that classifies all the points correctly. This is just a consequence of the fact that the VC dimension of &lt;span class="math"&gt;\(\mathbb{R}^2\)&lt;/span&gt; is three. Then the above supremum is attained by picking a classifier &lt;span class="math"&gt;\(g\)&lt;/span&gt; such that &lt;span class="math"&gt;\(\text{sup}_{g\in G} \sum_{i=1}^{m}\sigma_i g(z_i)=\sum_{i=1}^{m}|\sigma_i|\)&lt;/span&gt;, which is always possible if we have up to three points. The Rademacher complexity is simply &lt;span class="math"&gt;\(\mathcal{R}_{m\leq 3}=E_{\sigma}|\sigma|\)&lt;/span&gt;, and thus independent of &lt;span class="math"&gt;\(m\)&lt;/span&gt;. The same follows in higher dimensions. The Rademacher complexity is independent of &lt;span class="math"&gt;\(m\)&lt;/span&gt; if &lt;span class="math"&gt;\(m\)&lt;/span&gt; is less than the VC dimension. For &lt;span class="math"&gt;\(m\)&lt;/span&gt; bigger than the VC dimension we can find the following bound. &lt;/p&gt;
+&lt;p&gt;&lt;a name="bounds"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Bounds&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;One can determine several bounds on the Rademacher complexity. One of particular interest takes into account the growth function. Remember that the growth function &lt;span class="math"&gt;\(\Pi(m)\)&lt;/span&gt; is the maximal number of distinct ways of classifying a set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; points &lt;span class="math"&gt;\(z_1,\ldots,z_m\)&lt;/span&gt; using an hypothesis class &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;. In order to calculate this bound we need the following lemma:&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Massart's Lemma: let &lt;span class="math"&gt;\(A\subset \mathbb{R}^m\)&lt;/span&gt; be a finite set, and &lt;span class="math"&gt;\(r=\text{max}_{x\in A}\|x\|_2\)&lt;/span&gt;, then&lt;/em&gt;
 &lt;/p&gt;
-&lt;div class="math"&gt;$$E_{\sigma}\left[\frac{1}{m}\text{sup}_{x\in A}\sum_i \sigma_ix_i\right]\leq \frac{r\sqrt{2\ln|A|}}{m}$$&lt;/div&gt;
+&lt;div class="math"&gt;$$E_{\sigma}\left[\frac{1}{m}\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_ix_i\right]\leq \frac{r\sqrt{2\ln|A|}}{m}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\sigma_i\)&lt;/span&gt; are independent and uniformly distributed random variables in the interval &lt;span class="math"&gt;\([-1,1]\)&lt;/span&gt;. The proof goes by first using Jensen's inequality:&lt;/p&gt;
+&lt;div class="math"&gt;$$\exp(t E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i])\leq E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)\label{eq1}\tag{1}$$&lt;/div&gt;
+&lt;p&gt;
+Now since the exponential function is monotically increasing we have that:&lt;/p&gt;
+&lt;div class="math"&gt;$$E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)=E_{\sigma}\text{sup}_{x\in A}\exp(t\sum_{i=1}^m \sigma_i x_i)\leq \sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)$$&lt;/div&gt;
+&lt;p&gt;Next we use the inequality nr. 2 from Hoeffding's inequality post which states that for a random variable &lt;span class="math"&gt;\(w\in [a,b]\)&lt;/span&gt; with &lt;span class="math"&gt;\(E(w)=0\)&lt;/span&gt; we have:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$E_w\exp(tw)\leq \exp(t^2(b-a)^2/8)$$&lt;/div&gt;
+&lt;p&gt;This means that:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)=\sum_{x\in A}\prod_iE_{\sigma_i}\exp(t \sigma_i x_i)\leq \sum_{x\in A} \exp(t^2x_i^2/2)\leq |A| \exp(t^2 r^2/2)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(|A|\)&lt;/span&gt; is the "size" of the set &lt;span class="math"&gt;\(A\)&lt;/span&gt; and &lt;span class="math"&gt;\(r^2=\text{max}_{x\in A}\|x\|_2\)&lt;/span&gt;. Using this result in eq.\eqref{eq1} and taking the log on both sides of the inequality:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq \frac{\ln|A|}{t}+\frac{r^2}{2}t$$&lt;/div&gt;
+&lt;p&gt;. 
+The optimal bound corresponds to &lt;span class="math"&gt;\(t=\sqrt{2\ln|A|/r^2}\)&lt;/span&gt;, which is the value where the function on the right side obtains its minimum. The final result is:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq r\sqrt{2\ln |A|}$$&lt;/div&gt;
+&lt;p&gt;We can apply this result to determine a bound on the Rademacher complexity for hypothesis classes with target &lt;span class="math"&gt;\(\{-1,1\}\)&lt;/span&gt;. So we have&lt;/p&gt;
+&lt;div class="math"&gt;$$E_{D^m(z)}E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]\leq E_{D^m(z)}\frac{r}{m}\sqrt{2\ln |A|}$$&lt;/div&gt;
+&lt;p&gt;
+In this we can easily calculate &lt;span class="math"&gt;\(r^2=\sum_i^mx_i^2=m\)&lt;/span&gt; and thus &lt;span class="math"&gt;\(r=\sqrt{m}\)&lt;/span&gt;. Moreover we know that, by definition, &lt;span class="math"&gt;\(|A|\leq \Pi(m)\)&lt;/span&gt;, the growth function, and hence we find:&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathcal{R}_m\leq \sqrt{\frac{2\ln \Pi(m)}{m}}$$&lt;/div&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
