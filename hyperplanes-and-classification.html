@@ -47,11 +47,27 @@
 	</div>
 	<div itemprop="articleBody" class="article-body"><hr>
 <h3><strong>1. Hyperplanes</strong></h3>
-<p>Consider a set of <span class="math">\(d+1\)</span> points in <span class="math">\(\mathbb{R}^{d}\)</span> dimensions. Assume that no set of three points is collinear- this way any set of <span class="math">\(d\)</span> points forms a hyperplane. Firstly, we shall demonstrate that if a set of <span class="math">\(d\)</span> points is shattered in <span class="math">\(\mathbb{R}^{d-1}\)</span> dimensions then <span class="math">\(d+1\)</span> points are also shattered in <span class="math">\(\mathbb{R}^d\)</span>. We can use this to reduce the problem to two dimensions, where we have seen that <span class="math">\(VC_{\text{dim}}=3\)</span>.</p>
-<p>Consider the representation in the picture below. Choose <span class="math">\(d\)</span> points and take the hyperplane formed by these. If the remaining point belongs to the hyperplane then we can consider the projection to <span class="math">\(d-1\)</span> dimensions, and we are left with the case of <span class="math">\((d-1)+2\)</span> points in <span class="math">\(\mathbb{R}^{d-1}\)</span>, which we shall analyse later. If this is not the case, then we can show that if the <span class="math">\(d\)</span> points on the hyperplane are separable then we can always find a hyperplane in <span class="math">\(\mathbb{R}^d\)</span> that separates all the points. In the figure below the dashed line on the hyperplane <span class="math">\(H_d\)</span> represents the hyperplane in <span class="math">\(\mathbb{R}^{d-1}\)</span> that separates the set of <span class="math">\(d\)</span> points. It is easy to see that any hyperplane that contains the remaining point and the dashed line (hyperplane in one lower dimension) is the solution to this problem.</p>
+<p>Consider a set of <span class="math">\(d+1\)</span> points in <span class="math">\(\mathbb{R}^{d}\)</span> dimensions and assume that no set of three points is collinear- this way any set of <span class="math">\(d\)</span> points forms a hyperplane. Firstly, we shall demonstrate that if a set of <span class="math">\(d\)</span> points is shattered in <span class="math">\(\mathbb{R}^{d-1}\)</span> dimensions then <span class="math">\(d+1\)</span> points are also shattered in <span class="math">\(\mathbb{R}^d\)</span>. We can use this to reduce the problem to two dimensions, where we have seen that <span class="math">\(VC_{\text{dim}}=3\)</span>.</p>
+<p>Consider the representation in the picture below. Choose <span class="math">\(d\)</span> points and take the hyperplane formed by these. If the remaining point belongs to the hyperplane then we can consider the projection to <span class="math">\(d-1\)</span> dimensions, and we are left with the case of <span class="math">\((d-1)+2\)</span> points in <span class="math">\(\mathbb{R}^{d-1}\)</span>, which we shall analyse later. If this is not the case, then we can show that if the <span class="math">\(d\)</span> points on the hyperplane are separable then we can always find a hyperplane in <span class="math">\(\mathbb{R}^d\)</span> that separates all the points. In the figure below the dashed line on <span class="math">\(H_d\)</span> represents the hyperplane in <span class="math">\(\mathbb{R}^{d-1}\)</span> that separates the set of <span class="math">\(d\)</span> points. It is easy to see that any hyperplane that contains the remaining point and the dashed line (hyperplane in one lower dimension) is the solution to this problem.</p>
 <p><img alt="" height="300" src="/images/hyperplanes_dplus1.png" style="display: block; margin: 0 auto" width="300"></p>
-<p>We shall consider now the case of <span class="math">\(d+2\)</span> points in <span class="math">\(\mathbb{R}^d\)</span>. Suppose for the moment that <span class="math">\(d\)</span> points are red and two are blue as depicted in the figure below. In <span class="math">\(\mathbb{R}^d\)</span>, <span class="math">\(d+1\)</span> non-collinear points always form a convex polygon. If the blue point is inside this convex then the problem is not separable- if it is outside then it is separable. Let's say this is the case and change one red point into blue. We have <span class="math">\(d-1\)</span> red and one blue points forming a convex, and an additional blue point living outside.</p>
-<p><img alt="" height="300" src="/images/hyperplanes_convex.png" style="display: block; margin: 0 auto" width="300"></p>
+<p>We shall consider now the case of <span class="math">\(d+2\)</span> points in <span class="math">\(\mathbb{R}^d\)</span>. For this purpose we shall use Radon's theorem that states that any set of <span class="math">\(d+2\)</span> points in <span class="math">\(\mathbb{R}^d\)</span> can be partitioned in two sets <span class="math">\(X_1\)</span> and <span class="math">\(X_2\)</span> such that the corresponding convex hulls intersect. This implies that <span class="math">\(d+2\)</span> points in <span class="math">\(\mathbb{R}^d\)</span> cannot be shatered because if they were then we would have two non intersecting convex hulls separated by a plane, thus contradicting Radon's theorem.</p>
+<p><strong>Proof</strong></p>
+<p>For <span class="math">\(d+2\)</span> points <span class="math">\(x_i\)</span> in <span class="math">\(\mathbb{R}^d\)</span> one can always choose <span class="math">\(d+2\)</span> parameters <span class="math">\(\alpha_i\)</span> such that:
+</p>
+<div class="math">$$\sum_{i=1}^{d+2}\alpha_ix_i=0,\;\; \sum_{i=1}^{d+2}\alpha_i=0$$</div>
+<p>
+The reason is because one has <span class="math">\(d+2\)</span> unknowns (<span class="math">\(\alpha_i\)</span>) for <span class="math">\(d+1\)</span> equations (<span class="math">\(d\)</span> coming from the first vector equation and an additional from the constraint on <span class="math">\(\alpha\)</span>). The second equation can be rewritten as a sum over positive <span class="math">\(\alpha_{&gt;}\)</span> and negative <span class="math">\(\alpha_{&lt;}\)</span>, that is, <span class="math">\(\sum_{i}\alpha_i^{&gt;}=\sum_{i}\alpha_i^{&lt;}\)</span>. Define <span class="math">\(\alpha=\sum_i\alpha_i^{&gt;}\)</span>, then we have 
+</p>
+<div class="math">$$\sum_i\frac{\alpha_i^{&gt;}}{\alpha}=\sum_i\frac{\alpha_i^{&lt;}}{\alpha}$$</div>
+<p>
+which is a sum over numbers in the interval <span class="math">\((0,1]\)</span>. The vector equation separates into two terms
+</p>
+<div class="math">$$\sum_{i}\frac{\alpha_i^{&gt;}}{\alpha}x_i=\sum_i\frac{\alpha_i^{&lt;}}{\alpha}x_i$$</div>
+<p>
+and each of the sets <span class="math">\(X_1=\{x_i: \alpha_i^{&gt;}\neq 0\}\)</span> and <span class="math">\(X_2=\{x_i: \alpha_i^{&lt;}\neq 0\}\)</span> form convex hulls. This means that <span class="math">\(X_1\)</span> and <span class="math">\(X_2\)</span> intersect.</p>
+<h3><strong>References</strong></h3>
+<p><br/></p>
+<p>[1] <em>Foundations of machine learning</em>, M. Mohri, A. Rostamizadeh, A. Talwalkar</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -143,7 +159,7 @@
 					<div class="col-md-3">
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
-							<li><a href="/category/machine-learning.html">Machine Learning (5)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (6)</a></li>
 							<li><a href="/category/statistics.html">Statistics (1)</a></li>
 						</ul>
 					</div>

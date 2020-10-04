@@ -1,5 +1,222 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-05-02T00:00:00+02:00</updated><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-05-26T00:00:00+02:00</updated><entry><title>"Curse of dimensionality"</title><link href="/curse-of-dimensionality.html" rel="alternate"></link><published>2020-05-26T00:00:00+02:00</published><updated>2020-05-26T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-26:/curse-of-dimensionality.html</id><summary type="html">&lt;p&gt;We address the importance of dimensionality in machine learning.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#def1"&gt;Basic concept&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#def"&gt;Hughes phenomenon&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#python"&gt;Python implementation&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Basic concept&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;All the machine learning models suffer from the same basic problem. If we have too many features as compared to the amount of data, then it is easier to overfit and the model will generalize poorly- this means that the model can more easily memorize the data because there are more features that can be used to differentiate the datapoints. Instead if we have too few features for the same amount of data, then it is  harder for the model to capture the relevant features and it will mostly certainly underfit. &lt;/p&gt;
+&lt;p&gt;So what is the right amount of data versus number of features? A simple criterion is the following. Suppose we have a feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; that can take &lt;span class="math"&gt;\(N\)&lt;/span&gt; distinct values. In a binary classification problem for example, if &lt;span class="math"&gt;\(m\)&lt;/span&gt;, the number of data-points, is very large, then we have enough points to calculate the empirical probabilities &lt;span class="math"&gt;\(P(c|x)\)&lt;/span&gt; with relative confidence, where &lt;span class="math"&gt;\(c=0,1\)&lt;/span&gt; is the class. As a classifier model we can use the set of empirical probabilites- the predictor is the class which gives higher probability. On the other hand, if &lt;span class="math"&gt;\(m\)&lt;/span&gt; is smaller than &lt;span class="math"&gt;\(N\)&lt;/span&gt; then the data is too sparse and we cannot rely on the empirical probabilities. Similarly, if we have an additional feature which can also take &lt;span class="math"&gt;\(N\)&lt;/span&gt; values, then we need &lt;span class="math"&gt;\(m\)&lt;/span&gt; to be larger than &lt;span class="math"&gt;\(N^2\)&lt;/span&gt;. In general, for &lt;span class="math"&gt;\(d\)&lt;/span&gt; dimensions we need &lt;span class="math"&gt;\(m\gg N^d\)&lt;/span&gt;. The same applies for continuous features. One can assume that &lt;span class="math"&gt;\(N=2^{64}\)&lt;/span&gt; for a 64-bit computer, and still the necessary data grows exponentially with the number of dimensions.&lt;/p&gt;
+&lt;p&gt;A more detailed analysis, as explained in the following section, shows that there exists an optimal &lt;span class="math"&gt;\(N_{opt}\)&lt;/span&gt; for which the accuracy is the best possible. For &lt;span class="math"&gt;\(N&amp;gt;N_{opt}\)&lt;/span&gt; the model prediction deteriorates until it starts performing as well as an empirical model given by the relative frequencies of the classes, disregarding their features. That is, when the number of features is large, the data becomes so sparse that the best we can do is to draw the classes according to their probabilities &lt;span class="math"&gt;\(P(c=0,1)\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="def"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Hughes phenomenon&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Suppose we have a binary classification problem with classes &lt;span class="math"&gt;\(c_1,c_2\)&lt;/span&gt; and a training set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; samples with &lt;span class="math"&gt;\(n\)&lt;/span&gt; features &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;. Intuitively having a very large dataset with only very few features, that is, &lt;span class="math"&gt;\(n\ll m\)&lt;/span&gt; may lead to difficulties to learning because there may not be enough information to correctly classify the samples. On the other hand, a small dataset as compared to a very large number of features, &lt;span class="math"&gt;\(n\gg m\)&lt;/span&gt;, means that we need a very complex hypothesis function which may lead to overfitting. What is the optimal number of features &lt;span class="math"&gt;\(n_{opt}\)&lt;/span&gt;?&lt;/p&gt;
+&lt;p&gt;We use the Bayes optimal classifier. In this case we choose the class that has higher probability according to the rule&lt;/p&gt;
+&lt;div class="math"&gt;$$\tilde{c}_i=\text{argmax}_{j=1,2}P(c_j|x)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\tilde{c}_i\)&lt;/span&gt; is the predicted class and &lt;span class="math"&gt;\(P(c,x)\)&lt;/span&gt; is the true distribution. The accuracy of the Bayes optimal classifier is then
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{x,c}\mathbb{1}_{c,\tilde{c}}P(c,x)=\sum_{x,\tilde{c}=\text{argmax P(c|x)}} P(\tilde{c},x)=\sum_x[\text{max}_c P(c|x)] P(x) =\sum_x [\text{max}_c P(x|c)P(c)]$$&lt;/div&gt;
+&lt;p&gt;
+Lets define &lt;span class="math"&gt;\(P(c_1)=p_{c_1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(P(c_2)=p_{c_2}\)&lt;/span&gt;, then the Bayes accuracy has the form:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{x=x_1}^{x_n} \text{max}\left(P(x|c_1)p_{c_1},P(x|c_2)p_{c_2}\right)$$&lt;/div&gt;
+&lt;p&gt;We ought to study the Bayes accuracy over all possible environment probabilities &lt;span class="math"&gt;\(P(x|c_1)\)&lt;/span&gt; and &lt;span class="math"&gt;\(P(x|c_2)\)&lt;/span&gt;. To do this we define&lt;br&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}u_i&amp;amp;\equiv&amp;amp; P(x_i|c_1), i=1\ldots n\\ v_i&amp;amp;\equiv&amp;amp; P(x_i|c_2), i=1\ldots n\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+and assume that &lt;span class="math"&gt;\(u,v\)&lt;/span&gt; are themselves random  variables. 
+The measure can be calculated from
+&lt;/p&gt;
+&lt;div class="math"&gt;$$dP(u_1,u_2,\ldots,u_n,v_1,v_2,\ldots,v_n)=Ndu_1du_2\ldots du_{n-1}dv_1dv_2\ldots dv_{n-1}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(N\)&lt;/span&gt; is a normalization constant. Note that because of the constraints &lt;span class="math"&gt;\(\sum_i u_i=1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_i v_i=1\)&lt;/span&gt;, the measure does not depend on &lt;span class="math"&gt;\(du_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(dv_n\)&lt;/span&gt;. To find the normalization &lt;span class="math"&gt;\(N\)&lt;/span&gt; note that the variables &lt;span class="math"&gt;\(u_i,v_i\)&lt;/span&gt; live in the hypercube &lt;span class="math"&gt;\(0\leq u_i\leq 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(0\leq v_i\leq 1\)&lt;/span&gt; and must obey the conditions &lt;span class="math"&gt;\(\sum_{i=1}^n u_i= 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_{i=1}^nv_i= 1\)&lt;/span&gt;, respectively. Given this we calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$1=N\int_0^1 du_1\int_{0}^{1-u_1}du_2\int_0^{1-u_1-u_2}du_3\ldots \int_0^1dv_1\int_0^{1-v_1}dv_2\int_0^{1-v_1-v_2}dv_3\ldots $$&lt;/div&gt;
+&lt;p&gt;The integrals can be calculated easily to give &lt;span class="math"&gt;\(N=[(n-1)!]^2\)&lt;/span&gt;. One trick is to use the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^n \int_0^{\infty} dx_i e^{-\alpha x_i}\)&lt;/span&gt; and then use the change of variables &lt;span class="math"&gt;\(x_i=r u_i\)&lt;/span&gt; with &lt;span class="math"&gt;\(\sum_{i=1}^nu_i=1\)&lt;/span&gt; and integrate over &lt;span class="math"&gt;\(r\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The mean Bayes accuracy is therefore
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\int\Big(\sum_i \text{max}(u_ip_{c_1},v_ip_{c_2}) \Big)dP(u,v)= \\
+ &amp;amp;=n(n-1)^2\int_0^1\int_0^1du_1dv_1(1-u_1)^{n-2}(1-v_1)^{n-2}\text{max}(u_1p_{c_1},v_1p_{c_2})\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+By symmetry, the sum in the first equation splits into &lt;span class="math"&gt;\(n\)&lt;/span&gt; equal terms. The integrals over the remaining &lt;span class="math"&gt;\(u_2,\ldots u_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_2,\ldots v_n\)&lt;/span&gt; give the term &lt;span class="math"&gt;\((1-u_1)^{n-2}(1-v_1)^{n-2}\)&lt;/span&gt; (one can use again the trick of the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^{n-1}\int_0^{\infty}dx_ie^{-\alpha x_i}\)&lt;/span&gt;, change variables to &lt;span class="math"&gt;\(x_i=ru_i\)&lt;/span&gt; and then use the constrain &lt;span class="math"&gt;\(\sum_{i=2}^{n}u_i=1-u_1\)&lt;/span&gt;).&lt;/p&gt;
+&lt;p&gt;The integral above is relatively easy to calculate. However, we are mostly interested in the limit when &lt;span class="math"&gt;\(n\rightarrow \infty\)&lt;/span&gt;. To do this we change variables &lt;span class="math"&gt;\(u_1\rightarrow u_1/n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_1\rightarrow v_1/n\)&lt;/span&gt; and take &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. This gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\sim \int_0^n\int_0^ndu_1dv_1(1-u_1/n)^{n}(1-v_1/n)^{n}\text{max}(u_1p_{c_1},v_1p_{c_2})\\
+&amp;amp;\sim \int_0^{\infty}\int_0^{\infty}du_1dv_1e^{-u_1-v_1}\text{max}(u_1p_{c_1},v_1p_{c_2})\\&amp;amp;=1-p_{c_1}p_{c_2}\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;which means that the Bayes accuracy has a limiting value as the number of features is very large. &lt;/p&gt;
+&lt;p&gt;In the case of a finite dataset, we can use the empirical distribution of &lt;span class="math"&gt;\(u_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_i\)&lt;/span&gt;. Suppose we have &lt;span class="math"&gt;\(m_1\)&lt;/span&gt; datapoints with class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2\)&lt;/span&gt; points with class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;. Then we can estimate &lt;span class="math"&gt;\(P(x_i|c_1)\)&lt;/span&gt; by the fraction of points in class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; that have feature &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; and similarly for class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;, that is, 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;P(x_i|c_1)\simeq \frac{s_i}{m_1}\\
+&amp;amp;P(x_i|c_2)\simeq \frac{r_i}{m_2}\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+In turn the probabilities &lt;span class="math"&gt;\(p_{c_1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(p_{c_2}\)&lt;/span&gt; are given by &lt;span class="math"&gt;\(m_1/m\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2/m\)&lt;/span&gt; respectively where &lt;span class="math"&gt;\(m\)&lt;/span&gt; is the total number of datapoints. The Bayes classification rule then consists in choosing class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; for feature &lt;span class="math"&gt;\(x_1\)&lt;/span&gt; provided &lt;span class="math"&gt;\(s_1p_{c_1}/m_1=s_1/m\)&lt;/span&gt; is larger than &lt;span class="math"&gt;\(r_1p_{c_2}/m_2=r_1/m\)&lt;/span&gt;, and class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt; if it is smaller. When &lt;span class="math"&gt;\(s_1=r_1\)&lt;/span&gt; we choose class which has higher prior probability. &lt;/p&gt;
+&lt;p&gt;The probability of drawing &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; points in class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; with feature &lt;span class="math"&gt;\(x_1\)&lt;/span&gt;, &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; points with feature &lt;span class="math"&gt;\(x_2\)&lt;/span&gt;, and so on, follows a multinomial distribution:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(s_1,s_2,\ldots s_n|u_1,u_2,\ldots)=\frac{m_1!}{s_1!s_2!\ldots s_n!}u_1^{s_1}u_2^{s_2}\ldots u_n^{s_n}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(s_1+s_2+\ldots s_n=m_1\)&lt;/span&gt;. Marginalizing over &lt;span class="math"&gt;\(s_2,\ldots s_n\)&lt;/span&gt; one obtains:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(s_1|u_1)=\frac{m_1!}{s_1!(m_1-s_1)!}u_1^{s_1}(1-u_1)^{m_1-s_1}$$&lt;/div&gt;
+&lt;p&gt;The mean Bayes accuracy is then:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp; n\int\prod_{i=1}^{n-1}du_idv_i \sum_{s_1,r_1}\text{max}(u_1p_{c_1},v_1 p_{c_2})P(s_1|u_1)P(r_1|v_1)dP(u_1,v_1,\ldots)\\
+&amp;amp;=n(n-1)^2\sum_{s_1&amp;gt;r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_1}\int du_1dv_1 u_1^{s_1+1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1}(1-v_1)^{m_2+n-r_1-2} \\
+&amp;amp;+ n(n-1)^2\sum_{s_1\leq r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_2}\int du_1dv_1 u_1^{s_1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1+1}(1-v_1)^{m_2+n-r_1-2}\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;Using &lt;span class="math"&gt;\(\int_0^1 dx x^a (1-x)^b=a!b!/(a+b+1)!\)&lt;/span&gt; we calculate:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}n(n-1)^2&amp;amp;\sum_{s_1&amp;gt;r_1}p_{c_1}{m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\\
++n(n-1)^2&amp;amp;\sum_{s_1\leq r_1}p_{c_2}{m_1\choose s_1}{m_2\choose r_1}\frac{(r_1+1)!(m_2+n-r_1-2)!}{(m_2+n)!}\frac{s_1!(m_1+n-s_1-2)!}{(m_1+n-1)!}\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;With some work we can simplify the expression above:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}n(n-1)^2&amp;amp;\sum_{s_1&amp;gt;r_1}p_{c_1}(s_1+1)\frac{(m_1+n-s_1-2)(m_1+n-s_1-2)\ldots (m_1-s_1+1)}{(m_1+n)(m_1+n-1)\ldots (m_1+1)}\times \frac{(m_2+n-r_1-2)(m_2+n-r_1-2)\ldots (m_2-r_1+1)}{(m_2+n-1)(m_2+n-2)\ldots (m_2+1)}\\
++n(n-1)^2&amp;amp;\sum_{s_1\leq r_1}p_{c_2}(s_1\leftrightarrow r_1,m_1\leftrightarrow m_2)\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;We can determine the limit &lt;span class="math"&gt;\(n\rightarrow \infty\)&lt;/span&gt; by using the Stirling's approximation of the factorial function:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^{n}$$&lt;/div&gt;
+&lt;p&gt;
+For each &lt;span class="math"&gt;\(s_1,r_1\)&lt;/span&gt; term we calculate:
+&lt;/p&gt;
+&lt;div class="math"&gt;$${m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\simeq (s_1+1)\frac{m_1!}{(m_1-s_1)!}\frac{m_2!}{(m_2-r_1)!}n^{-(s_1+r_1+3)}+\mathcal{O}(n^{-(s_1+r_1+4)})$$&lt;/div&gt;
+&lt;p&gt;
+and for the other term we interchange &lt;span class="math"&gt;\(s_1\leftrightarrow r_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_1\leftrightarrow m_2\)&lt;/span&gt;. Only the term with &lt;span class="math"&gt;\(s_1=r_1=0\)&lt;/span&gt; gives an order &lt;span class="math"&gt;\(\mathcal{O}(1)\)&lt;/span&gt; term and so we obtain:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{lim}_{n\rightarrow \infty}=p_{c_2}$$&lt;/div&gt;
+&lt;p&gt;Below a plot of the curve for some values of &lt;span class="math"&gt;\(m=m_1+m_2\)&lt;/span&gt;:
+&lt;img alt="" height="400" src="/images/p105p205.png" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
+&lt;p&gt;ando also for different prior probabilities:
+&lt;img alt="" height="400" src="/images/p102p208.png" style="display: block; margin: 0 auto" width="400"&gt;
+We see in this case that the mean accuracy first increases then it deteriorates until it reaches a limiting value for large &lt;span class="math"&gt;\(n\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Python implementation&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;plt&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;numpy&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;np&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;pd&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;multiprocessing&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;mp&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;seaborn&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="nn"&gt;sns&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Define functions:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;term&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;frac&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;term&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;frac&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;f&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;term&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Respectively:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{term(m1,m2,s1,r1,n)}\equiv \frac{(m_1+n-s_1-2)(m_1+n-s_1-2)\ldots (m_1-s_1+1)}{(m_1+n-2)(m_1+n-3)\ldots (m_1+1)}\times (s_1\leftrightarrow r_1,m_1\leftrightarrow m_2)$$&lt;/div&gt;
+&lt;p&gt;
+and
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{f(m1,m2,s1,r1,n)}\equiv \frac{n(n-1)^2(s_1+1)}{(m_1+n)(m_1+n-1)(m_2+n-1)}\text{term(m1,m2,s1,r1,n)}$$&lt;/div&gt;
+&lt;p&gt;The final expression is calculated as :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.5&lt;/span&gt;
+&lt;span class="n"&gt;p2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;g&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;
+    &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;p2&lt;/span&gt;
+
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that calculating all the sums can be computationally expensive, especially for large values of &lt;span class="math"&gt;\(m_1,m_2\)&lt;/span&gt; and &lt;span class="math"&gt;\(n\)&lt;/span&gt;. We have use parallel processing to handle the calculation faster. Here is an example of how to implement this using the library &lt;em&gt;multiprocessing&lt;/em&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+&lt;span class="n"&gt;m_list&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;500&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;m_list&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;p1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;
+    &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;mp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Pool&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;mp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cpu_count&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;pool&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;pool&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;g&lt;/span&gt;&lt;span class="p"&gt;,[(&lt;/span&gt;&lt;span class="n"&gt;m1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;m2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;n&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;)])&lt;/span&gt;
+    &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;
+[1] &lt;em&gt;On the mean accuracy of statistical pattern recognizers&lt;/em&gt;, Gordon F. Hughes, "Transactions on information theory", 1968&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Rademacher complexity"</title><link href="/rademacher-complexity.html" rel="alternate"></link><published>2020-05-02T00:00:00+02:00</published><updated>2020-05-02T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-02:/rademacher-complexity.html</id><summary type="html">&lt;p&gt;The Rademacher complexity measures how a hypothesis correlates with noise. This gives a way to evaluate the capacity or complexity of a hypothesis class.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;a href="#def"&gt;Definition&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#bounds"&gt;Bounds&lt;/a&gt;&lt;/li&gt;
@@ -42,7 +259,7 @@ The optimal bound corresponds to &lt;span class="math"&gt;\(t=\sqrt{2\ln|A|/r^2}
 &lt;p&gt;We can apply this result to determine a bound on the Rademacher complexity for hypothesis classes with target &lt;span class="math"&gt;\(\{-1,1\}\)&lt;/span&gt;. So we have&lt;/p&gt;
 &lt;div class="math"&gt;$$E_{D^m(z)}E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]\leq E_{D^m(z)}\frac{r}{m}\sqrt{2\ln |A|}$$&lt;/div&gt;
 &lt;p&gt;
-In this we can easily calculate &lt;span class="math"&gt;\(r^2=\sum_i^mx_i^2=m\)&lt;/span&gt; and thus &lt;span class="math"&gt;\(r=\sqrt{m}\)&lt;/span&gt;. Moreover we know that, by definition, &lt;span class="math"&gt;\(|A|\leq \Pi(m)\)&lt;/span&gt;, the growth function, and hence we find:&lt;/p&gt;
+We can easily calculate &lt;span class="math"&gt;\(r^2=\sum_i^mx_i^2=m\)&lt;/span&gt; and thus &lt;span class="math"&gt;\(r=\sqrt{m}\)&lt;/span&gt;. Moreover we know that, by definition, &lt;span class="math"&gt;\(|A|\leq \Pi(m)\)&lt;/span&gt;, the growth function, and hence we find:&lt;/p&gt;
 &lt;div class="math"&gt;$$\mathcal{R}_m\leq \sqrt{\frac{2\ln \Pi(m)}{m}}$$&lt;/div&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
@@ -169,11 +386,27 @@ In this we can easily calculate &lt;span class="math"&gt;\(r^2=\sum_i^mx_i^2=m\)
 }
 &lt;/script&gt;</summary><content type="html">&lt;hr&gt;
 &lt;h3&gt;&lt;strong&gt;1. Hyperplanes&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;Consider a set of &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d}\)&lt;/span&gt; dimensions. Assume that no set of three points is collinear- this way any set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points forms a hyperplane. Firstly, we shall demonstrate that if a set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points is shattered in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; dimensions then &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points are also shattered in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. We can use this to reduce the problem to two dimensions, where we have seen that &lt;span class="math"&gt;\(VC_{\text{dim}}=3\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;Consider the representation in the picture below. Choose &lt;span class="math"&gt;\(d\)&lt;/span&gt; points and take the hyperplane formed by these. If the remaining point belongs to the hyperplane then we can consider the projection to &lt;span class="math"&gt;\(d-1\)&lt;/span&gt; dimensions, and we are left with the case of &lt;span class="math"&gt;\((d-1)+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt;, which we shall analyse later. If this is not the case, then we can show that if the &lt;span class="math"&gt;\(d\)&lt;/span&gt; points on the hyperplane are separable then we can always find a hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; that separates all the points. In the figure below the dashed line on the hyperplane &lt;span class="math"&gt;\(H_d\)&lt;/span&gt; represents the hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; that separates the set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points. It is easy to see that any hyperplane that contains the remaining point and the dashed line (hyperplane in one lower dimension) is the solution to this problem.&lt;/p&gt;
+&lt;p&gt;Consider a set of &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d}\)&lt;/span&gt; dimensions and assume that no set of three points is collinear- this way any set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points forms a hyperplane. Firstly, we shall demonstrate that if a set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points is shattered in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; dimensions then &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; points are also shattered in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. We can use this to reduce the problem to two dimensions, where we have seen that &lt;span class="math"&gt;\(VC_{\text{dim}}=3\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;Consider the representation in the picture below. Choose &lt;span class="math"&gt;\(d\)&lt;/span&gt; points and take the hyperplane formed by these. If the remaining point belongs to the hyperplane then we can consider the projection to &lt;span class="math"&gt;\(d-1\)&lt;/span&gt; dimensions, and we are left with the case of &lt;span class="math"&gt;\((d-1)+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt;, which we shall analyse later. If this is not the case, then we can show that if the &lt;span class="math"&gt;\(d\)&lt;/span&gt; points on the hyperplane are separable then we can always find a hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; that separates all the points. In the figure below the dashed line on &lt;span class="math"&gt;\(H_d\)&lt;/span&gt; represents the hyperplane in &lt;span class="math"&gt;\(\mathbb{R}^{d-1}\)&lt;/span&gt; that separates the set of &lt;span class="math"&gt;\(d\)&lt;/span&gt; points. It is easy to see that any hyperplane that contains the remaining point and the dashed line (hyperplane in one lower dimension) is the solution to this problem.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="" height="300" src="/images/hyperplanes_dplus1.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
-&lt;p&gt;We shall consider now the case of &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. Suppose for the moment that &lt;span class="math"&gt;\(d\)&lt;/span&gt; points are red and two are blue as depicted in the figure below. In &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;, &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; non-collinear points always form a convex polygon. If the blue point is inside this convex then the problem is not separable- if it is outside then it is separable. Let's say this is the case and change one red point into blue. We have &lt;span class="math"&gt;\(d-1\)&lt;/span&gt; red and one blue points forming a convex, and an additional blue point living outside.&lt;/p&gt;
-&lt;p&gt;&lt;img alt="" height="300" src="/images/hyperplanes_convex.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;p&gt;We shall consider now the case of &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt;. For this purpose we shall use Radon's theorem that states that any set of &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; can be partitioned in two sets &lt;span class="math"&gt;\(X_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(X_2\)&lt;/span&gt; such that the corresponding convex hulls intersect. This implies that &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; cannot be shatered because if they were then we would have two non intersecting convex hulls separated by a plane, thus contradicting Radon's theorem.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Proof&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;For &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; points &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; in &lt;span class="math"&gt;\(\mathbb{R}^d\)&lt;/span&gt; one can always choose &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; parameters &lt;span class="math"&gt;\(\alpha_i\)&lt;/span&gt; such that:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=1}^{d+2}\alpha_ix_i=0,\;\; \sum_{i=1}^{d+2}\alpha_i=0$$&lt;/div&gt;
+&lt;p&gt;
+The reason is because one has &lt;span class="math"&gt;\(d+2\)&lt;/span&gt; unknowns (&lt;span class="math"&gt;\(\alpha_i\)&lt;/span&gt;) for &lt;span class="math"&gt;\(d+1\)&lt;/span&gt; equations (&lt;span class="math"&gt;\(d\)&lt;/span&gt; coming from the first vector equation and an additional from the constraint on &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;). The second equation can be rewritten as a sum over positive &lt;span class="math"&gt;\(\alpha_{&amp;gt;}\)&lt;/span&gt; and negative &lt;span class="math"&gt;\(\alpha_{&amp;lt;}\)&lt;/span&gt;, that is, &lt;span class="math"&gt;\(\sum_{i}\alpha_i^{&amp;gt;}=\sum_{i}\alpha_i^{&amp;lt;}\)&lt;/span&gt;. Define &lt;span class="math"&gt;\(\alpha=\sum_i\alpha_i^{&amp;gt;}\)&lt;/span&gt;, then we have 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_i\frac{\alpha_i^{&amp;gt;}}{\alpha}=\sum_i\frac{\alpha_i^{&amp;lt;}}{\alpha}$$&lt;/div&gt;
+&lt;p&gt;
+which is a sum over numbers in the interval &lt;span class="math"&gt;\((0,1]\)&lt;/span&gt;. The vector equation separates into two terms
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i}\frac{\alpha_i^{&amp;gt;}}{\alpha}x_i=\sum_i\frac{\alpha_i^{&amp;lt;}}{\alpha}x_i$$&lt;/div&gt;
+&lt;p&gt;
+and each of the sets &lt;span class="math"&gt;\(X_1=\{x_i: \alpha_i^{&amp;gt;}\neq 0\}\)&lt;/span&gt; and &lt;span class="math"&gt;\(X_2=\{x_i: \alpha_i^{&amp;lt;}\neq 0\}\)&lt;/span&gt; form convex hulls. This means that &lt;span class="math"&gt;\(X_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(X_2\)&lt;/span&gt; intersect.&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;[1] &lt;em&gt;Foundations of machine learning&lt;/em&gt;, M. Mohri, A. Rostamizadeh, A. Talwalkar&lt;/p&gt;
 &lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

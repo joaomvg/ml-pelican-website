@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Curse of dimensionality" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Curse of dimensionality"; Date: 2020-05-26; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Curse of dimensionality"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-05-26T00:00:00+02:00" itemprop="datePublished">Tue 26 May 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><h3><strong>Table of contents</strong></h3>
+<ol>
+<li><a href="#def1">Basic concept</a></li>
+<li><a href="#def">Hughes phenomenon</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Basic concept</strong></h3>
+<p>All the machine learning models suffer from the same basic problem. If we have too many features as compared to the amount of data, then it is easier to overfit and the model will generalize poorly- this means that the model can more easily memorize the data because there are more features that can be used to differentiate the datapoints. Instead if we have too few features for the same amount of data, then it is  harder for the model to capture the relevant features and it will mostly certainly underfit. </p>
+<p>So what is the right amount of data versus number of features? A simple criterion is the following. Suppose we have a feature <span class="math">\(x\)</span> that can take <span class="math">\(N\)</span> distinct values. In a binary classification problem for example, if <span class="math">\(m\)</span>, the number of data-points, is very large, then we have enough points to calculate the empirical probabilities <span class="math">\(P(c|x)\)</span> with relative confidence, where <span class="math">\(c=0,1\)</span> is the class. As a classifier model we can use the set of empirical probabilites- the predictor is the class which gives higher probability. On the other hand, if <span class="math">\(m\)</span> is smaller than <span class="math">\(N\)</span> then the data is too sparse and we cannot rely on the empirical probabilities. Similarly, if we have an additional feature which can also take <span class="math">\(N\)</span> values, then we need <span class="math">\(m\)</span> to be larger than <span class="math">\(N^2\)</span>. In general, for <span class="math">\(d\)</span> dimensions we need <span class="math">\(m\gg N^d\)</span>. The same applies for continuous features. One can assume that <span class="math">\(N=2^{64}\)</span> for a 64-bit computer, and still the necessary data grows exponentially with the number of dimensions.</p>
+<p>A more detailed analysis, as explained in the following section, shows that there exists an optimal <span class="math">\(N_{opt}\)</span> for which the accuracy is the best possible. For <span class="math">\(N&gt;N_{opt}\)</span> the model prediction deteriorates until it starts performing as well as an empirical model given by the relative frequencies of the classes, disregarding their features. That is, when the number of features is large, the data becomes so sparse that the best we can do is to draw the classes according to their probabilities <span class="math">\(P(c=0,1)\)</span>.</p>
+<p><a name="def"></a></p>
+<h3><strong>2. Hughes phenomenon</strong></h3>
+<p>Suppose we have a binary classification problem with classes <span class="math">\(c_1,c_2\)</span> and a training set of <span class="math">\(m\)</span> samples with <span class="math">\(n\)</span> features <span class="math">\(x_i\)</span>. Intuitively having a very large dataset with only very few features, that is, <span class="math">\(n\ll m\)</span> may lead to difficulties to learning because there may not be enough information to correctly classify the samples. On the other hand, a small dataset as compared to a very large number of features, <span class="math">\(n\gg m\)</span>, means that we need a very complex hypothesis function which may lead to overfitting. What is the optimal number of features <span class="math">\(n_{opt}\)</span>?</p>
+<p>We use the Bayes optimal classifier. In this case we choose the class that has higher probability according to the rule</p>
+<div class="math">$$\tilde{c}_i=\text{argmax}_{j=1,2}P(c_j|x)$$</div>
+<p>
+where <span class="math">\(\tilde{c}_i\)</span> is the predicted class and <span class="math">\(P(c,x)\)</span> is the true distribution. The accuracy of the Bayes optimal classifier is then
+</p>
+<div class="math">$$\sum_{x,c}\mathbb{1}_{c,\tilde{c}}P(c,x)=\sum_{x,\tilde{c}=\text{argmax P(c|x)}} P(\tilde{c},x)=\sum_x[\text{max}_c P(c|x)] P(x) =\sum_x [\text{max}_c P(x|c)P(c)]$$</div>
+<p>
+Lets define <span class="math">\(P(c_1)=p_{c_1}\)</span> and <span class="math">\(P(c_2)=p_{c_2}\)</span>, then the Bayes accuracy has the form:
+</p>
+<div class="math">$$\sum_{x=x_1}^{x_n} \text{max}\left(P(x|c_1)p_{c_1},P(x|c_2)p_{c_2}\right)$$</div>
+<p>We ought to study the Bayes accuracy over all possible environment probabilities <span class="math">\(P(x|c_1)\)</span> and <span class="math">\(P(x|c_2)\)</span>. To do this we define<br>
+</p>
+<div class="math">$$\begin{aligned}u_i&amp;\equiv&amp; P(x_i|c_1), i=1\ldots n\\ v_i&amp;\equiv&amp; P(x_i|c_2), i=1\ldots n\end{aligned}$$</div>
+<p>
+and assume that <span class="math">\(u,v\)</span> are themselves random  variables. 
+The measure can be calculated from
+</p>
+<div class="math">$$dP(u_1,u_2,\ldots,u_n,v_1,v_2,\ldots,v_n)=Ndu_1du_2\ldots du_{n-1}dv_1dv_2\ldots dv_{n-1}$$</div>
+<p>
+where <span class="math">\(N\)</span> is a normalization constant. Note that because of the constraints <span class="math">\(\sum_i u_i=1\)</span> and <span class="math">\(\sum_i v_i=1\)</span>, the measure does not depend on <span class="math">\(du_n\)</span> and <span class="math">\(dv_n\)</span>. To find the normalization <span class="math">\(N\)</span> note that the variables <span class="math">\(u_i,v_i\)</span> live in the hypercube <span class="math">\(0\leq u_i\leq 1\)</span> and <span class="math">\(0\leq v_i\leq 1\)</span> and must obey the conditions <span class="math">\(\sum_{i=1}^n u_i= 1\)</span> and <span class="math">\(\sum_{i=1}^nv_i= 1\)</span>, respectively. Given this we calculate
+</p>
+<div class="math">$$1=N\int_0^1 du_1\int_{0}^{1-u_1}du_2\int_0^{1-u_1-u_2}du_3\ldots \int_0^1dv_1\int_0^{1-v_1}dv_2\int_0^{1-v_1-v_2}dv_3\ldots $$</div>
+<p>The integrals can be calculated easily to give <span class="math">\(N=[(n-1)!]^2\)</span>. One trick is to use the unconstrained integral <span class="math">\(\prod_{i=1}^n \int_0^{\infty} dx_i e^{-\alpha x_i}\)</span> and then use the change of variables <span class="math">\(x_i=r u_i\)</span> with <span class="math">\(\sum_{i=1}^nu_i=1\)</span> and integrate over <span class="math">\(r\)</span>.</p>
+<p>The mean Bayes accuracy is therefore
+</p>
+<div class="math">$$\begin{aligned}&amp;\int\Big(\sum_i \text{max}(u_ip_{c_1},v_ip_{c_2}) \Big)dP(u,v)= \\
+ &amp;=n(n-1)^2\int_0^1\int_0^1du_1dv_1(1-u_1)^{n-2}(1-v_1)^{n-2}\text{max}(u_1p_{c_1},v_1p_{c_2})\end{aligned}$$</div>
+<p>
+By symmetry, the sum in the first equation splits into <span class="math">\(n\)</span> equal terms. The integrals over the remaining <span class="math">\(u_2,\ldots u_n\)</span> and <span class="math">\(v_2,\ldots v_n\)</span> give the term <span class="math">\((1-u_1)^{n-2}(1-v_1)^{n-2}\)</span> (one can use again the trick of the unconstrained integral <span class="math">\(\prod_{i=1}^{n-1}\int_0^{\infty}dx_ie^{-\alpha x_i}\)</span>, change variables to <span class="math">\(x_i=ru_i\)</span> and then use the constrain <span class="math">\(\sum_{i=2}^{n}u_i=1-u_1\)</span>).</p>
+<p>The integral above is relatively easy to calculate. However, we are mostly interested in the limit when <span class="math">\(n\rightarrow \infty\)</span>. To do this we change variables <span class="math">\(u_1\rightarrow u_1/n\)</span> and <span class="math">\(v_1\rightarrow v_1/n\)</span> and take <span class="math">\(n\gg 1\)</span>. This gives
+</p>
+<div class="math">$$\begin{aligned}&amp;\sim \int_0^n\int_0^ndu_1dv_1(1-u_1/n)^{n}(1-v_1/n)^{n}\text{max}(u_1p_{c_1},v_1p_{c_2})\\
+&amp;\sim \int_0^{\infty}\int_0^{\infty}du_1dv_1e^{-u_1-v_1}\text{max}(u_1p_{c_1},v_1p_{c_2})\\&amp;=1-p_{c_1}p_{c_2}\end{aligned}$$</div>
+<p>which means that the Bayes accuracy has a limiting value as the number of features is very large. </p>
+<p>In the case of a finite dataset, we can use the empirical distribution of <span class="math">\(u_i\)</span> and <span class="math">\(v_i\)</span>. Suppose we have <span class="math">\(m_1\)</span> datapoints with class <span class="math">\(c_1\)</span> and <span class="math">\(m_2\)</span> points with class <span class="math">\(c_2\)</span>. Then we can estimate <span class="math">\(P(x_i|c_1)\)</span> by the fraction of points in class <span class="math">\(c_1\)</span> that have feature <span class="math">\(x_i\)</span> and similarly for class <span class="math">\(c_2\)</span>, that is, 
+</p>
+<div class="math">$$\begin{aligned}&amp;P(x_i|c_1)\simeq \frac{s_i}{m_1}\\
+&amp;P(x_i|c_2)\simeq \frac{r_i}{m_2}\end{aligned}$$</div>
+<p>
+In turn the probabilities <span class="math">\(p_{c_1}\)</span> and <span class="math">\(p_{c_2}\)</span> are given by <span class="math">\(m_1/m\)</span> and <span class="math">\(m_2/m\)</span> respectively where <span class="math">\(m\)</span> is the total number of datapoints. The Bayes classification rule then consists in choosing class <span class="math">\(c_1\)</span> for feature <span class="math">\(x_1\)</span> provided <span class="math">\(s_1p_{c_1}/m_1=s_1/m\)</span> is larger than <span class="math">\(r_1p_{c_2}/m_2=r_1/m\)</span>, and class <span class="math">\(c_2\)</span> if it is smaller. When <span class="math">\(s_1=r_1\)</span> we choose class which has higher prior probability. </p>
+<p>The probability of drawing <span class="math">\(s_1\)</span> points in class <span class="math">\(c_1\)</span> with feature <span class="math">\(x_1\)</span>, <span class="math">\(s_2\)</span> points with feature <span class="math">\(x_2\)</span>, and so on, follows a multinomial distribution:
+</p>
+<div class="math">$$P(s_1,s_2,\ldots s_n|u_1,u_2,\ldots)=\frac{m_1!}{s_1!s_2!\ldots s_n!}u_1^{s_1}u_2^{s_2}\ldots u_n^{s_n}$$</div>
+<p>
+where <span class="math">\(s_1+s_2+\ldots s_n=m_1\)</span>. Marginalizing over <span class="math">\(s_2,\ldots s_n\)</span> one obtains:
+</p>
+<div class="math">$$P(s_1|u_1)=\frac{m_1!}{s_1!(m_1-s_1)!}u_1^{s_1}(1-u_1)^{m_1-s_1}$$</div>
+<p>The mean Bayes accuracy is then:
+</p>
+<div class="math">$$\begin{aligned}&amp; n\int\prod_{i=1}^{n-1}du_idv_i \sum_{s_1,r_1}\text{max}(u_1p_{c_1},v_1 p_{c_2})P(s_1|u_1)P(r_1|v_1)dP(u_1,v_1,\ldots)\\
+&amp;=n(n-1)^2\sum_{s_1&gt;r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_1}\int du_1dv_1 u_1^{s_1+1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1}(1-v_1)^{m_2+n-r_1-2} \\
+&amp;+ n(n-1)^2\sum_{s_1\leq r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_2}\int du_1dv_1 u_1^{s_1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1+1}(1-v_1)^{m_2+n-r_1-2}\end{aligned}$$</div>
+<p>Using <span class="math">\(\int_0^1 dx x^a (1-x)^b=a!b!/(a+b+1)!\)</span> we calculate:
+</p>
+<div class="math">$$\begin{aligned}n(n-1)^2&amp;\sum_{s_1&gt;r_1}p_{c_1}{m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\\
++n(n-1)^2&amp;\sum_{s_1\leq r_1}p_{c_2}{m_1\choose s_1}{m_2\choose r_1}\frac{(r_1+1)!(m_2+n-r_1-2)!}{(m_2+n)!}\frac{s_1!(m_1+n-s_1-2)!}{(m_1+n-1)!}\end{aligned}$$</div>
+<p>With some work we can simplify the expression above:
+</p>
+<div class="math">$$\begin{aligned}n(n-1)^2&amp;\sum_{s_1&gt;r_1}p_{c_1}(s_1+1)\frac{(m_1+n-s_1-2)(m_1+n-s_1-2)\ldots (m_1-s_1+1)}{(m_1+n)(m_1+n-1)\ldots (m_1+1)}\times \frac{(m_2+n-r_1-2)(m_2+n-r_1-2)\ldots (m_2-r_1+1)}{(m_2+n-1)(m_2+n-2)\ldots (m_2+1)}\\
++n(n-1)^2&amp;\sum_{s_1\leq r_1}p_{c_2}(s_1\leftrightarrow r_1,m_1\leftrightarrow m_2)\end{aligned}$$</div>
+<p>We can determine the limit <span class="math">\(n\rightarrow \infty\)</span> by using the Stirling's approximation of the factorial function:
+</p>
+<div class="math">$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^{n}$$</div>
+<p>
+For each <span class="math">\(s_1,r_1\)</span> term we calculate:
+</p>
+<div class="math">$${m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\simeq (s_1+1)\frac{m_1!}{(m_1-s_1)!}\frac{m_2!}{(m_2-r_1)!}n^{-(s_1+r_1+3)}+\mathcal{O}(n^{-(s_1+r_1+4)})$$</div>
+<p>
+and for the other term we interchange <span class="math">\(s_1\leftrightarrow r_1\)</span> and <span class="math">\(m_1\leftrightarrow m_2\)</span>. Only the term with <span class="math">\(s_1=r_1=0\)</span> gives an order <span class="math">\(\mathcal{O}(1)\)</span> term and so we obtain:
+</p>
+<div class="math">$$\text{lim}_{n\rightarrow \infty}=p_{c_2}$$</div>
+<p>Below a plot of the curve for some values of <span class="math">\(m=m_1+m_2\)</span>:
+<img alt="" height="400" src="/images/p105p205.png" style="display: block; margin: 0 auto" width="400"></p>
+<p>ando also for different prior probabilities:
+<img alt="" height="400" src="/images/p102p208.png" style="display: block; margin: 0 auto" width="400">
+We see in this case that the mean accuracy first increases then it deteriorates until it reaches a limiting value for large <span class="math">\(n\)</span>.</p>
+<p><a name="python"></a></p>
+<h3><strong>2. Python implementation</strong></h3>
+<p><br/></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+</pre></div>
+
+
+<p>Define functions:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">term</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">n</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frac</span><span class="o">=</span><span class="p">(</span><span class="n">m1</span><span class="o">-</span><span class="n">s1</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m1</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">m2</span><span class="o">-</span><span class="n">r1</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m2</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">term</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">frac</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">s1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="n">m1</span><span class="o">+</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">m1</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">m2</span><span class="o">+</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">term</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Respectively:
+</p>
+<div class="math">$$\text{term(m1,m2,s1,r1,n)}\equiv \frac{(m_1+n-s_1-2)(m_1+n-s_1-2)\ldots (m_1-s_1+1)}{(m_1+n-2)(m_1+n-3)\ldots (m_1+1)}\times (s_1\leftrightarrow r_1,m_1\leftrightarrow m_2)$$</div>
+<p>
+and
+</p>
+<div class="math">$$\text{f(m1,m2,s1,r1,n)}\equiv \frac{n(n-1)^2(s_1+1)}{(m_1+n)(m_1+n-1)(m_2+n-1)}\text{term(m1,m2,s1,r1,n)}$$</div>
+<p>The final expression is calculated as :</p>
+<div class="highlight"><pre><span></span><span class="n">p1</span><span class="o">=</span><span class="mf">0.5</span>
+<span class="n">p2</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">p1</span>
+
+<span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="n">args</span>
+    <span class="n">t</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">m1</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">+=</span><span class="n">f</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">p1</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m1</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">m2</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">+=</span><span class="n">f</span><span class="p">(</span><span class="n">m2</span><span class="p">,</span><span class="n">m1</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">p2</span>
+
+    <span class="k">return</span> <span class="n">t</span>
+</pre></div>
+
+
+<p>Note that calculating all the sums can be computationally expensive, especially for large values of <span class="math">\(m_1,m_2\)</span> and <span class="math">\(n\)</span>. We have use parallel processing to handle the calculation faster. Here is an example of how to implement this using the library <em>multiprocessing</em>:</p>
+<div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="p">{}</span>
+<span class="n">m_list</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">m_list</span><span class="p">:</span>
+    <span class="n">m1</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">p1</span><span class="p">)</span>
+    <span class="n">m2</span><span class="o">=</span><span class="n">m</span><span class="o">-</span><span class="n">m1</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">g</span><span class="p">,[(</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)])</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">=</span><span class="n">result</span>
+</pre></div>
+
+
+<h3><strong>References</strong></h3>
+<p><br/>
+[1] <em>On the mean accuracy of statistical pattern recognizers</em>, Gordon F. Hughes, "Transactions on information theory", 1968</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/machine-learning.html">Machine Learning (6)</a></li>
+							<li><a href="/category/statistics.html">Statistics (1)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
