@@ -1,5 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-05-26T00:00:00+02:00</updated><entry><title>"Curse of dimensionality"</title><link href="/curse-of-dimensionality.html" rel="alternate"></link><published>2020-05-26T00:00:00+02:00</published><updated>2020-05-26T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-26:/curse-of-dimensionality.html</id><summary type="html">&lt;p&gt;We address the importance of dimensionality in machine learning.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-06-05T00:00:00+02:00</updated><entry><title>"Bias-Variance tradeoff"</title><link href="/bias-variance-tradeoff.html" rel="alternate"></link><published>2020-06-05T00:00:00+02:00</published><updated>2020-06-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-05:/bias-variance-tradeoff.html</id><summary type="html">&lt;p&gt;we explain bias-variance tradeoff&lt;/p&gt;</summary><content type="html">&lt;p&gt;Let &lt;span class="math"&gt;\(h_S\)&lt;/span&gt; be the solution of an ERM algorithm. We decompose the generalization error as 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L_D(h_S)=\epsilon_{app}+\epsilon_{est}$$&lt;/div&gt;
+&lt;p&gt;
+with 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\epsilon_{app}=\text{min}_{h\in \mathcal{H}}L_D(h),\;\;\epsilon_{est}=L_D(h_S)-\text{min}_{h\in \mathcal{H}}L_D(h)$$&lt;/div&gt;
+&lt;p&gt;Here &lt;span class="math"&gt;\(\epsilon_{app}\)&lt;/span&gt; is the &lt;strong&gt;approximation error&lt;/strong&gt; which is the smallest error one can achieve using the hypothesis class &lt;span class="math"&gt;\(\mathcal{H}\)&lt;/span&gt;. This error is independent of the data and only depends on the choise of hypothesis class. On the other hand, &lt;span class="math"&gt;\(\epsilon_{est}\)&lt;/span&gt; is the &lt;strong&gt;estimation error&lt;/strong&gt;, that is, how far the generalization error is from the approximation error. Since &lt;span class="math"&gt;\(h_S\)&lt;/span&gt; depends on the training set, the estimation error depends strongly on the training data. &lt;/p&gt;
+&lt;p&gt;In order to reduce the approximation error we need a more complex hypothesis class but this might make the estimation error worse, since a more complex hypothesis may lead to overfitting. On the other hand, a smaller hypothesis class, that is, less complex, reduces the estimation error, because &lt;span class="math"&gt;\(h_S\)&lt;/span&gt; and &lt;span class="math"&gt;\(\text{argmin}_hL_D(h)\)&lt;/span&gt; are now closer, but it will increase the approximation error because of underfitting. This tradeoff is known as &lt;strong&gt;bias-complexity&lt;/strong&gt; tradeoff.&lt;/p&gt;
+&lt;p&gt;Lets see how this works in practice in the iris dataset.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Curse of dimensionality"</title><link href="/curse-of-dimensionality.html" rel="alternate"></link><published>2020-05-26T00:00:00+02:00</published><updated>2020-05-26T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-26:/curse-of-dimensionality.html</id><summary type="html">&lt;p&gt;We address the importance of dimensionality in machine learning.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Table of contents&lt;/strong&gt;&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;a href="#def1"&gt;Basic concept&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#def"&gt;Hughes phenomenon&lt;/a&gt;&lt;/li&gt;

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>"Rademacher complexity" — Data Science and Machine Learning</title>
-	<meta name="description" content="Title: "Rademacher complexity"; Date: 2020-05-02; Author: Joao Gomes">
+	<title>"Bias-Variance tradeoff" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Bias-Variance tradeoff"; Date: 2020-06-05; Author: Joao Gomes">
 	<meta name="author" content="Joao Gomes">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -26,11 +26,11 @@
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
 	<div class="text-center article-header">
-		<h1 itemprop="name headline" class="article-title">"Rademacher complexity"</h1>
+		<h1 itemprop="name headline" class="article-title">"Bias-Variance tradeoff"</h1>
 		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
 			<h4 itemprop="name">Joao Gomes</h4>
 		</span>
-		<time datetime="2020-05-02T00:00:00+02:00" itemprop="datePublished">Sat 02 May 2020</time>
+		<time datetime="2020-06-05T00:00:00+02:00" itemprop="datePublished">Fri 05 June 2020</time>
 	</div>
 	<div>
 		Category:
@@ -45,51 +45,16 @@
 			<a href="/tag/data-science.html" rel="tag">data science</a>
 		</span>
 	</div>
-	<div itemprop="articleBody" class="article-body"><h3><strong>Table of contents</strong></h3>
-<ol>
-<li><a href="#def">Definition</a></li>
-<li><a href="#bounds">Bounds</a></li>
-</ol>
-<p><a name="def"></a></p>
-<h3><strong>1. Definition</strong></h3>
-<p>The empirical Rademacher complexity of a hypothesis class <span class="math">\(G=\{g\}\)</span> is defined as an average over the training set <span class="math">\(S=(z_1,\ldots,z_m)\)</span> in the following way:</p>
-<div class="math">$$\hat{\mathcal{R}}(G)=E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]$$</div>
-<p>where <span class="math">\(\sigma_i\)</span> are <span class="math">\(m\)</span> independently and uniformly distributed random variables in the interval <span class="math">\([-1,1]\)</span>. Since <span class="math">\(E(\sigma)=0\)</span>, we see that the above average is the correlation between <span class="math">\(\sigma\)</span> and <span class="math">\(g(z)\)</span>. The Rademacher complexity therefore measures how well a hypothesis class correlates with noise. If a class has enough complexity, it will correlate more easily with noise and hence have higher rademacher complexity.</p>
-<p>The Rademacher complexity, rather than the empirical one, is in turn defined as the statistical average over the true distribution <span class="math">\(D(z)^m\)</span> on all the possible sets of size <span class="math">\(m\)</span>:</p>
-<div class="math">$$\mathcal{R}_m(G)=E_{\sim D^m}(\hat{\mathcal{R}}(G))$$</div>
-<p>Note that this definition is explicitly dependent on <span class="math">\(m\)</span> because one cannot move the expectation in <span class="math">\(z\)</span> over to <span class="math">\(g(z)\)</span> inside the definition of the empirical Rademacher complexity.</p>
-<p>Example: suppose we have a linear classifier in two dimensions <span class="math">\(g(x\in \mathbb{R}^2)\)</span>, which is a line that classifies points as <span class="math">\(\{-1,1\}\)</span> depending on whether the point is above or below the line. If we have up to three points one can always choose a line that classifies all the points correctly. This is just a consequence of the fact that the VC dimension of <span class="math">\(\mathbb{R}^2\)</span> is three. Then the above supremum is attained by picking a classifier <span class="math">\(g\)</span> such that <span class="math">\(\text{sup}_{g\in G} \sum_{i=1}^{m}\sigma_i g(z_i)=\sum_{i=1}^{m}|\sigma_i|\)</span>, which is always possible if we have up to three points. The Rademacher complexity is simply <span class="math">\(\mathcal{R}_{m\leq 3}=E_{\sigma}|\sigma|\)</span>, and thus independent of <span class="math">\(m\)</span>. The same follows in higher dimensions. The Rademacher complexity is independent of <span class="math">\(m\)</span> if <span class="math">\(m\)</span> is less than the VC dimension. For <span class="math">\(m\)</span> bigger than the VC dimension we can find the following bound. </p>
-<p><a name="bounds"></a></p>
-<h3><strong>1. Bounds</strong></h3>
-<p>One can determine several bounds on the Rademacher complexity. One of particular interest takes into account the growth function. Remember that the growth function <span class="math">\(\Pi(m)\)</span> is the maximal number of distinct ways of classifying a set of <span class="math">\(m\)</span> points <span class="math">\(z_1,\ldots,z_m\)</span> using an hypothesis class <span class="math">\(\mathcal{H}\)</span>. In order to calculate this bound we need the following lemma:</p>
-<p><em>Massart's Lemma: let <span class="math">\(A\subset \mathbb{R}^m\)</span> be a finite set, and <span class="math">\(r=\text{max}_{x\in A}\|x\|_2\)</span>, then</em>
+	<div itemprop="articleBody" class="article-body"><p>Let <span class="math">\(h_S\)</span> be the solution of an ERM algorithm. We decompose the generalization error as 
 </p>
-<div class="math">$$E_{\sigma}\left[\frac{1}{m}\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_ix_i\right]\leq \frac{r\sqrt{2\ln|A|}}{m}$$</div>
+<div class="math">$$L_D(h_S)=\epsilon_{app}+\epsilon_{est}$$</div>
 <p>
-where <span class="math">\(\sigma_i\)</span> are independent and uniformly distributed random variables in the interval <span class="math">\([-1,1]\)</span>. The proof goes by first using Jensen's inequality:</p>
-<div class="math">$$\exp(t E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i])\leq E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)\label{eq1}\tag{1}$$</div>
-<p>
-Now since the exponential function is monotically increasing we have that:</p>
-<div class="math">$$E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)=E_{\sigma}\text{sup}_{x\in A}\exp(t\sum_{i=1}^m \sigma_i x_i)\leq \sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)$$</div>
-<p>Next we use the inequality nr. 2 from Hoeffding's inequality post which states that for a random variable <span class="math">\(w\in [a,b]\)</span> with <span class="math">\(E(w)=0\)</span> we have:
+with 
 </p>
-<div class="math">$$E_w\exp(tw)\leq \exp(t^2(b-a)^2/8)$$</div>
-<p>This means that:
-</p>
-<div class="math">$$\sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)=\sum_{x\in A}\prod_iE_{\sigma_i}\exp(t \sigma_i x_i)\leq \sum_{x\in A} \exp(t^2x_i^2/2)\leq |A| \exp(t^2 r^2/2)$$</div>
-<p>
-where <span class="math">\(|A|\)</span> is the "size" of the set <span class="math">\(A\)</span> and <span class="math">\(r^2=\text{max}_{x\in A}\|x\|_2\)</span>. Using this result in eq.\eqref{eq1} and taking the log on both sides of the inequality:
-</p>
-<div class="math">$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq \frac{\ln|A|}{t}+\frac{r^2}{2}t$$</div>
-<p>. 
-The optimal bound corresponds to <span class="math">\(t=\sqrt{2\ln|A|/r^2}\)</span>, which is the value where the function on the right side obtains its minimum. The final result is:
-</p>
-<div class="math">$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq r\sqrt{2\ln |A|}$$</div>
-<p>We can apply this result to determine a bound on the Rademacher complexity for hypothesis classes with target <span class="math">\(\{-1,1\}\)</span>. So we have</p>
-<div class="math">$$E_{D^m(z)}E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]\leq E_{D^m(z)}\frac{r}{m}\sqrt{2\ln |A|}$$</div>
-<p>
-We can easily calculate <span class="math">\(r^2=\sum_i^mx_i^2=m\)</span> and thus <span class="math">\(r=\sqrt{m}\)</span>. Moreover we know that, by definition, <span class="math">\(|A|\leq \Pi(m)\)</span>, the growth function, and hence we find:</p>
-<div class="math">$$\mathcal{R}_m\leq \sqrt{\frac{2\ln \Pi(m)}{m}}$$</div>
+<div class="math">$$\epsilon_{app}=\text{min}_{h\in \mathcal{H}}L_D(h),\;\;\epsilon_{est}=L_D(h_S)-\text{min}_{h\in \mathcal{H}}L_D(h)$$</div>
+<p>Here <span class="math">\(\epsilon_{app}\)</span> is the <strong>approximation error</strong> which is the smallest error one can achieve using the hypothesis class <span class="math">\(\mathcal{H}\)</span>. This error is independent of the data and only depends on the choise of hypothesis class. On the other hand, <span class="math">\(\epsilon_{est}\)</span> is the <strong>estimation error</strong>, that is, how far the generalization error is from the approximation error. Since <span class="math">\(h_S\)</span> depends on the training set, the estimation error depends strongly on the training data. </p>
+<p>In order to reduce the approximation error we need a more complex hypothesis class but this might make the estimation error worse, since a more complex hypothesis may lead to overfitting. On the other hand, a smaller hypothesis class, that is, less complex, reduces the estimation error, because <span class="math">\(h_S\)</span> and <span class="math">\(\text{argmin}_hL_D(h)\)</span> are now closer, but it will increase the approximation error because of underfitting. This tradeoff is known as <strong>bias-complexity</strong> tradeoff.</p>
+<p>Lets see how this works in practice in the iris dataset.</p>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
