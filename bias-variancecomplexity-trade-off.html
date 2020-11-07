@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Bias-Variance/Complexity trade-off" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Bias-Variance/Complexity trade-off"; Date: 2020-06-05; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Bias-Variance/Complexity trade-off"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-06-05T00:00:00+02:00" itemprop="datePublished">Fri 05 June 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Basic concept</a></li>
+<li><a href="#python">Python implementation: Classification</a></li>
+<li><a href="#python2">Python implementation: Regression</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Basic concept</strong></h3>
+<p>Let <span class="math">\(h_S\)</span> be the solution of an ERM algorithm. We decompose the generalization error as 
+</p>
+<div class="math">$$L_D(h_S)=\epsilon_{app}+\epsilon_{est}$$</div>
+<p>
+with 
+</p>
+<div class="math">$$\epsilon_{app}=\text{min}_{h\in \mathcal{H}}L_D(h),\;\;\epsilon_{est}=L_D(h_S)-\text{min}_{h\in \mathcal{H}}L_D(h)$$</div>
+<p>Here <span class="math">\(\epsilon_{app}\)</span> is the <strong>approximation error</strong> which is the smallest error one can achieve using the hypothesis class <span class="math">\(\mathcal{H}\)</span>. This error is independent of the data and depends only on the choice of the hypothesis class. On the other hand, <span class="math">\(\epsilon_{est}\)</span> is the <strong>estimation error</strong>, that is, it measuers how far the generalization error is from the approximation error. Since <span class="math">\(h_S\)</span> depends on the training set, the estimation error depends strongly on the training data. </p>
+<p>In order to reduce the approximation error we need a more complex hypothesis class but this might make the estimation error worse, since a more complex hypothesis may lead to overfitting. On the other hand, a smaller hypothesis class, that is, less complex, reduces the estimation error, because <span class="math">\(h_S\)</span> and <span class="math">\(\text{argmin}_hL_D(h)\)</span> are now closer, but it will increase the approximation error because of underfitting. This tradeoff is known as <strong>bias-complexity</strong> tradeoff.</p>
+<p>Lets see how this works in practice. We create artificial data of around 1million samples in a 10 dimensional feature space, according to the classification rule:</p>
+<div class="math">$$y(x)=\text{sign}(w^0_1\tanh(w^1_ix^i)+w^0_2\tanh(w^2_ix^i))$$</div>
+<p>
+where <span class="math">\(w^1,w^2\)</span> are 10 dimensional parameters and <span class="math">\((w^0_1,w^0_2)\)</span> is a two parameter. For the classification we use a decision tree and adjust its max depth and number of features used in order to obtain different levels of complexity. Below we show the behaviour of the estimation (est_error), approximation (app_error) and generalization errors (gen_error):</p>
+<p><img alt="" height="400" src="/images/bias_vs_complexity.png" style="display: block; margin: 0 auto" width="400"></p>
+<p>To determine the approximation error we train the decision tree on the full data keeping fixed the number of features used and adjusting the depth of the tree (max_depth in the picture above). On the other hand, to determine the estimation error we train the decision tree on 10% of the data (around 100k samples) for a variety of depths and number of features. The generalization error is calculated on the remaining 90% of the data.</p>
+<p>The generalization error curves shows a tradeoff between bias and complexity. When the depth is smaller, so bias is larger, the approximation error grows but the estimation error is smaller. In contrast, if we increase the depth, the approximation error becomes smaller but the estimation error grows due to overfitting. The "sweet spot" occurs for an intermediate value of the depth, where the generalization error is a minimum.  </p>
+<p>Similar behaviour is obtained for different number of features (max_features):
+<img alt="" height="600" src="/images/bias_vs_complex_multiple.png" style="display: block; margin: 0 auto" width="600"></p>
+<p>In case of regression, a similar trade-off is observed. Nevertheless the analysis is slightly different. In general we want to model <span class="math">\(y=f(x)+\epsilon\)</span> where <span class="math">\(\epsilon\)</span> is noise with mean zero and standard deviation <span class="math">\(\sigma\)</span>. So we use an algorithm to approximate <span class="math">\(f(x)\simeq \hat{f}(x)\)</span>. Here <span class="math">\(\hat{f}\)</span> is the output of our algorithm.</p>
+<p>The mean square error of a predictor (regression problem) can be decomposed as follows:
+</p>
+<div class="math">$$E_D[(y-\hat{f}(x_0;D))^2]=\text{Bias}^2+\text{Var}^2+\sigma^2$$</div>
+<p>
+where
+</p>
+<div class="math">$$\text{Bias}=E_D[\hat{f}(x_0;D)]-f(x_0)$$</div>
+<p>
+and
+</p>
+<div class="math">$$\text{Var}^2=E_D[E_D[\hat{f}(x_0;D)]-\hat{f}(x_0;D)]^2$$</div>
+<p>
+Note that the expectation <span class="math">\(E_D\)</span> is calculated by using different training datasets and <span class="math">\(x_0\)</span> is a reference point- the error will depend on this point which is kept fixed while averaging over different training sets.</p>
+<p>We use again fake data (1million samples) in a 10 dimensional feature space and target function
+</p>
+<div class="math">$$f(x)=(x.w)^4+(x.w)^2+x.h$$</div>
+<p>
+where <span class="math">\(w,h\)</span> are 10 dimensional parameter arrays. We use a decision tree regressor and adjust number of features used and max depth. </p>
+<p><img alt="" height="400" src="/images/bias_variance_maxfeatures.png" style="display: block; margin: 0 auto" width="400"></p>
+<p>In each iteration, we sample about 20k datapoints and fit the decision tree,  calculate <span class="math">\(\hat{f}(x_0)\)</span> for a determined reference point and store this value. The bias is then calculated from the mean of the difference <span class="math">\(\hat{f}(x_0)-f(x_0)\)</span> and for the variance we calculate <span class="math">\(\hat{f}(x_0)\)</span> after each training sample and then calculate the variance of that array.</p>
+<p><img alt="" height="600" src="/images/bias_variance_multiple.png" style="display: block; margin: 0 auto" width="600"></p>
+<p>We can see that while variance increases with increasing depth, bias decreases. This behaviour translates into a trade-off between bias and variance which explains why the mean square error (mse) reachs its minimum at an intermediate depth. </p>
+<p><a name="python"></a></p>
+<h3><strong>2. Python implementation: Classification</strong></h3>
+<p>Classification with Decision Tree:</p>
+<p><br/></p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_wine</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+<span class="kn">import</span> <span class="nn">progressbar</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+</pre></div>
+
+
+<p>Create artificial data</p>
+<div class="highlight"><pre><span></span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="mi">3</span><span class="p">,(</span><span class="mi">1000000</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">w1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">w2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">w0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">y</span><span class="o">=</span><span class="n">w0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w1</span><span class="p">))</span><span class="o">+</span><span class="n">w0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w2</span><span class="p">))</span>
+<span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Train and test data:</p>
+<div class="highlight"><pre><span></span><span class="n">indices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
+<span class="n">l</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span> <span class="c1">#keep only 10% of the data</span>
+<span class="n">train_x</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">indices</span><span class="p">][:</span><span class="n">l</span><span class="p">]</span>
+<span class="n">test_x</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">indices</span><span class="p">][</span><span class="n">l</span><span class="p">:]</span>
+<span class="n">train_y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">indices</span><span class="p">][:</span><span class="n">l</span><span class="p">]</span>
+<span class="n">test_y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">indices</span><span class="p">][</span><span class="n">l</span><span class="p">:]</span>
+
+<span class="c1">#add some noise to the training data</span>
+<span class="n">noise</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,(</span><span class="n">l</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">train_x</span><span class="o">=</span><span class="n">train_x</span><span class="o">+</span><span class="n">noise</span>
+</pre></div>
+
+
+<p>Train the algorithm on the full dataset (1million). We can then determine the approximation error:</p>
+<div class="highlight"><pre><span></span><span class="c1">#Decision Tree parameters</span>
+<span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;ccp_alpha&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+ <span class="s1">&#39;class_weight&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="s1">&#39;gini&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+ <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+ <span class="s1">&#39;max_leaf_nodes&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;min_impurity_decrease&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+ <span class="s1">&#39;min_impurity_split&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+ <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+ <span class="s1">&#39;min_weight_fraction_leaf&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+ <span class="s1">&#39;presort&#39;</span><span class="p">:</span> <span class="s1">&#39;deprecated&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;splitter&#39;</span><span class="p">:</span> <span class="s1">&#39;best&#39;</span><span class="p">}</span>
+
+<span class="n">complexity</span><span class="o">=</span><span class="p">{}</span>
+<span class="n">max_features</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">max_f</span> <span class="ow">in</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span><span class="n">max_features</span><span class="p">):</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">max_f</span>
+    <span class="n">complexity</span><span class="p">[</span><span class="n">max_f</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+
+    <span class="n">DT</span><span class="o">=</span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">pred</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="n">DT</span><span class="o">.</span><span class="n">max_depth</span><span class="o">=</span><span class="n">d</span>
+        <span class="n">DT</span><span class="o">.</span><span class="n">random_state</span><span class="o">=</span><span class="n">d</span>
+        <span class="n">DT</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">acc</span><span class="o">=</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">DT</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">data</span><span class="p">),</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">-</span><span class="n">acc</span>
+
+    <span class="c1">#parallelize the calculation</span>
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span> 
+        <span class="n">complexity</span><span class="p">[</span><span class="n">max_f</span><span class="p">]</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pred</span><span class="p">,[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">)])</span>
+</pre></div>
+
+
+<p>Now train on the train set:</p>
+<div class="highlight"><pre><span></span><span class="n">max_features</span><span class="o">=</span><span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">complexity</span><span class="p">]</span>
+
+<span class="n">learning</span><span class="o">=</span><span class="p">{}</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">max_features</span><span class="p">:</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">f</span>
+    <span class="n">learning</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">depth</span> <span class="ow">in</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">)):</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;max_depth&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">depth</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;random_state&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">depth</span><span class="o">+</span><span class="mi">100</span>
+        <span class="n">DT</span><span class="o">=</span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">DT</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span><span class="n">train_y</span><span class="p">)</span>
+        <span class="n">acc</span><span class="o">=</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">DT</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_x</span><span class="p">),</span><span class="n">test_y</span><span class="p">)</span> <span class="c1">#calculates the generalization error</span>
+        <span class="n">learning</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">acc</span><span class="p">)</span>
+</pre></div>
+
+
+<p><a name="python2"></a></p>
+<h3><strong>3. Python implementation: Regression</strong></h3>
+<p>Regression with Decision Tree:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">progressbar</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+</pre></div>
+
+
+<p>Data preparation</p>
+<div class="highlight"><pre><span></span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,(</span><span class="mi">1000000</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">w</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">h</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1">#target function</span>
+<span class="k">def</span> <span class="nf">fnt</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">))</span><span class="o">**</span><span class="mi">4</span>
+
+<span class="n">y</span><span class="o">=</span><span class="n">fnt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+
+<p>Decision Tree regressor:</p>
+<div class="highlight"><pre><span></span><span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;criterion&#39;</span><span class="p">:</span> <span class="s1">&#39;mse&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;max_features&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;max_leaf_nodes&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;min_impurity_decrease&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+ <span class="s1">&#39;min_impurity_split&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;min_samples_leaf&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+ <span class="s1">&#39;min_samples_split&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+ <span class="s1">&#39;min_weight_fraction_leaf&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+ <span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s1">&#39;splitter&#39;</span><span class="p">:</span> <span class="s1">&#39;best&#39;</span><span class="p">}</span>
+
+<span class="n">indices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+<span class="n">i</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">[:</span><span class="mi">10</span><span class="p">],</span><span class="mi">1</span><span class="p">,</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1">#reference point</span>
+
+<span class="n">max_features</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">models</span><span class="o">=</span><span class="p">{}</span>
+
+<span class="k">def</span> <span class="nf">sampling</span><span class="p">(</span><span class="n">t</span><span class="p">):</span> <span class="c1">#takes in a model and fits on a sample</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">t</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="o">%</span><span class="mi">11</span>
+    <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">10</span><span class="p">:],</span><span class="mi">2</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">train_x</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">train_y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span><span class="n">train_y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span><span class="n">max_features</span><span class="p">):</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;max_features&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">f</span>
+    <span class="n">models</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">):</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;max_depth&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">d</span>
+
+        <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="n">models</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">]</span><span class="o">=</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">sampling</span><span class="p">,[(</span><span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">),</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)])</span>
+</pre></div>
+
+
+<p>Calculate Bias and Variance:</p>
+<div class="highlight"><pre><span></span><span class="n">bias</span><span class="o">=</span><span class="p">{}</span>
+<span class="n">var</span><span class="o">=</span><span class="p">{}</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span><span class="n">max_features</span><span class="p">):</span>
+    <span class="n">bias</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="p">{}</span>
+    <span class="n">var</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="p">{}</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">):</span>
+        <span class="n">bias</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">var</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">y_pred</span><span class="o">=</span><span class="n">models</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#predictions</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">][</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">y_pred</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">y_pred</span><span class="p">,</span><span class="n">m</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">bias</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">]</span><span class="o">=</span><span class="n">y_pred</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">fnt</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">[</span><span class="n">f</span><span class="p">][</span><span class="n">d</span><span class="p">]</span><span class="o">=</span><span class="n">y_pred</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/machine-learning.html">Machine Learning (8)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

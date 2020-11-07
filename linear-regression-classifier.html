@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Linear regression classifier" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Linear regression classifier"; Date: 2020-06-20; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Linear regression classifier"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-06-20T00:00:00+02:00" itemprop="datePublished">Sat 20 June 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Linear regression and classification</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Linear regression and classification</strong></h3>
+<p>Suppose we have a dataset with n features and k classes. We want to fit an hyperplane. For that purpose we write the target variable <span class="math">\(y\)</span> in a one-hot-encoded way, that is, as a vector <span class="math">\(y_k\)</span> with only one entry equal to one and <span class="math">\(k-1\)</span> others equal zero, and fit:
+</p>
+<div class="math">$$y^k\sim w^k_{\mu}x^{\mu}+w^k_0$$</div>
+<p> 
+where <span class="math">\(\mu\)</span> is the feature dimension and <span class="math">\(w^k_0\)</span> is the bias. Next we consider the mean square loss:
+</p>
+<div class="math">$$L=\frac{1}{m}\sum_{i=1}^{m}||(y^k_i-w^k_{\mu}x^{\mu}_i-w^k_0)||^2$$</div>
+<p>
+and find its minima, that is,
+</p>
+<div class="math">$$\begin{aligned}&amp;\frac{\partial L}{\partial w^k_{\mu}}=-\frac{2}{m}\sum_{i=1}^{m}(y^k_i-w^k_{\nu}x^{\nu}_i-w^k_0)x^{\mu}_i=0\\
+&amp;\frac{\partial L}{\partial w^k_{0}}=-\frac{2}{m}\sum_{i=1}^{m}(y^k_i-w^k_{\mu}x^{\mu}_i-w^k_0)=0
+\end{aligned}$$</div>
+<p>Alternatively
+</p>
+<div class="math">$$\begin{aligned}&amp; \langle y^kx^{\mu}\rangle-w^k_{\nu}\langle x^{\nu}x^{\mu}\rangle -w^k_0\langle x^{\mu}\rangle=0\\
+&amp;\langle y^k\rangle-w^k_{\mu}\langle x^u\rangle-w^k_0=0
+\end{aligned}$$</div>
+<p>It is best to write <span class="math">\(w^k_a=(w^k_{\mu},w^k_0)\)</span> and <span class="math">\(x^{a}=(x^{\mu},1)\)</span>, so that the equations for <span class="math">\(w^k_{\mu}\)</span> and the bias merge into a single equation:
+</p>
+<div class="math">$$\langle y^kx^{a}\rangle-w^k_{b}\langle x^{b}x^{a}\rangle=0$$</div>
+<p>The solution is
+</p>
+<div class="math">$$w=Y^{T}X(X^{T}X)^{-1}$$</div>
+<p>
+where <span class="math">\(Y=y_{ik}\)</span> and <span class="math">\(X=x_{ia}\)</span>. The predictor becomes:
+</p>
+<div class="math">$$\hat{Y}\equiv Xw^T=X(X^TX)^{-1}X^TY$$</div>
+<p>When is it guaranteed that there exists a solution? Or in other words, when is <span class="math">\(X^TX\)</span> invertible? We need to look at the vector space spanned by the columns of <span class="math">\(X\)</span>, that is, <span class="math">\(\text{Span}=\{v_a\equiv X_{ia}\}\)</span>. If the dimension of this vector space is less than the number of features then some of the vectors <span class="math">\(v_a\)</span> are not linearly independent and thus the matrix <span class="math">\(X^TX\)</span> will have determinant zero. Or in other words, there are coefficients <span class="math">\(c_a\)</span> such that <span class="math">\(\sum_ac_av_a=0\)</span>, which means that <span class="math">\(Xc=0\)</span> and thus <span class="math">\(X^TXc=0\)</span>. If there is a large number of datapoints as compared to the number of features then it becomes harder to find linearly dependent vectors <span class="math">\(v_a\)</span>.</p>
+<p>Note that 
+</p>
+<div class="math">$$X^TX \Big[\begin{array}{c}
+   0_{\mu}  \\
+   1  \\
+  \end{array} \Big]_{a\times 1}=N\Big[\begin{array}{c}
+   \langle x^{\mu}\rangle  \\
+   1  \\
+  \end{array} \Big]_{a\times 1}$$</div>
+<p> 
+  and therefore
+  </p>
+<div class="math">$$X(X^TX)^{-1}X^TY \Big[\begin{array}{c}
+   1_{k} 
+  \end{array}\Big]_{k\times 1}=\Big[\begin{array}{c}
+   1_{i} 
+  \end{array}\Big]_{i\times 1}$$</div>
+<p>that is, the predictions <span class="math">\(\hat{Y}_i\)</span> sum up to one just like a probability. However, it is not guaranteed that <span class="math">\(\hat{Y}\)</span> is always positive. To predict the class of a datapoint we use the rule:
+  </p>
+<div class="math">$$k=\text{argmax}_{k'}\hat{Y}(x)$$</div>
+<p>We can work out in more detail the inverse matrix <span class="math">\((X^TX)^{-1}\)</span>.
+  </p>
+<div class="math">$$X^TX=N\Big[\begin{array}{cc}
+   \langle x^{\mu}x^{\nu}\rangle &amp; \langle x^{\mu}\rangle\\
+   \langle x^{\nu}\rangle &amp; 1
+  \end{array}\Big]$$</div>
+<p>
+where <span class="math">\(N\)</span> is the number of datapoints. Now we use the result 
+</p>
+<div class="math">$$\Big[\begin{array}{cc}
+   A_{ij} &amp; v_i\\
+   v_j &amp; 1
+  \end{array}\Big]^{-1}=\Big[\begin{array}{cc}
+   A^{-1}+\frac{A^{-1}vv^TA^{-1}}{(1-v^TA^{-1}v)} &amp; -\frac{A^{-1}v}{(1-v^TA^{-1}v)}\\
+   -\frac{v^TA^{-1}}{(1-v^TA^{-1}v)} &amp; \frac{1}{(1-v^TA^{-1}v)}
+  \end{array}\Big]$$</div>
+<p>
+to find that
+</p>
+<div class="math">$$(X^TX)^{-1}=N^{-1}\Big[\begin{array}{cc}
+   \text{Cov}^{-1}_{\mu\nu} &amp; -\sum_{\nu}\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
+    -\sum_{\mu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}&amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
+  \end{array}\Big]$$</div>
+<p>
+where 
+</p>
+<div class="math">$$\text{Cov}_{\mu\nu}=\langle x^{\mu}x^{\nu}\rangle-\langle x^{\mu}\rangle \langle x^{\nu}\rangle$$</div>
+<p>
+is the covariance matrix. On the other hand, the weight matrix <span class="math">\(w^T\)</span> becomes
+</p>
+<div class="math">$$\Big[\begin{array}{cc}
+   \text{Cov}^{-1}_{\mu\nu} &amp; -\sum_{\nu}\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
+    -\sum_{\mu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}&amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
+  \end{array}\Big] \Big[\begin{array}{c}
+   \langle x^{\nu}y^k\rangle\\
+   \langle y^k \rangle
+  \end{array}\Big]$$</div>
+<p>Lets see how this works in practice. We build artificial data using the normal distribution in two dimensions. We consider first the case with two classes and later the multi-class case.</p>
+<p><img alt="" height="300" src="/images/lr_2classes.png" style="display: block; margin: 0 auto" width="300"></p>
+<p>One can see that despite a very simple model the linear classifier can separate very clearly all the points. The trouble happens with more classes. Consider now the case with three classes.</p>
+<p><img alt="" height="400" src="/images/lr_3classes.png" style="display: block; margin: 0 auto" width="400">
+  We see that the linear model cannot differentiate between classes <span class="math">\(0/1\)</span> and <span class="math">\(1/2\)</span>, as the decision boundaries almost overlap.</p>
+<p><a name="python"></a></p>
+<h3><strong>2. Python implementation</strong></h3>
+<p>Create data (three classes)</p>
+<div class="highlight"><pre><span></span><span class="n">L</span><span class="o">=</span><span class="mi">1000</span>
+<span class="n">n1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span><span class="n">L</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">],[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span><span class="n">L</span><span class="p">)</span>
+<span class="n">n3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span><span class="n">L</span><span class="p">)</span>
+
+<span class="n">n1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">L</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">int</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">n2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">L</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">int</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">n3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">L</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">int</span><span class="p">)],</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">n</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span><span class="n">n2</span><span class="p">,</span><span class="n">n3</span><span class="p">])</span>
+<span class="n">data</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;target&#39;</span><span class="p">])</span>
+</pre></div>
+
+
+<p>Regression:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+
+<span class="c1">#One-hot-encoding</span>
+<span class="n">enc</span><span class="o">=</span><span class="n">OneHotEncoder</span><span class="p">()</span>
+<span class="n">Y</span><span class="o">=</span><span class="n">enc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">lr</span><span class="o">=</span><span class="n">LinearRegression</span><span class="p">()</span>
+<span class="n">lr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">[[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]],</span><span class="n">Y</span><span class="o">.</span><span class="n">toarray</span><span class="p">())</span>
+</pre></div>
+
+
+<p>Decision boundary:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">decision</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">cl1</span><span class="p">,</span><span class="n">cl2</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">=-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl2</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl2</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">b</span><span class="o">=-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="n">cl1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="n">cl2</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="n">cl2</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">b</span>
+
+<span class="n">lr_bnd</span><span class="o">=</span><span class="n">decision</span><span class="p">(</span><span class="n">lr</span><span class="p">)</span>
+
+<span class="c1">#draw line from (p1[0],p2[0]) to (p1[1],p2[1]), and so on</span>
+<span class="n">p1</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">]</span>
+<span class="n">p2</span><span class="o">=</span><span class="p">[</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)]</span>
+
+<span class="n">p3</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">]</span>
+<span class="n">p4</span><span class="o">=</span><span class="p">[</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p3</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p3</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+
+<span class="n">p5</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">]</span>
+<span class="n">p6</span><span class="o">=</span><span class="p">[</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p5</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">lr_bnd</span><span class="p">(</span><span class="n">p5</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)]</span>
+</pre></div>
+
+
+<p>Plot:</p>
+<div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">scatterplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="n">hue</span><span class="o">=</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span><span class="n">p2</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;decision bnd 0/1&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p3</span><span class="p">,</span><span class="n">p4</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;decision bnd 1/2&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p5</span><span class="p">,</span><span class="n">p6</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;decision bnd 0/2&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Linear Regression 3 classes Decision Boundary&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/machine-learning.html">Machine Learning (8)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
