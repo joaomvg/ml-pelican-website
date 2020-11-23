@@ -45,7 +45,265 @@
 			<a href="/tag/data-science.html" rel="tag">data science</a>
 		</span>
 	</div>
-	<div itemprop="articleBody" class="article-body"></div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li>
+<p><a href="#def1">Student's t-test</a></p>
+<ul>
+<li>One-sample mean</li>
+<li>Two-sample mean </li>
+<li>Regression coefficient</li>
+<li>Correlation</li>
+</ul>
+</li>
+<li>
+<p><a href="#def2">Chi square test</a></p>
+<ul>
+<li>Pearson's Chi-square test</li>
+<li>Variance</li>
+</ul>
+</li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Student's t-test</strong></h3>
+<ul>
+<li>One-sample mean</li>
+</ul>
+<p>Consider <span class="math">\(n\)</span> random variables distributed i.i.d., each following a normal distribution with mean <span class="math">\(\mu\)</span> and variance <span class="math">\(\sigma\)</span>. The joint probability density function is
+</p>
+<div class="math">$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\mu)^2}{2\sigma^2}}\prod_{i=1}^n dx_i$$</div>
+<p>We want to write a density distribution as a function of <span class="math">\(\bar{x}=\frac{\sum_i x_i}{n}\)</span>, the sample mean. As such, use the equality
+</p>
+<div class="math">$$\sum_{i=1}^n(x_i-\mu)^2=\sum_{i=1}^n (x_i-\bar{x})^2+n(\bar{x}-\mu)^2$$</div>
+<p>and change variables <span class="math">\((x_1,\ldots,x_n)\rightarrow (x_1,\ldots,x_{n-1},\bar{x})\)</span> - the jacobian of the coordinate transformation is <span class="math">\(n\)</span>. The density function becomes
+</p>
+<div class="math">$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\bar{x})^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}d\bar{x}\prod_{i=1}^{n-1} dx_i$$</div>
+<p>Because <span class="math">\(x_i\)</span> and <span class="math">\(\bar{x}\)</span> are independent, we can shift the variables <span class="math">\(x_i\rightarrow x_i+\bar{x}\)</span>, after which the term <span class="math">\(\sum_{i=1}^{n}(x_i-\bar{x})^2\)</span> becomes <span class="math">\(\sum_{i=1}^{n-1}x_i^2+(\sum_i^{n-1}x_i)^2\)</span>. Since this is quadratic in the <span class="math">\(x_i\)</span>, it can be safely integrated out. However, before doing that we write <span class="math">\(x_i=\frac{s}{\sqrt{n-1}}u_i\)</span>, with <span class="math">\(\sum_{i=1}^{n-1}u_i^2+(\sum_i^{n-1}u_i)^2=1\)</span>, that is, <span class="math">\((s,u_i)\)</span> play a similar role to spherical coordinates. The density distribution becomes
+</p>
+<div class="math">$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-(n-1)\frac{s^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}s^{n-2}\,\Omega(u_i)dsd\bar{x}\prod_{i=1}^{n-1} du_i$$</div>
+<p>
+where <span class="math">\(\Omega(u_i)\)</span> is a measure for the variables <span class="math">\(u_i\)</span>- it gives an overall constant that we determine at the end instead.</p>
+<p>To remove dependence on the variance <span class="math">\(\sigma\)</span> we consider the variable <span class="math">\(t=(\bar{x}-\mu)\sqrt{n}/s\)</span>, which gives the Jacobian <span class="math">\(s/\sqrt{n}\)</span>. We scale <span class="math">\(s\rightarrow \sqrt{\frac{2}{n-1}}s\sigma\)</span> to obtain 
+</p>
+<div class="math">$$\propto \int_{s=0}^{\infty}e^{-s^2(1+\frac{1}{n-1}t^2)}s^{n-1}\,dsdt$$</div>
+<p>By changing <span class="math">\(s\rightarrow \sqrt{s}\)</span> we obtain
+</p>
+<div class="math">$$\propto\Big(1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}\Gamma(n/2)dt$$</div>
+<p>
+and integrating over <span class="math">\(t: (-\infty,\infty)\)</span> we fix the overall constant
+</p>
+<div class="math">$$\frac{\Gamma(n/2)}{\sqrt{(n-1)\pi}\Gamma(\frac{n-1}{2})}\Big (1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}$$</div>
+<p>This is known as the <strong>Student's t-distribution</strong> with <span class="math">\(\nu=n-1\)</span> degrees of freedom.
+<img alt="" height="300" src="/images/Student_t.png" style="display: block; margin: 0 auto" width="300"></p>
+<ul>
+<li>Two-sample mean (equal variance)</li>
+</ul>
+<p>For two samples with sizes <span class="math">\(n_1,n_2\)</span> the idea is roughly the same. We follow similar steps as in the previous case. After some algebra, the exponential contains the terms</p>
+<div class="math">$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-n_1\frac{(\bar{x}_1-\mu_1)^2}{2\sigma^2}-n_2\frac{(\bar{x}_2-\mu_2)^2}{2\sigma^2}$$</div>
+<p>
+where <span class="math">\(s_1\)</span> and <span class="math">\(s_2\)</span> are the two sample means.</p>
+<p>Now we write <span class="math">\(\bar{x}_1-\mu_1=(\bar{x}_{+}+\bar{x}_{-})/2\)</span> and <span class="math">\(\bar{x}_2-\mu_2=(\bar{x}_{+}-\bar{x}_{-})/2\)</span>, because we will want to integrate over <span class="math">\(\bar{x}_{+}\)</span>. We use the equality
+</p>
+<div class="math">$$-n_1(\bar{x}_1-\mu_1)^2-n_2(\bar{x}_2-\mu_2)^2=-\frac{\bar{x}_{-}^2}{1/n_1+1/n_2}-\frac{n_1+n_2}{4}\Big(\bar{x}_{+}+\frac{n_1-n_2}{n_1+n_2}\bar{x}_{-}\Big)^2$$</div>
+<p>
+and integrate over <span class="math">\(\bar{x}_{+}\)</span>. So we are left with</p>
+<div class="math">$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-\frac{\bar{x}_{-}^2}{(1/n_1+1/n_2)2\sigma^2}$$</div>
+<p>By writing 
+</p>
+<div class="math">$$s^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2},\;t=\frac{\bar{x}_{-}}{s\sqrt{1/n_1+1/n_2}}$$</div>
+<p>we obtain again the t-distribution with <span class="math">\(\nu=n_1+n_2-2\)</span> degrees of freedom.</p>
+<ul>
+<li>Regression coefficient</li>
+</ul>
+<p>In linear regression, we assume that the target <span class="math">\(y\)</span> is a linear combination of the feature <span class="math">\(x\)</span> up to a gaussian noise, that is,
+</p>
+<div class="math">$$y=ax+b+\epsilon$$</div>
+<p>
+where <span class="math">\(\epsilon\)</span> is the noise distributed i.i.d according to a normal distribution with mean zero. Here <span class="math">\(a,b\)</span> are the true parameters that we want to estimate. In linear regression we use least square error to determine the estimators
+</p>
+<div class="math">$$\hat{a}=\frac{\sum_i(y_i-\bar{y})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\hat{b}=\bar{y}-\hat{a}\bar{x}$$</div>
+<p>We want to calculate a probability for the difference <span class="math">\(\hat{a}-a\)</span>. To do this we substitute <span class="math">\(y_i=ax_i+b+\epsilon_i\)</span> in the estimator equation. This gives
+</p>
+<div class="math">$$\hat{a}-a=\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\; \hat{b}-b=(a-\hat{a})\bar{x}+\bar{\epsilon}$$</div>
+<p>
+Since <span class="math">\(\epsilon\)</span> is normally distributed we want determine the probability of the quantity above. To facilitate the algebra we use vectorial notation. As such
+</p>
+<div class="math">$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\equiv\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\;\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}$$</div>
+<p>
+where <span class="math">\(\overrightarrow{\gamma}\equiv x_i-\bar{x}\)</span>, <span class="math">\(\zeta\equiv \epsilon_i-\bar{\epsilon}\)</span> and <span class="math">\(\overrightarrow{1}=(1,1,1,\ldots,1)/n\)</span>, a vector of ones divided by the number of datapoints. Note that
+</p>
+<div class="math">$$\overrightarrow{\gamma}\cdot \overrightarrow{1}=0,\;\;\overrightarrow{\zeta}\cdot \overrightarrow{1}=0$$</div>
+<p>The probability density function is proportional to the exponential of
+</p>
+<div class="math">$$-\frac{\|\overrightarrow{\epsilon}\|^2}{2\sigma^2}$$</div>
+<p>We write <span class="math">\(\overrightarrow{\epsilon}=\overrightarrow{\epsilon}_{\perp}+\alpha\overrightarrow{\gamma}+\beta\overrightarrow{1}\)</span> with <span class="math">\(\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{\gamma}=\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{1}=0\)</span>. We calculate
+</p>
+<div class="math">$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}=\alpha,\;\; \|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+\frac{\beta^2}{n}$$</div>
+<p>Integrating out <span class="math">\(\beta\)</span> we can build a t-test like variable with <span class="math">\(n-2\)</span> degrees of freedom, since <span class="math">\(\overrightarrow{\epsilon}_{\perp}\)</span> lives in a <span class="math">\(n-2\)</span> dimensional vector space. That is, 
+</p>
+<div class="math">$$t=\frac{\alpha\|\overrightarrow{\gamma}\|}{\|\overrightarrow{\epsilon}_{\perp}\|}\sqrt{n-2}$$</div>
+<p>One can show that <span class="math">\(\|\overrightarrow{\epsilon}_{\perp}\|^2=\sum_i(y_i-\hat{y}_i)^2\)</span>, and therefore
+</p>
+<div class="math">$$t=\frac{\hat{a}-a}{\sqrt{\frac{\sum_i(y_i-\hat{y}_i)^2}{\sum_i(x_i-\bar{x}_i)^2}}}\sqrt{n-2}$$</div>
+<p>For the intercept the logic is similar.  We have
+</p>
+<div class="math">$$\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}=-\alpha\bar{x}+\frac{\beta}{n}$$</div>
+<p>
+and thus
+</p>
+<div class="math">$$\|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+n(\hat{b}-b+\alpha\bar{x})^2$$</div>
+<p>Integrating out <span class="math">\(\alpha\)</span> one finds that
+</p>
+<div class="math">$$t_{\text{intercept}}=\frac{(\hat{b}-b)\|\overrightarrow{\gamma}\|\sqrt{n-2}}{\|\overrightarrow{\epsilon}_{\perp}\|\sqrt{\|\overrightarrow{\gamma}\|^2/n+\bar{x}^2}}$$</div>
+<p>follows the Student's t-distribution with <span class="math">\(n-2\)</span> degrees of freedom.</p>
+<ul>
+<li>Correlation</li>
+</ul>
+<p>We want to test whether two variables  <span class="math">\(y\)</span> and <span class="math">\(x\)</span> have zero correlation, statistically speaking. Essentialy this accounts to fit <span class="math">\(y\sim ax+b\)</span>. We have seen that the regression coefficient <span class="math">\(a\)</span> is proportional to the sample correlation coefficient, that is,</p>
+<div class="math">$$a=\frac{\langle yx\rangle -\langle y\rangle \langle x\rangle}{\langle x^2\rangle -\langle x\rangle^2 }=r\frac{\sigma(y)}{\sigma(x)}$$</div>
+<p>
+where <span class="math">\(\sigma(y)^2=\sum_{i}(y_i-\bar{y})^2/n\)</span> and <span class="math">\(\sigma(x)^2=\sum_{i}(x_i-\bar{x})^2/n\)</span>, and <span class="math">\(r\)</span> is the Pearson's correlation coefficient. Then we use the equality
+</p>
+<div class="math">$$\sum_{i}(y_i-\hat{y}_i)^2/n=\sigma(y)^2(1-r^2)$$</div>
+<p>
+to find that the t-statistic for the regression coefficient <span class="math">\(a\)</span> can be written as
+</p>
+<div class="math">$$t=\frac{r\sqrt{n-2}}{\sqrt{1-r^2}}$$</div>
+<p>
+assuming that true coefficient is zero, that is, <span class="math">\(a=0\)</span>.</p>
+<p><a name="def2"></a></p>
+<h3><strong>2. Chi square test</strong></h3>
+<p>Let each <span class="math">\(X_i,\,i=1\ldots n\)</span> be a random variable following a standard normal distribution. Then the sum of squares
+</p>
+<div class="math">$$\chi^2=\sum_{i=1}^nX^2_i$$</div>
+<p>
+follows a chi-distribution with <span class="math">\(k\)</span> degrees of freedom. To understand this, consider the joint probability density function of <span class="math">\(n\)</span> standard normal random variables
+</p>
+<div class="math">$$e^{-\frac{1}{2}\sum_{i=1}^n X_i^2}\prod_{i=1}^n dX_i$$</div>
+<p>
+If we use spherical coordinates with
+</p>
+<div class="math">$$X_i=ru_i,\;\sum_{i=1}^n u_i^2=1$$</div>
+<p>
+the probability density becomes
+</p>
+<div class="math">$$e^{-\frac{r^2}{2}}drr^{n-1}\Omega$$</div>
+<p>
+where <span class="math">\(\Omega\)</span> comes from integrating out <span class="math">\(u_i\)</span>. Since <span class="math">\(r\)</span> is never negative we further use <span class="math">\(s=r^{2}\)</span> and  obtain 
+</p>
+<div class="math">$$\propto e^{-\frac{s}{2}}s^{\frac{n}{2}-1}ds$$</div>
+<p>
+Therefore the chi-square variable <span class="math">\(\chi^2\equiv s\)</span> with <span class="math">\(k\)</span> degrees of freedom follows the distribution
+</p>
+<div class="math">$$\chi^2\sim \frac{s^{\frac{n}{2}-1}}{2^{n/2}\Gamma(n/2)}e^{-\frac{s}{2}}$$</div>
+<p>
+This distribution has the following shape (from Wikipedia):
+<img alt="" height="400" src="/images/Chi-square_pdf.svg" style="display: block; margin: 0 auto" width="400"></p>
+<ul>
+<li>Pearson's Chi-square test</li>
+</ul>
+<p>This test gives a measure of goodness of fit for a categorical variable with <span class="math">\(k\)</span> classes. Suppose we have <span class="math">\(n\)</span> observations with <span class="math">\(x_i\)</span> (<span class="math">\(i=1\ldots k\)</span>) observed numbers, that is, <span class="math">\(\sum_{i=1}^k x_i=n\)</span>. We want to test the hypotheses that each category is drawn with probability <span class="math">\(p_i\)</span>. Under this assumption, the joint probability of observing <span class="math">\(x_i\)</span> numbers follows a multinomial distribution
+</p>
+<div class="math">$$P(x_1,x_2,\ldots,x_n)=\frac{n!}{x_1!x_2!\ldots x_k!}p_1^{x_1}p_2^{x_2}\ldots p_k^{x_k}$$</div>
+<p> 
+We want to understand the behaviour of this probability when <span class="math">\(n\)</span> is very large. Assume that <span class="math">\(x_i\)</span> is also sufficiently large, which is ok to do for typical observations. In this case use stirling's approximation of the factorial, that is,
+</p>
+<div class="math">$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^n$$</div>
+<p>
+to write
+</p>
+<div class="math">$$P(x_1,x_2,\ldots,x_n)\propto \Big(\frac{n}{e}\Big)^n \prod_{i=1}^k \Big(\frac{x_i}{e}\Big)^{-x_i}p_i^{x_i}$$</div>
+<p>
+In taking <span class="math">\(n\)</span> very large, we want to keep the frequency <span class="math">\(\lambda_i=x_i/ n\)</span> fixed. Then the logarithm of the above expression becomes
+</p>
+<div class="math">$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\lambda_in\ln(\lambda_i)+\sum_{i=1}^k\lambda_i n\ln(p_i)$$</div>
+<p>
+Since this is proportional to <span class="math">\(n\)</span> we can perform an asymptotic expansion as <span class="math">\(n\gg 1\)</span>. We perform the expansion around the maximum of <span class="math">\(\ln P\)</span> (note that <span class="math">\(\ln P\)</span> is a concave function of <span class="math">\(\lambda_i\)</span> ), that is,
+</p>
+<div class="math">$$\frac{\partial P}{\partial \lambda_i}=0,\;i=1\ldots n-1$$</div>
+<p>
+Using the fact that we have <span class="math">\(n-1\)</span> independent variables since <span class="math">\(\sum_i \lambda_i=1\)</span>, the solution is <span class="math">\(\lambda_i^*=p_i\)</span>. Expanding around this solution we find
+</p>
+<div class="math">$$\ln P(\lambda_1,\lambda_2,\ldots,\lambda_n)=-n\sum_{i=1}^k\frac{(\lambda_i-p_i)^2}{2p_i}$$</div>
+<p>
+In terms of <span class="math">\(x_i\)</span> this gives
+</p>
+<div class="math">$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\frac{(x_i-m_i)^2}{2m_i}$$</div>
+<p>
+where <span class="math">\(m_i=np_i\)</span> is the expected observed number. Therefore the quantity
+</p>
+<div class="math">$$\sum_{i=1}^k\frac{(x_i-m_i)^2}{m_i}$$</div>
+<p>
+follows a <span class="math">\(\chi^2\)</span> distribution with <span class="math">\(k-1\)</span> degrees of fredom, since only <span class="math">\(k-1\)</span> of the <span class="math">\(x\)</span>'s are independent.</p>
+<ul>
+<li>Variance</li>
+</ul>
+<p>In order to investigate the difference between the sample variance <span class="math">\(s^2=\sum_i(x_i-\bar{x})^2/n-1\)</span> and the assumed variance <span class="math">\(\sigma^2\)</span> of the distribution. We calculate
+</p>
+<div class="math">$$(n-1)\frac{s^2}{\sigma^2}$$</div>
+<p>
+Remember that for a normally distributed random variable <span class="math">\(x_i\)</span>, the sum <span class="math">\(\sum_i(x_i-\bar{x})^2\)</span> also follows a normal distribution. In particular, the combination <span class="math">\(\sum_i(x_i-\bar{x})^2/\sigma^2\)</span> follows a <span class="math">\(\chi^2\)</span> distribution with <span class="math">\(n-1\)</span> degrees of freedom, because we have integrated out <span class="math">\(\bar{x}\)</span> as explained in the beginning of the post.</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
 	<hr>
 	<h2>Comments</h2>
 </div>
@@ -75,7 +333,8 @@
 					<div class="col-md-3">
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
-							<li><a href="/category/machine-learning.html">Machine Learning (8)</a></li>
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (9)</a></li>
 							<li><a href="/category/statistics.html">Statistics (2)</a></li>
 						</ul>
 					</div>

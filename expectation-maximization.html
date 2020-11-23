@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>"Rademacher complexity" — Data Science and Machine Learning</title>
-	<meta name="description" content="Title: "Rademacher complexity"; Date: 2020-05-02; Author: Joao Gomes">
+	<title>"Expectation-Maximization" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Expectation-Maximization"; Date: 2020-07-15; Author: Joao Gomes">
 	<meta name="author" content="Joao Gomes">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -26,16 +26,16 @@
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
 	<div class="text-center article-header">
-		<h1 itemprop="name headline" class="article-title">"Rademacher complexity"</h1>
+		<h1 itemprop="name headline" class="article-title">"Expectation-Maximization"</h1>
 		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
 			<h4 itemprop="name">Joao Gomes</h4>
 		</span>
-		<time datetime="2020-05-02T00:00:00+02:00" itemprop="datePublished">Sat 02 May 2020</time>
+		<time datetime="2020-07-15T00:00:00+02:00" itemprop="datePublished">Wed 15 July 2020</time>
 	</div>
 	<div>
 		Category:
 		<span itemprop="articleSection">
-			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+			<a href="/category/data-science.html" rel="category">Data Science</a>
 		</span>
 	</div>
  
@@ -45,51 +45,60 @@
 			<a href="/tag/data-science.html" rel="tag">data science</a>
 		</span>
 	</div>
-	<div itemprop="articleBody" class="article-body"><h3><strong>Table of contents</strong></h3>
-<ol>
-<li><a href="#def">Definition</a></li>
-<li><a href="#bounds">Bounds</a></li>
-</ol>
-<p><a name="def"></a></p>
-<h3><strong>1. Definition</strong></h3>
-<p>The empirical Rademacher complexity of a hypothesis class <span class="math">\(G=\{g\}\)</span> is defined as an average over the training set <span class="math">\(S=(z_1,\ldots,z_m)\)</span> in the following way:</p>
-<div class="math">$$\hat{\mathcal{R}}(G)=E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]$$</div>
-<p>where <span class="math">\(\sigma_i\)</span> are <span class="math">\(m\)</span> independently and uniformly distributed random variables in the interval <span class="math">\([-1,1]\)</span>. Since <span class="math">\(E(\sigma)=0\)</span>, we see that the above average is the correlation between <span class="math">\(\sigma\)</span> and <span class="math">\(g(z)\)</span>. The Rademacher complexity therefore measures how well a hypothesis class correlates with noise. If a class has enough complexity, it will correlate more easily with noise and hence have higher rademacher complexity.</p>
-<p>The Rademacher complexity, rather than the empirical one, is in turn defined as the statistical average over the true distribution <span class="math">\(D(z)^m\)</span> on all the possible sets of size <span class="math">\(m\)</span>:</p>
-<div class="math">$$\mathcal{R}_m(G)=E_{\sim D^m}(\hat{\mathcal{R}}(G))$$</div>
-<p>Note that this definition is explicitly dependent on <span class="math">\(m\)</span> because one cannot move the expectation in <span class="math">\(z\)</span> over to <span class="math">\(g(z)\)</span> inside the definition of the empirical Rademacher complexity.</p>
-<p>Example: suppose we have a linear classifier in two dimensions <span class="math">\(g(x\in \mathbb{R}^2)\)</span>, which is a line that classifies points as <span class="math">\(\{-1,1\}\)</span> depending on whether the point is above or below the line. If we have up to three points one can always choose a line that classifies all the points correctly. This is just a consequence of the fact that the VC dimension of <span class="math">\(\mathbb{R}^2\)</span> is three. Then the above supremum is attained by picking a classifier <span class="math">\(g\)</span> such that <span class="math">\(\text{sup}_{g\in G} \sum_{i=1}^{m}\sigma_i g(z_i)=\sum_{i=1}^{m}|\sigma_i|\)</span>, which is always possible if we have up to three points. The Rademacher complexity is simply <span class="math">\(\mathcal{R}_{m\leq 3}=E_{\sigma}|\sigma|\)</span>, and thus independent of <span class="math">\(m\)</span>. The same follows in higher dimensions. The Rademacher complexity is independent of <span class="math">\(m\)</span> if <span class="math">\(m\)</span> is less than the VC dimension. For <span class="math">\(m\)</span> bigger than the VC dimension we can find the following bound. </p>
-<p><a name="bounds"></a></p>
-<h3><strong>1. Bounds</strong></h3>
-<p>One can determine several bounds on the Rademacher complexity. One of particular interest takes into account the growth function. Remember that the growth function <span class="math">\(\Pi(m)\)</span> is the maximal number of distinct ways of classifying a set of <span class="math">\(m\)</span> points <span class="math">\(z_1,\ldots,z_m\)</span> using an hypothesis class <span class="math">\(\mathcal{H}\)</span>. In order to calculate this bound we need the following lemma:</p>
-<p><em>Massart's Lemma: let <span class="math">\(A\subset \mathbb{R}^m\)</span> be a finite set, and <span class="math">\(r=\text{max}_{x\in A}\|x\|_2\)</span>, then</em>
+	<div itemprop="articleBody" class="article-body"><p>Often we have to deal with hidden variables in machine learning problems. The maximum-likelihood algorithm requires "integrating" over these hidden variables if we want to compare with the observed distribution. However this can lead to a serious problem since we have to deal with sums inside the logarithms. That is, we are instructed to maximize the log-likelihood quantity
 </p>
-<div class="math">$$E_{\sigma}\left[\frac{1}{m}\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_ix_i\right]\leq \frac{r\sqrt{2\ln|A|}}{m}$$</div>
+<div class="math">$$\sum_i\ln p(x_i)=\sum_i\ln\Big( \sum_h p(x_i,h)\Big)$$</div>
 <p>
-where <span class="math">\(\sigma_i\)</span> are independent and uniformly distributed random variables in the interval <span class="math">\([-1,1]\)</span>. The proof goes by first using Jensen's inequality:</p>
-<div class="math">$$\exp(t E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i])\leq E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)\label{eq1}\tag{1}$$</div>
+where <span class="math">\(h\)</span> is the hidden variable and <span class="math">\(x_i\)</span> is the observed one. Except for simple problems, having two sums turns the problem computationally infeasible, especially if the hidden variable is continuous. To deal with this issue we use the concavity property of the logarithm to approximate
+</p>
+<div class="math">$$\ln\Big( \sum_h p(x_i,h)\Big)\geq \sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)$$</div>
 <p>
-Now since the exponential function is monotically increasing we have that:</p>
-<div class="math">$$E_{\sigma}\exp(t\text{sup}_{x\in A}\sum_{i=1}^m \sigma_i x_i)=E_{\sigma}\text{sup}_{x\in A}\exp(t\sum_{i=1}^m \sigma_i x_i)\leq \sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)$$</div>
-<p>Next we use the inequality nr. 2 from Hoeffding's inequality post which states that for a random variable <span class="math">\(w\in [a,b]\)</span> with <span class="math">\(E(w)=0\)</span> we have:
+where <span class="math">\(q(h)\)</span> is an unknown distribution that we will want to fix. Further we write
 </p>
-<div class="math">$$E_w\exp(tw)\leq \exp(t^2(b-a)^2/8)$$</div>
-<p>This means that:
-</p>
-<div class="math">$$\sum_{x\in A} E_{\sigma}\exp(t\sum_{i=1}^m \sigma_i x_i)=\sum_{x\in A}\prod_iE_{\sigma_i}\exp(t \sigma_i x_i)\leq \sum_{x\in A} \exp(t^2x_i^2/2)\leq |A| \exp(t^2 r^2/2)$$</div>
+<div class="math">$$\ln p(x_i)=\sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)+R_i$$</div>
 <p>
-where <span class="math">\(|A|\)</span> is the "size" of the set <span class="math">\(A\)</span> and <span class="math">\(r^2=\text{max}_{x\in A}\|x\|_2\)</span>. Using this result in eq.\eqref{eq1} and taking the log on both sides of the inequality:
+where the remaining <span class="math">\(R_i\)</span> is given by
 </p>
-<div class="math">$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq \frac{\ln|A|}{t}+\frac{r^2}{2}t$$</div>
-<p>. 
-The optimal bound corresponds to <span class="math">\(t=\sqrt{2\ln|A|/r^2}\)</span>, which is the value where the function on the right side obtains its minimum. The final result is:
-</p>
-<div class="math">$$E_{\sigma}[\text{sup}_{x\in A}\sum_{i=1}^{m} \sigma_i x_i]\leq r\sqrt{2\ln |A|}$$</div>
-<p>We can apply this result to determine a bound on the Rademacher complexity for hypothesis classes with target <span class="math">\(\{-1,1\}\)</span>. So we have</p>
-<div class="math">$$E_{D^m(z)}E_{\sigma}\left[\text{sup}_{g\in G}\frac{1}{m}\sum_{i=1}^{m}\sigma_i g(z_i)\right]\leq E_{D^m(z)}\frac{r}{m}\sqrt{2\ln |A|}$$</div>
+<div class="math">$$R_i=-\sum_h q(h)\ln\Big(\frac{p(h|x_i)}{q(h)}\Big)=KL(p(h|x_i)||q(h))$$</div>
 <p>
-We can easily calculate <span class="math">\(r^2=\sum_i^mx_i^2=m\)</span> and thus <span class="math">\(r=\sqrt{m}\)</span>. Moreover we know that, by definition, <span class="math">\(|A|\leq \Pi(m)\)</span>, the growth function, and hence we find:</p>
-<div class="math">$$\mathcal{R}_m\leq \sqrt{\frac{2\ln \Pi(m)}{m}}$$</div>
+which is the Kullback-Leibler divergence. Since <span class="math">\(R_i\geq 0\)</span> by definition, we have that
+</p>
+<div class="math">$$\ln p(x_i|\theta)\geq \langle \ln p(x_i,h|\theta)\rangle_{q(h)}-\langle \ln q(h)\rangle_{q(h)}$$</div>
+<p>
+where we have introduced prior parameters <span class="math">\(\theta\)</span>, without lack of generality. The lower bound is saturated provided we choose 
+</p>
+<div class="math">$$\text{E-step:}\quad q(h_i)=p(h_i|x_i,\theta_0)$$</div>
+<p>
+This is also known as expectation E-step. Note that we have a distribution <span class="math">\(q(h_i)\)</span> for each sample, as it is determined by <span class="math">\(x_i,\theta_0\)</span>. However, this step does not solve the maximum-likelihood problem because we still have to fix the parameter <span class="math">\(\theta\)</span>. What we do next is to maximize the lower bound by choosing <span class="math">\(\theta\)</span> keeping <span class="math">\(q(h)\)</span> fixed, that is,
+</p>
+<div class="math">$$\text{M-step:}\quad \frac{\partial}{\partial \theta}\langle \ln p(x_i,h|\theta)\rangle_{q(h)}=0$$</div>
+<p>Lets take an example that can help clarify some of these ideas. Consider the model which is a mixture of two normal distributions:
+</p>
+<div class="math">$$p(x,c)=\phi(x|\mu_c,\sigma_c)\pi_c,\quad c=0,1$$</div>
+<p>
+where <span class="math">\(\phi(x|\mu,\sigma)\)</span> is a normal distribution with mean <span class="math">\(\mu\)</span> and variance <span class="math">\(\sigma\)</span>, and <span class="math">\(\pi_c=p(c)\)</span> with <span class="math">\(\pi_0+\pi_1=1\)</span>. In this example <span class="math">\(\theta\equiv \mu,\sigma\)</span>, and the hidden variable is <span class="math">\(h\equiv c\)</span>. </p>
+<p>In the E-step we calculate:
+</p>
+<div class="math">$$\text{E-step:}\quad q(h)=p(h|x,\mu_h,\sigma_h)=\frac{\phi(x|\mu_h,\sigma_h)\pi_h}{\sum_c \phi(x|\mu_c,\sigma_c)\pi_c}$$</div>
+<p>
+We write <span class="math">\(q(h_i=0)=\gamma_i(x_i)\)</span> and <span class="math">\(q(h_i=1)=1-\gamma_i(x_i)\)</span> for each sample <span class="math">\(x_i\)</span>, with <span class="math">\(\gamma\)</span> given by the ratio above. The initial parameters <span class="math">\(\mu,\sigma\)</span> are arbitrary.</p>
+<p>The maximization step consists in maximizing the lower bound of the log-likelihood, hence
+</p>
+<div class="math">$$\begin{aligned}\text{M-step:}\quad &amp;\gamma\ln p(x,h=0|\mu,\sigma)+(1-\gamma)\ln p(x,h=1|\mu,\sigma)\\
+=&amp;\gamma \ln \phi(x|\mu_0,\sigma_0)+(1-\gamma)\ln \phi(x|\mu_1,\sigma_1)-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\\
+=&amp; -\gamma \frac{(x-\mu_0)^2}{2\sigma_0^2}-(1-\gamma) \frac{(x-\mu_1)^2}{2\sigma_1^2}-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\end{aligned}$$</div>
+<p>
+where <span class="math">\(\ldots\)</span> do not depend on <span class="math">\(\mu,\sigma\)</span>. We need to sum over all samples, so the maximum is calculated
+</p>
+<div class="math">$$\mu_0=\frac{\sum_i x_i\gamma_i}{\sum_i \gamma_i},\;\mu_1=\frac{\sum_i x_i(1-\gamma_i)}{\sum_i (1-\gamma_i)}$$</div>
+<p>
+and 
+</p>
+<div class="math">$$\sigma_0=\frac{\sum_i\gamma_i(x_i-\mu_0)^2}{\sum_i\gamma_i},\quad \sigma_1=\frac{\sum_i(1-\gamma_i)(x_i-\mu_1)^2}{\sum_i(1-\gamma_i)}$$</div>
+<p>
+Maximizing relatively to the probabilities <span class="math">\(\pi\)</span> gives
+</p>
+<div class="math">$$\pi_0=\frac{1}{n}\sum_i\gamma_i,\;\pi_1=1-\pi_0$$</div>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",

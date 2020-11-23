@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Data Science</title><link href="/" rel="alternate"></link><link href="/feeds/data-science.atom.xml" rel="self"></link><id>/</id><updated>2020-07-15T00:00:00+02:00</updated><entry><title>"Expectation-Maximization"</title><link href="/expectation-maximization.html" rel="alternate"></link><published>2020-07-15T00:00:00+02:00</published><updated>2020-07-15T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-07-15:/expectation-maximization.html</id><summary type="html">&lt;p&gt;The expectation-maximization algorithm.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Often we have to deal with hidden variables in machine learning problems. The maximum-likelihood algorithm requires "integrating" over these hidden variables if we want to compare with the observed distribution. However this can lead to a serious problem since we have to deal with sums inside the logarithms. That is, we are instructed to maximize the log-likelihood quantity
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_i\ln p(x_i)=\sum_i\ln\Big( \sum_h p(x_i,h)\Big)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(h\)&lt;/span&gt; is the hidden variable and &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; is the observed one. Except for simple problems, having two sums turns the problem computationally infeasible, especially if the hidden variable is continuous. To deal with this issue we use the concavity property of the logarithm to approximate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln\Big( \sum_h p(x_i,h)\Big)\geq \sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(q(h)\)&lt;/span&gt; is an unknown distribution that we will want to fix. Further we write
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln p(x_i)=\sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)+R_i$$&lt;/div&gt;
+&lt;p&gt;
+where the remaining &lt;span class="math"&gt;\(R_i\)&lt;/span&gt; is given by
+&lt;/p&gt;
+&lt;div class="math"&gt;$$R_i=-\sum_h q(h)\ln\Big(\frac{p(h|x_i)}{q(h)}\Big)=KL(p(h|x_i)||q(h))$$&lt;/div&gt;
+&lt;p&gt;
+which is the Kullback-Leibler divergence. Since &lt;span class="math"&gt;\(R_i\geq 0\)&lt;/span&gt; by definition, we have that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln p(x_i|\theta)\geq \langle \ln p(x_i,h|\theta)\rangle_{q(h)}-\langle \ln q(h)\rangle_{q(h)}$$&lt;/div&gt;
+&lt;p&gt;
+where we have introduced prior parameters &lt;span class="math"&gt;\(\theta\)&lt;/span&gt;, without lack of generality. The lower bound is saturated provided we choose 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{E-step:}\quad q(h_i)=p(h_i|x_i,\theta_0)$$&lt;/div&gt;
+&lt;p&gt;
+This is also known as expectation E-step. Note that we have a distribution &lt;span class="math"&gt;\(q(h_i)\)&lt;/span&gt; for each sample, as it is determined by &lt;span class="math"&gt;\(x_i,\theta_0\)&lt;/span&gt;. However, this step does not solve the maximum-likelihood problem because we still have to fix the parameter &lt;span class="math"&gt;\(\theta\)&lt;/span&gt;. What we do next is to maximize the lower bound by choosing &lt;span class="math"&gt;\(\theta\)&lt;/span&gt; keeping &lt;span class="math"&gt;\(q(h)\)&lt;/span&gt; fixed, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{M-step:}\quad \frac{\partial}{\partial \theta}\langle \ln p(x_i,h|\theta)\rangle_{q(h)}=0$$&lt;/div&gt;
+&lt;p&gt;Lets take an example that can help clarify some of these ideas. Consider the model which is a mixture of two normal distributions:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(x,c)=\phi(x|\mu_c,\sigma_c)\pi_c,\quad c=0,1$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\phi(x|\mu,\sigma)\)&lt;/span&gt; is a normal distribution with mean &lt;span class="math"&gt;\(\mu\)&lt;/span&gt; and variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;, and &lt;span class="math"&gt;\(\pi_c=p(c)\)&lt;/span&gt; with &lt;span class="math"&gt;\(\pi_0+\pi_1=1\)&lt;/span&gt;. In this example &lt;span class="math"&gt;\(\theta\equiv \mu,\sigma\)&lt;/span&gt;, and the hidden variable is &lt;span class="math"&gt;\(h\equiv c\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;In the E-step we calculate:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{E-step:}\quad q(h)=p(h|x,\mu_h,\sigma_h)=\frac{\phi(x|\mu_h,\sigma_h)\pi_h}{\sum_c \phi(x|\mu_c,\sigma_c)\pi_c}$$&lt;/div&gt;
+&lt;p&gt;
+We write &lt;span class="math"&gt;\(q(h_i=0)=\gamma_i(x_i)\)&lt;/span&gt; and &lt;span class="math"&gt;\(q(h_i=1)=1-\gamma_i(x_i)\)&lt;/span&gt; for each sample &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, with &lt;span class="math"&gt;\(\gamma\)&lt;/span&gt; given by the ratio above. The initial parameters &lt;span class="math"&gt;\(\mu,\sigma\)&lt;/span&gt; are arbitrary.&lt;/p&gt;
+&lt;p&gt;The maximization step consists in maximizing the lower bound of the log-likelihood, hence
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}\text{M-step:}\quad &amp;amp;\gamma\ln p(x,h=0|\mu,\sigma)+(1-\gamma)\ln p(x,h=1|\mu,\sigma)\\
+=&amp;amp;\gamma \ln \phi(x|\mu_0,\sigma_0)+(1-\gamma)\ln \phi(x|\mu_1,\sigma_1)-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\\
+=&amp;amp; -\gamma \frac{(x-\mu_0)^2}{2\sigma_0^2}-(1-\gamma) \frac{(x-\mu_1)^2}{2\sigma_1^2}-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\ldots\)&lt;/span&gt; do not depend on &lt;span class="math"&gt;\(\mu,\sigma\)&lt;/span&gt;. We need to sum over all samples, so the maximum is calculated
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mu_0=\frac{\sum_i x_i\gamma_i}{\sum_i \gamma_i},\;\mu_1=\frac{\sum_i x_i(1-\gamma_i)}{\sum_i (1-\gamma_i)}$$&lt;/div&gt;
+&lt;p&gt;
+and 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sigma_0=\frac{\sum_i\gamma_i(x_i-\mu_0)^2}{\sum_i\gamma_i},\quad \sigma_1=\frac{\sum_i(1-\gamma_i)(x_i-\mu_1)^2}{\sum_i(1-\gamma_i)}$$&lt;/div&gt;
+&lt;p&gt;
+Maximizing relatively to the probabilities &lt;span class="math"&gt;\(\pi\)&lt;/span&gt; gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\pi_0=\frac{1}{n}\sum_i\gamma_i,\;\pi_1=1-\pi_0$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Data Science"></category><category term="data science"></category></entry></feed>

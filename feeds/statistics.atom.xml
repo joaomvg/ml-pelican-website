@@ -1,5 +1,325 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Statistics</title><link href="/" rel="alternate"></link><link href="/feeds/statistics.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T00:00:00+02:00</updated><entry><title>"Statistical Testing"</title><link href="/statistical-testing.html" rel="alternate"></link><published>2020-06-30T00:00:00+02:00</published><updated>2020-06-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-30:/statistical-testing.html</id><summary type="html">&lt;p&gt;statistical tests&lt;/p&gt;</summary><content type="html"></content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Statistics</title><link href="/" rel="alternate"></link><link href="/feeds/statistics.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T00:00:00+02:00</updated><entry><title>"Statistical Testing"</title><link href="/statistical-testing.html" rel="alternate"></link><published>2020-06-30T00:00:00+02:00</published><updated>2020-06-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-30:/statistical-testing.html</id><summary type="html">&lt;p&gt;We explain in detail the Student's t-statistic and the &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; statistic.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="#def1"&gt;Student's t-test&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One-sample mean&lt;/li&gt;
+&lt;li&gt;Two-sample mean &lt;/li&gt;
+&lt;li&gt;Regression coefficient&lt;/li&gt;
+&lt;li&gt;Correlation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="#def2"&gt;Chi square test&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pearson's Chi-square test&lt;/li&gt;
+&lt;li&gt;Variance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Student's t-test&lt;/strong&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;One-sample mean&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Consider &lt;span class="math"&gt;\(n\)&lt;/span&gt; random variables distributed i.i.d., each following a normal distribution with mean &lt;span class="math"&gt;\(\mu\)&lt;/span&gt; and variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;. The joint probability density function is
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\mu)^2}{2\sigma^2}}\prod_{i=1}^n dx_i$$&lt;/div&gt;
+&lt;p&gt;We want to write a density distribution as a function of &lt;span class="math"&gt;\(\bar{x}=\frac{\sum_i x_i}{n}\)&lt;/span&gt;, the sample mean. As such, use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=1}^n(x_i-\mu)^2=\sum_{i=1}^n (x_i-\bar{x})^2+n(\bar{x}-\mu)^2$$&lt;/div&gt;
+&lt;p&gt;and change variables &lt;span class="math"&gt;\((x_1,\ldots,x_n)\rightarrow (x_1,\ldots,x_{n-1},\bar{x})\)&lt;/span&gt; - the jacobian of the coordinate transformation is &lt;span class="math"&gt;\(n\)&lt;/span&gt;. The density function becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\bar{x})^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}d\bar{x}\prod_{i=1}^{n-1} dx_i$$&lt;/div&gt;
+&lt;p&gt;Because &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(\bar{x}\)&lt;/span&gt; are independent, we can shift the variables &lt;span class="math"&gt;\(x_i\rightarrow x_i+\bar{x}\)&lt;/span&gt;, after which the term &lt;span class="math"&gt;\(\sum_{i=1}^{n}(x_i-\bar{x})^2\)&lt;/span&gt; becomes &lt;span class="math"&gt;\(\sum_{i=1}^{n-1}x_i^2+(\sum_i^{n-1}x_i)^2\)&lt;/span&gt;. Since this is quadratic in the &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, it can be safely integrated out. However, before doing that we write &lt;span class="math"&gt;\(x_i=\frac{s}{\sqrt{n-1}}u_i\)&lt;/span&gt;, with &lt;span class="math"&gt;\(\sum_{i=1}^{n-1}u_i^2+(\sum_i^{n-1}u_i)^2=1\)&lt;/span&gt;, that is, &lt;span class="math"&gt;\((s,u_i)\)&lt;/span&gt; play a similar role to spherical coordinates. The density distribution becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-(n-1)\frac{s^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}s^{n-2}\,\Omega(u_i)dsd\bar{x}\prod_{i=1}^{n-1} du_i$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\Omega(u_i)\)&lt;/span&gt; is a measure for the variables &lt;span class="math"&gt;\(u_i\)&lt;/span&gt;- it gives an overall constant that we determine at the end instead.&lt;/p&gt;
+&lt;p&gt;To remove dependence on the variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; we consider the variable &lt;span class="math"&gt;\(t=(\bar{x}-\mu)\sqrt{n}/s\)&lt;/span&gt;, which gives the Jacobian &lt;span class="math"&gt;\(s/\sqrt{n}\)&lt;/span&gt;. We scale &lt;span class="math"&gt;\(s\rightarrow \sqrt{\frac{2}{n-1}}s\sigma\)&lt;/span&gt; to obtain 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto \int_{s=0}^{\infty}e^{-s^2(1+\frac{1}{n-1}t^2)}s^{n-1}\,dsdt$$&lt;/div&gt;
+&lt;p&gt;By changing &lt;span class="math"&gt;\(s\rightarrow \sqrt{s}\)&lt;/span&gt; we obtain
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto\Big(1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}\Gamma(n/2)dt$$&lt;/div&gt;
+&lt;p&gt;
+and integrating over &lt;span class="math"&gt;\(t: (-\infty,\infty)\)&lt;/span&gt; we fix the overall constant
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\Gamma(n/2)}{\sqrt{(n-1)\pi}\Gamma(\frac{n-1}{2})}\Big (1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}$$&lt;/div&gt;
+&lt;p&gt;This is known as the &lt;strong&gt;Student's t-distribution&lt;/strong&gt; with &lt;span class="math"&gt;\(\nu=n-1\)&lt;/span&gt; degrees of freedom.
+&lt;img alt="" height="300" src="/images/Student_t.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Two-sample mean (equal variance)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For two samples with sizes &lt;span class="math"&gt;\(n_1,n_2\)&lt;/span&gt; the idea is roughly the same. We follow similar steps as in the previous case. After some algebra, the exponential contains the terms&lt;/p&gt;
+&lt;div class="math"&gt;$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-n_1\frac{(\bar{x}_1-\mu_1)^2}{2\sigma^2}-n_2\frac{(\bar{x}_2-\mu_2)^2}{2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; are the two sample means.&lt;/p&gt;
+&lt;p&gt;Now we write &lt;span class="math"&gt;\(\bar{x}_1-\mu_1=(\bar{x}_{+}+\bar{x}_{-})/2\)&lt;/span&gt; and &lt;span class="math"&gt;\(\bar{x}_2-\mu_2=(\bar{x}_{+}-\bar{x}_{-})/2\)&lt;/span&gt;, because we will want to integrate over &lt;span class="math"&gt;\(\bar{x}_{+}\)&lt;/span&gt;. We use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$-n_1(\bar{x}_1-\mu_1)^2-n_2(\bar{x}_2-\mu_2)^2=-\frac{\bar{x}_{-}^2}{1/n_1+1/n_2}-\frac{n_1+n_2}{4}\Big(\bar{x}_{+}+\frac{n_1-n_2}{n_1+n_2}\bar{x}_{-}\Big)^2$$&lt;/div&gt;
+&lt;p&gt;
+and integrate over &lt;span class="math"&gt;\(\bar{x}_{+}\)&lt;/span&gt;. So we are left with&lt;/p&gt;
+&lt;div class="math"&gt;$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-\frac{\bar{x}_{-}^2}{(1/n_1+1/n_2)2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;By writing 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$s^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2},\;t=\frac{\bar{x}_{-}}{s\sqrt{1/n_1+1/n_2}}$$&lt;/div&gt;
+&lt;p&gt;we obtain again the t-distribution with &lt;span class="math"&gt;\(\nu=n_1+n_2-2\)&lt;/span&gt; degrees of freedom.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Regression coefficient&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In linear regression, we assume that the target &lt;span class="math"&gt;\(y\)&lt;/span&gt; is a linear combination of the feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; up to a gaussian noise, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$y=ax+b+\epsilon$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is the noise distributed i.i.d according to a normal distribution with mean zero. Here &lt;span class="math"&gt;\(a,b\)&lt;/span&gt; are the true parameters that we want to estimate. In linear regression we use least square error to determine the estimators
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{a}=\frac{\sum_i(y_i-\bar{y})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\hat{b}=\bar{y}-\hat{a}\bar{x}$$&lt;/div&gt;
+&lt;p&gt;We want to calculate a probability for the difference &lt;span class="math"&gt;\(\hat{a}-a\)&lt;/span&gt;. To do this we substitute &lt;span class="math"&gt;\(y_i=ax_i+b+\epsilon_i\)&lt;/span&gt; in the estimator equation. This gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{a}-a=\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\; \hat{b}-b=(a-\hat{a})\bar{x}+\bar{\epsilon}$$&lt;/div&gt;
+&lt;p&gt;
+Since &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is normally distributed we want determine the probability of the quantity above. To facilitate the algebra we use vectorial notation. As such
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\equiv\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\;\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\overrightarrow{\gamma}\equiv x_i-\bar{x}\)&lt;/span&gt;, &lt;span class="math"&gt;\(\zeta\equiv \epsilon_i-\bar{\epsilon}\)&lt;/span&gt; and &lt;span class="math"&gt;\(\overrightarrow{1}=(1,1,1,\ldots,1)/n\)&lt;/span&gt;, a vector of ones divided by the number of datapoints. Note that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\overrightarrow{\gamma}\cdot \overrightarrow{1}=0,\;\;\overrightarrow{\zeta}\cdot \overrightarrow{1}=0$$&lt;/div&gt;
+&lt;p&gt;The probability density function is proportional to the exponential of
+&lt;/p&gt;
+&lt;div class="math"&gt;$$-\frac{\|\overrightarrow{\epsilon}\|^2}{2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;We write &lt;span class="math"&gt;\(\overrightarrow{\epsilon}=\overrightarrow{\epsilon}_{\perp}+\alpha\overrightarrow{\gamma}+\beta\overrightarrow{1}\)&lt;/span&gt; with &lt;span class="math"&gt;\(\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{\gamma}=\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{1}=0\)&lt;/span&gt;. We calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}=\alpha,\;\; \|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+\frac{\beta^2}{n}$$&lt;/div&gt;
+&lt;p&gt;Integrating out &lt;span class="math"&gt;\(\beta\)&lt;/span&gt; we can build a t-test like variable with &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; degrees of freedom, since &lt;span class="math"&gt;\(\overrightarrow{\epsilon}_{\perp}\)&lt;/span&gt; lives in a &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; dimensional vector space. That is, 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{\alpha\|\overrightarrow{\gamma}\|}{\|\overrightarrow{\epsilon}_{\perp}\|}\sqrt{n-2}$$&lt;/div&gt;
+&lt;p&gt;One can show that &lt;span class="math"&gt;\(\|\overrightarrow{\epsilon}_{\perp}\|^2=\sum_i(y_i-\hat{y}_i)^2\)&lt;/span&gt;, and therefore
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{\hat{a}-a}{\sqrt{\frac{\sum_i(y_i-\hat{y}_i)^2}{\sum_i(x_i-\bar{x}_i)^2}}}\sqrt{n-2}$$&lt;/div&gt;
+&lt;p&gt;For the intercept the logic is similar.  We have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}=-\alpha\bar{x}+\frac{\beta}{n}$$&lt;/div&gt;
+&lt;p&gt;
+and thus
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+n(\hat{b}-b+\alpha\bar{x})^2$$&lt;/div&gt;
+&lt;p&gt;Integrating out &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt; one finds that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t_{\text{intercept}}=\frac{(\hat{b}-b)\|\overrightarrow{\gamma}\|\sqrt{n-2}}{\|\overrightarrow{\epsilon}_{\perp}\|\sqrt{\|\overrightarrow{\gamma}\|^2/n+\bar{x}^2}}$$&lt;/div&gt;
+&lt;p&gt;follows the Student's t-distribution with &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; degrees of freedom.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Correlation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We want to test whether two variables  &lt;span class="math"&gt;\(y\)&lt;/span&gt; and &lt;span class="math"&gt;\(x\)&lt;/span&gt; have zero correlation, statistically speaking. Essentialy this accounts to fit &lt;span class="math"&gt;\(y\sim ax+b\)&lt;/span&gt;. We have seen that the regression coefficient &lt;span class="math"&gt;\(a\)&lt;/span&gt; is proportional to the sample correlation coefficient, that is,&lt;/p&gt;
+&lt;div class="math"&gt;$$a=\frac{\langle yx\rangle -\langle y\rangle \langle x\rangle}{\langle x^2\rangle -\langle x\rangle^2 }=r\frac{\sigma(y)}{\sigma(x)}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\sigma(y)^2=\sum_{i}(y_i-\bar{y})^2/n\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sigma(x)^2=\sum_{i}(x_i-\bar{x})^2/n\)&lt;/span&gt;, and &lt;span class="math"&gt;\(r\)&lt;/span&gt; is the Pearson's correlation coefficient. Then we use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i}(y_i-\hat{y}_i)^2/n=\sigma(y)^2(1-r^2)$$&lt;/div&gt;
+&lt;p&gt;
+to find that the t-statistic for the regression coefficient &lt;span class="math"&gt;\(a\)&lt;/span&gt; can be written as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{r\sqrt{n-2}}{\sqrt{1-r^2}}$$&lt;/div&gt;
+&lt;p&gt;
+assuming that true coefficient is zero, that is, &lt;span class="math"&gt;\(a=0\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="def2"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Chi square test&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Let each &lt;span class="math"&gt;\(X_i,\,i=1\ldots n\)&lt;/span&gt; be a random variable following a standard normal distribution. Then the sum of squares
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\chi^2=\sum_{i=1}^nX^2_i$$&lt;/div&gt;
+&lt;p&gt;
+follows a chi-distribution with &lt;span class="math"&gt;\(k\)&lt;/span&gt; degrees of freedom. To understand this, consider the joint probability density function of &lt;span class="math"&gt;\(n\)&lt;/span&gt; standard normal random variables
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-\frac{1}{2}\sum_{i=1}^n X_i^2}\prod_{i=1}^n dX_i$$&lt;/div&gt;
+&lt;p&gt;
+If we use spherical coordinates with
+&lt;/p&gt;
+&lt;div class="math"&gt;$$X_i=ru_i,\;\sum_{i=1}^n u_i^2=1$$&lt;/div&gt;
+&lt;p&gt;
+the probability density becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-\frac{r^2}{2}}drr^{n-1}\Omega$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\Omega\)&lt;/span&gt; comes from integrating out &lt;span class="math"&gt;\(u_i\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(r\)&lt;/span&gt; is never negative we further use &lt;span class="math"&gt;\(s=r^{2}\)&lt;/span&gt; and  obtain 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto e^{-\frac{s}{2}}s^{\frac{n}{2}-1}ds$$&lt;/div&gt;
+&lt;p&gt;
+Therefore the chi-square variable &lt;span class="math"&gt;\(\chi^2\equiv s\)&lt;/span&gt; with &lt;span class="math"&gt;\(k\)&lt;/span&gt; degrees of freedom follows the distribution
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\chi^2\sim \frac{s^{\frac{n}{2}-1}}{2^{n/2}\Gamma(n/2)}e^{-\frac{s}{2}}$$&lt;/div&gt;
+&lt;p&gt;
+This distribution has the following shape (from Wikipedia):
+&lt;img alt="" height="400" src="/images/Chi-square_pdf.svg" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pearson's Chi-square test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This test gives a measure of goodness of fit for a categorical variable with &lt;span class="math"&gt;\(k\)&lt;/span&gt; classes. Suppose we have &lt;span class="math"&gt;\(n\)&lt;/span&gt; observations with &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; (&lt;span class="math"&gt;\(i=1\ldots k\)&lt;/span&gt;) observed numbers, that is, &lt;span class="math"&gt;\(\sum_{i=1}^k x_i=n\)&lt;/span&gt;. We want to test the hypotheses that each category is drawn with probability &lt;span class="math"&gt;\(p_i\)&lt;/span&gt;. Under this assumption, the joint probability of observing &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; numbers follows a multinomial distribution
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(x_1,x_2,\ldots,x_n)=\frac{n!}{x_1!x_2!\ldots x_k!}p_1^{x_1}p_2^{x_2}\ldots p_k^{x_k}$$&lt;/div&gt;
+&lt;p&gt; 
+We want to understand the behaviour of this probability when &lt;span class="math"&gt;\(n\)&lt;/span&gt; is very large. Assume that &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; is also sufficiently large, which is ok to do for typical observations. In this case use stirling's approximation of the factorial, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^n$$&lt;/div&gt;
+&lt;p&gt;
+to write
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(x_1,x_2,\ldots,x_n)\propto \Big(\frac{n}{e}\Big)^n \prod_{i=1}^k \Big(\frac{x_i}{e}\Big)^{-x_i}p_i^{x_i}$$&lt;/div&gt;
+&lt;p&gt;
+In taking &lt;span class="math"&gt;\(n\)&lt;/span&gt; very large, we want to keep the frequency &lt;span class="math"&gt;\(\lambda_i=x_i/ n\)&lt;/span&gt; fixed. Then the logarithm of the above expression becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\lambda_in\ln(\lambda_i)+\sum_{i=1}^k\lambda_i n\ln(p_i)$$&lt;/div&gt;
+&lt;p&gt;
+Since this is proportional to &lt;span class="math"&gt;\(n\)&lt;/span&gt; we can perform an asymptotic expansion as &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. We perform the expansion around the maximum of &lt;span class="math"&gt;\(\ln P\)&lt;/span&gt; (note that &lt;span class="math"&gt;\(\ln P\)&lt;/span&gt; is a concave function of &lt;span class="math"&gt;\(\lambda_i\)&lt;/span&gt; ), that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial P}{\partial \lambda_i}=0,\;i=1\ldots n-1$$&lt;/div&gt;
+&lt;p&gt;
+Using the fact that we have &lt;span class="math"&gt;\(n-1\)&lt;/span&gt; independent variables since &lt;span class="math"&gt;\(\sum_i \lambda_i=1\)&lt;/span&gt;, the solution is &lt;span class="math"&gt;\(\lambda_i^*=p_i\)&lt;/span&gt;. Expanding around this solution we find
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(\lambda_1,\lambda_2,\ldots,\lambda_n)=-n\sum_{i=1}^k\frac{(\lambda_i-p_i)^2}{2p_i}$$&lt;/div&gt;
+&lt;p&gt;
+In terms of &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; this gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\frac{(x_i-m_i)^2}{2m_i}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(m_i=np_i\)&lt;/span&gt; is the expected observed number. Therefore the quantity
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=1}^k\frac{(x_i-m_i)^2}{m_i}$$&lt;/div&gt;
+&lt;p&gt;
+follows a &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; distribution with &lt;span class="math"&gt;\(k-1\)&lt;/span&gt; degrees of fredom, since only &lt;span class="math"&gt;\(k-1\)&lt;/span&gt; of the &lt;span class="math"&gt;\(x\)&lt;/span&gt;'s are independent.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Variance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In order to investigate the difference between the sample variance &lt;span class="math"&gt;\(s^2=\sum_i(x_i-\bar{x})^2/n-1\)&lt;/span&gt; and the assumed variance &lt;span class="math"&gt;\(\sigma^2\)&lt;/span&gt; of the distribution. We calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$(n-1)\frac{s^2}{\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;
+Remember that for a normally distributed random variable &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, the sum &lt;span class="math"&gt;\(\sum_i(x_i-\bar{x})^2\)&lt;/span&gt; also follows a normal distribution. In particular, the combination &lt;span class="math"&gt;\(\sum_i(x_i-\bar{x})^2/\sigma^2\)&lt;/span&gt; follows a &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; distribution with &lt;span class="math"&gt;\(n-1\)&lt;/span&gt; degrees of freedom, because we have integrated out &lt;span class="math"&gt;\(\bar{x}\)&lt;/span&gt; as explained in the beginning of the post.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;&lt;br/&gt;
 Let &lt;span class="math"&gt;\(X_1,\ldots,X_m\)&lt;/span&gt; be &lt;span class="math"&gt;\(m\)&lt;/span&gt; independent random variables (not necessarily identically distributed). All &lt;span class="math"&gt;\(X_i\)&lt;/span&gt; takes values in &lt;span class="math"&gt;\([a_i,b_i]\)&lt;/span&gt;. Then for any &lt;span class="math"&gt;\(\epsilon&amp;gt;0\)&lt;/span&gt; we have&lt;/p&gt;
 &lt;div class="math"&gt;$$\mathbb{P}(|S_m-E(S_m)|\geq\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2},\;S_m=\sum_{i=1}^mX_i$$&lt;/div&gt;

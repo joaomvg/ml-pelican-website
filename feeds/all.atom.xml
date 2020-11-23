@@ -1,5 +1,623 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-06-30T00:00:00+02:00</updated><entry><title>"Statistical Testing"</title><link href="/statistical-testing.html" rel="alternate"></link><published>2020-06-30T00:00:00+02:00</published><updated>2020-06-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-30:/statistical-testing.html</id><summary type="html">&lt;p&gt;statistical tests&lt;/p&gt;</summary><content type="html"></content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Linear regression classifier"</title><link href="/linear-regression-classifier.html" rel="alternate"></link><published>2020-06-20T00:00:00+02:00</published><updated>2020-06-20T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-20:/linear-regression-classifier.html</id><summary type="html">&lt;p&gt;Linear regression/classifier basics&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-07-29T00:00:00+02:00</updated><entry><title>"K-Nearest Neighbors"</title><link href="/k-nearest-neighbors.html" rel="alternate"></link><published>2020-07-29T00:00:00+02:00</published><updated>2020-07-29T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-07-29:/k-nearest-neighbors.html</id><summary type="html">&lt;p&gt;The Nearest Neighbors algorithm is explained. This includes theoretical derivation, python implementation and also decision boundary.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;&lt;a href="#def1"&gt;KNN Algorithm&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#decision"&gt;Decision Boundary&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#python"&gt;Python implementation: Classification&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. KNN algorithm&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;The nearest-neighbors algorithm considers the &lt;span class="math"&gt;\(K\)&lt;/span&gt; nearest neighbors of a datapoint &lt;span class="math"&gt;\(x\)&lt;/span&gt; to predict its label. In the figure below, we have represented a binary classification problem (colors red and green for classes 0,1 respectively) with datapoints living in a 2-dimensional feature space .&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="300" src="/images/knn.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;p&gt;The algorithm consists in attributing the majority class amongts the &lt;span class="math"&gt;\(K\)&lt;/span&gt;-nearest neighbors. In the example above we consider the 3 nearest neighbors using euclidean distances. Mathematically the predictor &lt;span class="math"&gt;\(\hat{y}\)&lt;/span&gt; is given by
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{y}(x)=\text{argmax}_{0,1}\{n_0(x),n_1(x): x\in D_K(x)\}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(D_K(x)\)&lt;/span&gt; is the set of &lt;span class="math"&gt;\(K\)&lt;/span&gt;-nearest neighbors and &lt;span class="math"&gt;\(n_{0,1}(x)\)&lt;/span&gt; are the number of neighbors in &lt;span class="math"&gt;\(D_K\)&lt;/span&gt; with class &lt;span class="math"&gt;\(0,1\)&lt;/span&gt; respectively. The ratio &lt;span class="math"&gt;\(n_{0,1}/K\)&lt;/span&gt; are the corresponding probabilities. For a multiclass problem the predictor follows a similar logic except that we choose the majority class for which &lt;span class="math"&gt;\(n_i(x)\)&lt;/span&gt; is the maximum, with &lt;span class="math"&gt;\(i\)&lt;/span&gt; denoting the possible classes. &lt;/p&gt;
+&lt;p&gt;A probabilistic approach to nearest neighbors is as follows. We consider the distribution
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(x|c)=\frac{1}{N_c\sqrt{2\pi\sigma^2}^{D/2}}\sum_{n\in\text{class c},n=1}^{n=N_c}e^{-\frac{\|x-\mu_n\|^2}{2\sigma^2}}$$&lt;/div&gt;
+&lt;p&gt;
+with &lt;span class="math"&gt;\(N_c\)&lt;/span&gt; the number of points with class &lt;span class="math"&gt;\(c\)&lt;/span&gt; which have coordinates &lt;span class="math"&gt;\(\mu_c\)&lt;/span&gt;, and &lt;span class="math"&gt;\(x\)&lt;/span&gt; lives in &lt;span class="math"&gt;\(D\)&lt;/span&gt; dimensions. The probabilities &lt;span class="math"&gt;\(p(c)\)&lt;/span&gt; are determined from the observed frequencies, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(c=0)=\frac{N_0}{N_0+N_1},\;p(c=1)=\frac{N_1}{N_0+N_1}$$&lt;/div&gt;
+&lt;p&gt;
+The ratio of the likelihoods is then&lt;br&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{p(c=1|x)}{p(c=0|x)}=\frac{p(x|c=1)p(c=1)}{p(x|c=0)p(c=0)}=\frac{\sum_{n=1}^{n=N_1}e^{-\frac{\|x-\mu_n\|^2}{2\sigma^2}}}{\sum_{n=1}^{n=N_0}e^{-\frac{\|x-\mu_n\|^2}{2\sigma^2}}}$$&lt;/div&gt;
+&lt;p&gt;Take &lt;span class="math"&gt;\(d(x)\)&lt;/span&gt; as the largest distance within the set of &lt;span class="math"&gt;\(K\)&lt;/span&gt;-nearest neighbors of the datapoint &lt;span class="math"&gt;\(x\)&lt;/span&gt;. If the variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; is of order &lt;span class="math"&gt;\(\sim d\)&lt;/span&gt; then the exponentials with arguments &lt;span class="math"&gt;\(\|x-\mu\|^2&amp;gt;d^2\)&lt;/span&gt; can be neglected while for &lt;span class="math"&gt;\(\|x-\mu\|^2&amp;lt;d^2\)&lt;/span&gt; the exponential becomes of order one, and so we approximate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\sum_{n=1}^{n=N_1}e^{-\frac{\|x-\mu_n\|^2}{2\sigma^2}}}{\sum_{n=1}^{n=N_0}e^{-\frac{\|x-\mu_n\|^2}{2\sigma^2}}}\simeq \frac{\sum_{i\in D_K^1(x)} e^{-\frac{\|x-\mu_i\|^2}{2\sigma^2}}}{\sum_{j\in D_K^0(x)} e^{-\frac{\|x-\mu_j\|^2}{2\sigma^2}}}\sim\frac{\#i}{\#j}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(D^{0,1}_K(x)\)&lt;/span&gt; are the nearest neihgbors of &lt;span class="math"&gt;\(x\)&lt;/span&gt; with classes &lt;span class="math"&gt;\(0,1\)&lt;/span&gt; respectively, and &lt;span class="math"&gt;\(\#i+\#j=K\)&lt;/span&gt;. In theory this would reproduce the K-nearest neighbors predictor. However, this would require that for each &lt;span class="math"&gt;\(x\)&lt;/span&gt; the threshold &lt;span class="math"&gt;\(d\)&lt;/span&gt; is approximately constant, which may not happen in practice. The algorithm is however exact as &lt;span class="math"&gt;\(\sigma\rightarrow 0\)&lt;/span&gt; for which only the nearest neighbor is picked.&lt;/p&gt;
+&lt;p&gt;In regression we calculate instead the average of &lt;span class="math"&gt;\(K\)&lt;/span&gt;-nearest neighbor targets. That is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{y}(x)=\frac{1}{K}\sum_{i\in D_K(x)}y_i$$&lt;/div&gt;
+&lt;p&gt;Consider different datasets whereby the positions of the datapoints &lt;span class="math"&gt;\(x\)&lt;/span&gt; do not change but the target &lt;span class="math"&gt;\(y\)&lt;/span&gt; is drawn randomly as &lt;span class="math"&gt;\(f+\epsilon\)&lt;/span&gt; where &lt;span class="math"&gt;\(f\)&lt;/span&gt; is the true target and &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is a normally distributed random variable with mean zero and variance &lt;span class="math"&gt;\(\sigma^2\)&lt;/span&gt;. The bias is thus calculated as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{Bias}(x)=f(x)-\text{E}[\hat{f}(x)]=f(x)-\frac{1}{K}\sum_{i\in D_K(x)}f(x_i)$$&lt;/div&gt;
+&lt;p&gt; 
+For &lt;span class="math"&gt;\(K\)&lt;/span&gt; small the nearest neighbors will have targets &lt;span class="math"&gt;\(f(x_i)\)&lt;/span&gt; that are approximately equal to &lt;span class="math"&gt;\(f(x)\)&lt;/span&gt;, by continuity. As such, the bias is small for small values of &lt;span class="math"&gt;\(K\)&lt;/span&gt;. However, as &lt;span class="math"&gt;\(K\)&lt;/span&gt; grows we are probing datapoints that are farther and farther away and thus more distinct from &lt;span class="math"&gt;\(f(x)\)&lt;/span&gt;, which in general will make the bias increase. &lt;/p&gt;
+&lt;p&gt;On the other hand, the variance at a point &lt;span class="math"&gt;\(x\)&lt;/span&gt;, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{Var}(\hat{f})|_x=\text{E}[(\hat{f}(x)-\text{E}[\hat{f}(x)])^2]$$&lt;/div&gt;
+&lt;p&gt;
+becomes equal to
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{Var}(\hat{f})=\frac{\sigma^2}{K}$$&lt;/div&gt;
+&lt;p&gt;
+Therefore, for large values of &lt;span class="math"&gt;\(K\)&lt;/span&gt; the variance decreases, while it is larger for smaller values of &lt;span class="math"&gt;\(K\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="decision"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Decision Boundary&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;In the picture below, we draw the decision boundary for a &lt;span class="math"&gt;\(K=1\)&lt;/span&gt; nearest neighbor. For any point located inside the polygon (hard lines) the nearest neighbor is &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; and so the predicted target is &lt;span class="math"&gt;\(f(P_1)\)&lt;/span&gt; in that region.
+&lt;img alt="" height="400" src="/images/knn_decision.png" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
+&lt;p&gt;To construct the decision boundary we draw lines joining each point to &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; and for each of these we draw the corresponding bisector. For example, consider the points &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(P_2\)&lt;/span&gt;. For any point along the bisector of &lt;span class="math"&gt;\(\overline{P_1P_2}\)&lt;/span&gt;, the distance to &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; is the same as the distance to &lt;span class="math"&gt;\(P_2\)&lt;/span&gt;. Therefore, the polygon formed by drawing all the bisectors bounds a region in which the nearest point is &lt;span class="math"&gt;\(P_1\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;For &lt;span class="math"&gt;\(K&amp;gt;1\)&lt;/span&gt;, we have to proceed slightly different. First we construct the &lt;span class="math"&gt;\(K=1\)&lt;/span&gt; decision boundary- this determines the nearest neighbor. Call this point &lt;span class="math"&gt;\(N_1\)&lt;/span&gt;, the first neighbor. Second, we pretend that the point &lt;span class="math"&gt;\(N_1\)&lt;/span&gt; is not part of the dataset and proceed as in the first step. The corresponding nearest neighbor &lt;span class="math"&gt;\(N_2\)&lt;/span&gt; is then the second nearest neighbor while including &lt;span class="math"&gt;\(N_1\)&lt;/span&gt;. We proceed iteratively after &lt;span class="math"&gt;\(K\)&lt;/span&gt; steps. The decision boundary is then determined by joining the &lt;span class="math"&gt;\(K=1\)&lt;/span&gt; polygons of each &lt;span class="math"&gt;\(N_1,N_2,\ldots N_K\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;3. Python Implementation: Classification&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Define KNN class with fit and call methods. The fit method memorizes the training data and the call method retrieves the predictor.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;KNN&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;
+        &lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;sorted&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;enumerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="p"&gt;)}&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;zeros&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;enumerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;
+        &lt;span class="n"&gt;y_pred&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;zeros&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;enumerate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;t&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+            &lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;norm&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;
+            &lt;span class="n"&gt;norm&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;linalg&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;norm&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;norm&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;axis&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argpartition&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;norm&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;)[:&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="n"&gt;ypred&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;ypred&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ypred&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argmax&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+            &lt;span class="n"&gt;y_pred&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;ypred&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;y_pred&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As an example, load Iris dataset and also the built-in SKlearn K-nearest neighbors algorithm.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;sklearn.datasets&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;load_iris&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;sklearn.neighbors&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;KNeighborsClassifier&lt;/span&gt;
+
+&lt;span class="n"&gt;iris&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;load_iris&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;features&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;iris&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;data&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;target&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;iris&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;target&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="c1"&gt;#train &amp;amp; test split&lt;/span&gt;
+&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;arange&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;features&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;features&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;features&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;][:&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;xtest&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;features&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;:]&lt;/span&gt;
+
+&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;target&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;][:&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;ytest&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;target&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;indices&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="p"&gt;:]&lt;/span&gt;
+
+&lt;span class="n"&gt;knn&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;KNN&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#the class above&lt;/span&gt;
+&lt;span class="n"&gt;Kneighbor&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;KNeighborsClassifier&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n_neighbors&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;#the SKlearn class&lt;/span&gt;
+
+&lt;span class="n"&gt;knn&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;accuracy_score&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ytest&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;knn&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtest&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+&lt;span class="n"&gt;Kneighbor&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;accuracy_score&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ytest&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;Kneighbor&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtest&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Retrieving exactly the same accuracy.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Expectation-Maximization"</title><link href="/expectation-maximization.html" rel="alternate"></link><published>2020-07-15T00:00:00+02:00</published><updated>2020-07-15T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-07-15:/expectation-maximization.html</id><summary type="html">&lt;p&gt;The expectation-maximization algorithm.&lt;/p&gt;</summary><content type="html">&lt;p&gt;Often we have to deal with hidden variables in machine learning problems. The maximum-likelihood algorithm requires "integrating" over these hidden variables if we want to compare with the observed distribution. However this can lead to a serious problem since we have to deal with sums inside the logarithms. That is, we are instructed to maximize the log-likelihood quantity
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_i\ln p(x_i)=\sum_i\ln\Big( \sum_h p(x_i,h)\Big)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(h\)&lt;/span&gt; is the hidden variable and &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; is the observed one. Except for simple problems, having two sums turns the problem computationally infeasible, especially if the hidden variable is continuous. To deal with this issue we use the concavity property of the logarithm to approximate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln\Big( \sum_h p(x_i,h)\Big)\geq \sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(q(h)\)&lt;/span&gt; is an unknown distribution that we will want to fix. Further we write
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln p(x_i)=\sum_hq(h)\ln\Big(\frac{p(x_i,h)}{q(h)}\Big)+R_i$$&lt;/div&gt;
+&lt;p&gt;
+where the remaining &lt;span class="math"&gt;\(R_i\)&lt;/span&gt; is given by
+&lt;/p&gt;
+&lt;div class="math"&gt;$$R_i=-\sum_h q(h)\ln\Big(\frac{p(h|x_i)}{q(h)}\Big)=KL(p(h|x_i)||q(h))$$&lt;/div&gt;
+&lt;p&gt;
+which is the Kullback-Leibler divergence. Since &lt;span class="math"&gt;\(R_i\geq 0\)&lt;/span&gt; by definition, we have that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln p(x_i|\theta)\geq \langle \ln p(x_i,h|\theta)\rangle_{q(h)}-\langle \ln q(h)\rangle_{q(h)}$$&lt;/div&gt;
+&lt;p&gt;
+where we have introduced prior parameters &lt;span class="math"&gt;\(\theta\)&lt;/span&gt;, without lack of generality. The lower bound is saturated provided we choose 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{E-step:}\quad q(h_i)=p(h_i|x_i,\theta_0)$$&lt;/div&gt;
+&lt;p&gt;
+This is also known as expectation E-step. Note that we have a distribution &lt;span class="math"&gt;\(q(h_i)\)&lt;/span&gt; for each sample, as it is determined by &lt;span class="math"&gt;\(x_i,\theta_0\)&lt;/span&gt;. However, this step does not solve the maximum-likelihood problem because we still have to fix the parameter &lt;span class="math"&gt;\(\theta\)&lt;/span&gt;. What we do next is to maximize the lower bound by choosing &lt;span class="math"&gt;\(\theta\)&lt;/span&gt; keeping &lt;span class="math"&gt;\(q(h)\)&lt;/span&gt; fixed, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{M-step:}\quad \frac{\partial}{\partial \theta}\langle \ln p(x_i,h|\theta)\rangle_{q(h)}=0$$&lt;/div&gt;
+&lt;p&gt;Lets take an example that can help clarify some of these ideas. Consider the model which is a mixture of two normal distributions:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p(x,c)=\phi(x|\mu_c,\sigma_c)\pi_c,\quad c=0,1$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\phi(x|\mu,\sigma)\)&lt;/span&gt; is a normal distribution with mean &lt;span class="math"&gt;\(\mu\)&lt;/span&gt; and variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;, and &lt;span class="math"&gt;\(\pi_c=p(c)\)&lt;/span&gt; with &lt;span class="math"&gt;\(\pi_0+\pi_1=1\)&lt;/span&gt;. In this example &lt;span class="math"&gt;\(\theta\equiv \mu,\sigma\)&lt;/span&gt;, and the hidden variable is &lt;span class="math"&gt;\(h\equiv c\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;In the E-step we calculate:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{E-step:}\quad q(h)=p(h|x,\mu_h,\sigma_h)=\frac{\phi(x|\mu_h,\sigma_h)\pi_h}{\sum_c \phi(x|\mu_c,\sigma_c)\pi_c}$$&lt;/div&gt;
+&lt;p&gt;
+We write &lt;span class="math"&gt;\(q(h_i=0)=\gamma_i(x_i)\)&lt;/span&gt; and &lt;span class="math"&gt;\(q(h_i=1)=1-\gamma_i(x_i)\)&lt;/span&gt; for each sample &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, with &lt;span class="math"&gt;\(\gamma\)&lt;/span&gt; given by the ratio above. The initial parameters &lt;span class="math"&gt;\(\mu,\sigma\)&lt;/span&gt; are arbitrary.&lt;/p&gt;
+&lt;p&gt;The maximization step consists in maximizing the lower bound of the log-likelihood, hence
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}\text{M-step:}\quad &amp;amp;\gamma\ln p(x,h=0|\mu,\sigma)+(1-\gamma)\ln p(x,h=1|\mu,\sigma)\\
+=&amp;amp;\gamma \ln \phi(x|\mu_0,\sigma_0)+(1-\gamma)\ln \phi(x|\mu_1,\sigma_1)-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\\
+=&amp;amp; -\gamma \frac{(x-\mu_0)^2}{2\sigma_0^2}-(1-\gamma) \frac{(x-\mu_1)^2}{2\sigma_1^2}-\gamma\frac{1}{2}\ln\sigma_0-(1-\gamma)\frac{1}{2}\ln\sigma_1+\ldots\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\ldots\)&lt;/span&gt; do not depend on &lt;span class="math"&gt;\(\mu,\sigma\)&lt;/span&gt;. We need to sum over all samples, so the maximum is calculated
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mu_0=\frac{\sum_i x_i\gamma_i}{\sum_i \gamma_i},\;\mu_1=\frac{\sum_i x_i(1-\gamma_i)}{\sum_i (1-\gamma_i)}$$&lt;/div&gt;
+&lt;p&gt;
+and 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sigma_0=\frac{\sum_i\gamma_i(x_i-\mu_0)^2}{\sum_i\gamma_i},\quad \sigma_1=\frac{\sum_i(1-\gamma_i)(x_i-\mu_1)^2}{\sum_i(1-\gamma_i)}$$&lt;/div&gt;
+&lt;p&gt;
+Maximizing relatively to the probabilities &lt;span class="math"&gt;\(\pi\)&lt;/span&gt; gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\pi_0=\frac{1}{n}\sum_i\gamma_i,\;\pi_1=1-\pi_0$$&lt;/div&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Data Science"></category><category term="data science"></category></entry><entry><title>"Statistical Testing"</title><link href="/statistical-testing.html" rel="alternate"></link><published>2020-06-30T00:00:00+02:00</published><updated>2020-06-30T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-30:/statistical-testing.html</id><summary type="html">&lt;p&gt;We explain in detail the Student's t-statistic and the &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; statistic.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="#def1"&gt;Student's t-test&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;One-sample mean&lt;/li&gt;
+&lt;li&gt;Two-sample mean &lt;/li&gt;
+&lt;li&gt;Regression coefficient&lt;/li&gt;
+&lt;li&gt;Correlation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="#def2"&gt;Chi square test&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pearson's Chi-square test&lt;/li&gt;
+&lt;li&gt;Variance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Student's t-test&lt;/strong&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;One-sample mean&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Consider &lt;span class="math"&gt;\(n\)&lt;/span&gt; random variables distributed i.i.d., each following a normal distribution with mean &lt;span class="math"&gt;\(\mu\)&lt;/span&gt; and variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt;. The joint probability density function is
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\mu)^2}{2\sigma^2}}\prod_{i=1}^n dx_i$$&lt;/div&gt;
+&lt;p&gt;We want to write a density distribution as a function of &lt;span class="math"&gt;\(\bar{x}=\frac{\sum_i x_i}{n}\)&lt;/span&gt;, the sample mean. As such, use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=1}^n(x_i-\mu)^2=\sum_{i=1}^n (x_i-\bar{x})^2+n(\bar{x}-\mu)^2$$&lt;/div&gt;
+&lt;p&gt;and change variables &lt;span class="math"&gt;\((x_1,\ldots,x_n)\rightarrow (x_1,\ldots,x_{n-1},\bar{x})\)&lt;/span&gt; - the jacobian of the coordinate transformation is &lt;span class="math"&gt;\(n\)&lt;/span&gt;. The density function becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-\sum_{i=1}^{n}\frac{(x_i-\bar{x})^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}d\bar{x}\prod_{i=1}^{n-1} dx_i$$&lt;/div&gt;
+&lt;p&gt;Because &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(\bar{x}\)&lt;/span&gt; are independent, we can shift the variables &lt;span class="math"&gt;\(x_i\rightarrow x_i+\bar{x}\)&lt;/span&gt;, after which the term &lt;span class="math"&gt;\(\sum_{i=1}^{n}(x_i-\bar{x})^2\)&lt;/span&gt; becomes &lt;span class="math"&gt;\(\sum_{i=1}^{n-1}x_i^2+(\sum_i^{n-1}x_i)^2\)&lt;/span&gt;. Since this is quadratic in the &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, it can be safely integrated out. However, before doing that we write &lt;span class="math"&gt;\(x_i=\frac{s}{\sqrt{n-1}}u_i\)&lt;/span&gt;, with &lt;span class="math"&gt;\(\sum_{i=1}^{n-1}u_i^2+(\sum_i^{n-1}u_i)^2=1\)&lt;/span&gt;, that is, &lt;span class="math"&gt;\((s,u_i)\)&lt;/span&gt; play a similar role to spherical coordinates. The density distribution becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{(\sqrt{2\pi}\sigma)^n} e^{-(n-1)\frac{s^2}{2\sigma^2}-n\frac{(\bar{x}-\mu)^2}{2\sigma^2}}s^{n-2}\,\Omega(u_i)dsd\bar{x}\prod_{i=1}^{n-1} du_i$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\Omega(u_i)\)&lt;/span&gt; is a measure for the variables &lt;span class="math"&gt;\(u_i\)&lt;/span&gt;- it gives an overall constant that we determine at the end instead.&lt;/p&gt;
+&lt;p&gt;To remove dependence on the variance &lt;span class="math"&gt;\(\sigma\)&lt;/span&gt; we consider the variable &lt;span class="math"&gt;\(t=(\bar{x}-\mu)\sqrt{n}/s\)&lt;/span&gt;, which gives the Jacobian &lt;span class="math"&gt;\(s/\sqrt{n}\)&lt;/span&gt;. We scale &lt;span class="math"&gt;\(s\rightarrow \sqrt{\frac{2}{n-1}}s\sigma\)&lt;/span&gt; to obtain 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto \int_{s=0}^{\infty}e^{-s^2(1+\frac{1}{n-1}t^2)}s^{n-1}\,dsdt$$&lt;/div&gt;
+&lt;p&gt;By changing &lt;span class="math"&gt;\(s\rightarrow \sqrt{s}\)&lt;/span&gt; we obtain
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto\Big(1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}\Gamma(n/2)dt$$&lt;/div&gt;
+&lt;p&gt;
+and integrating over &lt;span class="math"&gt;\(t: (-\infty,\infty)\)&lt;/span&gt; we fix the overall constant
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\Gamma(n/2)}{\sqrt{(n-1)\pi}\Gamma(\frac{n-1}{2})}\Big (1+\frac{1}{n-1}t^2\Big)^{-\frac{n}{2}}$$&lt;/div&gt;
+&lt;p&gt;This is known as the &lt;strong&gt;Student's t-distribution&lt;/strong&gt; with &lt;span class="math"&gt;\(\nu=n-1\)&lt;/span&gt; degrees of freedom.
+&lt;img alt="" height="300" src="/images/Student_t.png" style="display: block; margin: 0 auto" width="300"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Two-sample mean (equal variance)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For two samples with sizes &lt;span class="math"&gt;\(n_1,n_2\)&lt;/span&gt; the idea is roughly the same. We follow similar steps as in the previous case. After some algebra, the exponential contains the terms&lt;/p&gt;
+&lt;div class="math"&gt;$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-n_1\frac{(\bar{x}_1-\mu_1)^2}{2\sigma^2}-n_2\frac{(\bar{x}_2-\mu_2)^2}{2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; are the two sample means.&lt;/p&gt;
+&lt;p&gt;Now we write &lt;span class="math"&gt;\(\bar{x}_1-\mu_1=(\bar{x}_{+}+\bar{x}_{-})/2\)&lt;/span&gt; and &lt;span class="math"&gt;\(\bar{x}_2-\mu_2=(\bar{x}_{+}-\bar{x}_{-})/2\)&lt;/span&gt;, because we will want to integrate over &lt;span class="math"&gt;\(\bar{x}_{+}\)&lt;/span&gt;. We use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$-n_1(\bar{x}_1-\mu_1)^2-n_2(\bar{x}_2-\mu_2)^2=-\frac{\bar{x}_{-}^2}{1/n_1+1/n_2}-\frac{n_1+n_2}{4}\Big(\bar{x}_{+}+\frac{n_1-n_2}{n_1+n_2}\bar{x}_{-}\Big)^2$$&lt;/div&gt;
+&lt;p&gt;
+and integrate over &lt;span class="math"&gt;\(\bar{x}_{+}\)&lt;/span&gt;. So we are left with&lt;/p&gt;
+&lt;div class="math"&gt;$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-\frac{\bar{x}_{-}^2}{(1/n_1+1/n_2)2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;By writing 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$s^2=\frac{(n_1-1)s_1^2+(n_2-1)s_2^2}{n_1+n_2-2},\;t=\frac{\bar{x}_{-}}{s\sqrt{1/n_1+1/n_2}}$$&lt;/div&gt;
+&lt;p&gt;we obtain again the t-distribution with &lt;span class="math"&gt;\(\nu=n_1+n_2-2\)&lt;/span&gt; degrees of freedom.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Regression coefficient&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In linear regression, we assume that the target &lt;span class="math"&gt;\(y\)&lt;/span&gt; is a linear combination of the feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; up to a gaussian noise, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$y=ax+b+\epsilon$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is the noise distributed i.i.d according to a normal distribution with mean zero. Here &lt;span class="math"&gt;\(a,b\)&lt;/span&gt; are the true parameters that we want to estimate. In linear regression we use least square error to determine the estimators
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{a}=\frac{\sum_i(y_i-\bar{y})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\hat{b}=\bar{y}-\hat{a}\bar{x}$$&lt;/div&gt;
+&lt;p&gt;We want to calculate a probability for the difference &lt;span class="math"&gt;\(\hat{a}-a\)&lt;/span&gt;. To do this we substitute &lt;span class="math"&gt;\(y_i=ax_i+b+\epsilon_i\)&lt;/span&gt; in the estimator equation. This gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{a}-a=\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\; \hat{b}-b=(a-\hat{a})\bar{x}+\bar{\epsilon}$$&lt;/div&gt;
+&lt;p&gt;
+Since &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is normally distributed we want determine the probability of the quantity above. To facilitate the algebra we use vectorial notation. As such
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\equiv\frac{\sum_i (\epsilon_i-\bar{\epsilon})(x_i-\bar{x})}{\sum_i(x_i-\bar{x})^2},\;\;\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\overrightarrow{\gamma}\equiv x_i-\bar{x}\)&lt;/span&gt;, &lt;span class="math"&gt;\(\zeta\equiv \epsilon_i-\bar{\epsilon}\)&lt;/span&gt; and &lt;span class="math"&gt;\(\overrightarrow{1}=(1,1,1,\ldots,1)/n\)&lt;/span&gt;, a vector of ones divided by the number of datapoints. Note that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\overrightarrow{\gamma}\cdot \overrightarrow{1}=0,\;\;\overrightarrow{\zeta}\cdot \overrightarrow{1}=0$$&lt;/div&gt;
+&lt;p&gt;The probability density function is proportional to the exponential of
+&lt;/p&gt;
+&lt;div class="math"&gt;$$-\frac{\|\overrightarrow{\epsilon}\|^2}{2\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;We write &lt;span class="math"&gt;\(\overrightarrow{\epsilon}=\overrightarrow{\epsilon}_{\perp}+\alpha\overrightarrow{\gamma}+\beta\overrightarrow{1}\)&lt;/span&gt; with &lt;span class="math"&gt;\(\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{\gamma}=\overrightarrow{\epsilon}_{\perp}\cdot \overrightarrow{1}=0\)&lt;/span&gt;. We calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}=\alpha,\;\; \|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+\frac{\beta^2}{n}$$&lt;/div&gt;
+&lt;p&gt;Integrating out &lt;span class="math"&gt;\(\beta\)&lt;/span&gt; we can build a t-test like variable with &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; degrees of freedom, since &lt;span class="math"&gt;\(\overrightarrow{\epsilon}_{\perp}\)&lt;/span&gt; lives in a &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; dimensional vector space. That is, 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{\alpha\|\overrightarrow{\gamma}\|}{\|\overrightarrow{\epsilon}_{\perp}\|}\sqrt{n-2}$$&lt;/div&gt;
+&lt;p&gt;One can show that &lt;span class="math"&gt;\(\|\overrightarrow{\epsilon}_{\perp}\|^2=\sum_i(y_i-\hat{y}_i)^2\)&lt;/span&gt;, and therefore
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{\hat{a}-a}{\sqrt{\frac{\sum_i(y_i-\hat{y}_i)^2}{\sum_i(x_i-\bar{x}_i)^2}}}\sqrt{n-2}$$&lt;/div&gt;
+&lt;p&gt;For the intercept the logic is similar.  We have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{b}-b=-\frac{\overrightarrow{\zeta}\cdot\overrightarrow{\gamma}}{\|\overrightarrow{\gamma}\|^2}\bar{x}+\overrightarrow{\epsilon}\cdot \overrightarrow{1}=-\alpha\bar{x}+\frac{\beta}{n}$$&lt;/div&gt;
+&lt;p&gt;
+and thus
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\|\overrightarrow{\epsilon}\|^2=\|\overrightarrow{\epsilon}_{\perp}\|^2+\alpha^2\|\overrightarrow{\gamma}\|^2+n(\hat{b}-b+\alpha\bar{x})^2$$&lt;/div&gt;
+&lt;p&gt;Integrating out &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt; one finds that
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t_{\text{intercept}}=\frac{(\hat{b}-b)\|\overrightarrow{\gamma}\|\sqrt{n-2}}{\|\overrightarrow{\epsilon}_{\perp}\|\sqrt{\|\overrightarrow{\gamma}\|^2/n+\bar{x}^2}}$$&lt;/div&gt;
+&lt;p&gt;follows the Student's t-distribution with &lt;span class="math"&gt;\(n-2\)&lt;/span&gt; degrees of freedom.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Correlation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We want to test whether two variables  &lt;span class="math"&gt;\(y\)&lt;/span&gt; and &lt;span class="math"&gt;\(x\)&lt;/span&gt; have zero correlation, statistically speaking. Essentialy this accounts to fit &lt;span class="math"&gt;\(y\sim ax+b\)&lt;/span&gt;. We have seen that the regression coefficient &lt;span class="math"&gt;\(a\)&lt;/span&gt; is proportional to the sample correlation coefficient, that is,&lt;/p&gt;
+&lt;div class="math"&gt;$$a=\frac{\langle yx\rangle -\langle y\rangle \langle x\rangle}{\langle x^2\rangle -\langle x\rangle^2 }=r\frac{\sigma(y)}{\sigma(x)}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\sigma(y)^2=\sum_{i}(y_i-\bar{y})^2/n\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sigma(x)^2=\sum_{i}(x_i-\bar{x})^2/n\)&lt;/span&gt;, and &lt;span class="math"&gt;\(r\)&lt;/span&gt; is the Pearson's correlation coefficient. Then we use the equality
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i}(y_i-\hat{y}_i)^2/n=\sigma(y)^2(1-r^2)$$&lt;/div&gt;
+&lt;p&gt;
+to find that the t-statistic for the regression coefficient &lt;span class="math"&gt;\(a\)&lt;/span&gt; can be written as
+&lt;/p&gt;
+&lt;div class="math"&gt;$$t=\frac{r\sqrt{n-2}}{\sqrt{1-r^2}}$$&lt;/div&gt;
+&lt;p&gt;
+assuming that true coefficient is zero, that is, &lt;span class="math"&gt;\(a=0\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="def2"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Chi square test&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Let each &lt;span class="math"&gt;\(X_i,\,i=1\ldots n\)&lt;/span&gt; be a random variable following a standard normal distribution. Then the sum of squares
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\chi^2=\sum_{i=1}^nX^2_i$$&lt;/div&gt;
+&lt;p&gt;
+follows a chi-distribution with &lt;span class="math"&gt;\(k\)&lt;/span&gt; degrees of freedom. To understand this, consider the joint probability density function of &lt;span class="math"&gt;\(n\)&lt;/span&gt; standard normal random variables
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-\frac{1}{2}\sum_{i=1}^n X_i^2}\prod_{i=1}^n dX_i$$&lt;/div&gt;
+&lt;p&gt;
+If we use spherical coordinates with
+&lt;/p&gt;
+&lt;div class="math"&gt;$$X_i=ru_i,\;\sum_{i=1}^n u_i^2=1$$&lt;/div&gt;
+&lt;p&gt;
+the probability density becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-\frac{r^2}{2}}drr^{n-1}\Omega$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\Omega\)&lt;/span&gt; comes from integrating out &lt;span class="math"&gt;\(u_i\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(r\)&lt;/span&gt; is never negative we further use &lt;span class="math"&gt;\(s=r^{2}\)&lt;/span&gt; and  obtain 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\propto e^{-\frac{s}{2}}s^{\frac{n}{2}-1}ds$$&lt;/div&gt;
+&lt;p&gt;
+Therefore the chi-square variable &lt;span class="math"&gt;\(\chi^2\equiv s\)&lt;/span&gt; with &lt;span class="math"&gt;\(k\)&lt;/span&gt; degrees of freedom follows the distribution
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\chi^2\sim \frac{s^{\frac{n}{2}-1}}{2^{n/2}\Gamma(n/2)}e^{-\frac{s}{2}}$$&lt;/div&gt;
+&lt;p&gt;
+This distribution has the following shape (from Wikipedia):
+&lt;img alt="" height="400" src="/images/Chi-square_pdf.svg" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pearson's Chi-square test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This test gives a measure of goodness of fit for a categorical variable with &lt;span class="math"&gt;\(k\)&lt;/span&gt; classes. Suppose we have &lt;span class="math"&gt;\(n\)&lt;/span&gt; observations with &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; (&lt;span class="math"&gt;\(i=1\ldots k\)&lt;/span&gt;) observed numbers, that is, &lt;span class="math"&gt;\(\sum_{i=1}^k x_i=n\)&lt;/span&gt;. We want to test the hypotheses that each category is drawn with probability &lt;span class="math"&gt;\(p_i\)&lt;/span&gt;. Under this assumption, the joint probability of observing &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; numbers follows a multinomial distribution
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(x_1,x_2,\ldots,x_n)=\frac{n!}{x_1!x_2!\ldots x_k!}p_1^{x_1}p_2^{x_2}\ldots p_k^{x_k}$$&lt;/div&gt;
+&lt;p&gt; 
+We want to understand the behaviour of this probability when &lt;span class="math"&gt;\(n\)&lt;/span&gt; is very large. Assume that &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; is also sufficiently large, which is ok to do for typical observations. In this case use stirling's approximation of the factorial, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^n$$&lt;/div&gt;
+&lt;p&gt;
+to write
+&lt;/p&gt;
+&lt;div class="math"&gt;$$P(x_1,x_2,\ldots,x_n)\propto \Big(\frac{n}{e}\Big)^n \prod_{i=1}^k \Big(\frac{x_i}{e}\Big)^{-x_i}p_i^{x_i}$$&lt;/div&gt;
+&lt;p&gt;
+In taking &lt;span class="math"&gt;\(n\)&lt;/span&gt; very large, we want to keep the frequency &lt;span class="math"&gt;\(\lambda_i=x_i/ n\)&lt;/span&gt; fixed. Then the logarithm of the above expression becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\lambda_in\ln(\lambda_i)+\sum_{i=1}^k\lambda_i n\ln(p_i)$$&lt;/div&gt;
+&lt;p&gt;
+Since this is proportional to &lt;span class="math"&gt;\(n\)&lt;/span&gt; we can perform an asymptotic expansion as &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. We perform the expansion around the maximum of &lt;span class="math"&gt;\(\ln P\)&lt;/span&gt; (note that &lt;span class="math"&gt;\(\ln P\)&lt;/span&gt; is a concave function of &lt;span class="math"&gt;\(\lambda_i\)&lt;/span&gt; ), that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial P}{\partial \lambda_i}=0,\;i=1\ldots n-1$$&lt;/div&gt;
+&lt;p&gt;
+Using the fact that we have &lt;span class="math"&gt;\(n-1\)&lt;/span&gt; independent variables since &lt;span class="math"&gt;\(\sum_i \lambda_i=1\)&lt;/span&gt;, the solution is &lt;span class="math"&gt;\(\lambda_i^*=p_i\)&lt;/span&gt;. Expanding around this solution we find
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(\lambda_1,\lambda_2,\ldots,\lambda_n)=-n\sum_{i=1}^k\frac{(\lambda_i-p_i)^2}{2p_i}$$&lt;/div&gt;
+&lt;p&gt;
+In terms of &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; this gives
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\ln P(x_1,x_2,\ldots,x_n)=-\sum_{i=1}^k\frac{(x_i-m_i)^2}{2m_i}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(m_i=np_i\)&lt;/span&gt; is the expected observed number. Therefore the quantity
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{i=1}^k\frac{(x_i-m_i)^2}{m_i}$$&lt;/div&gt;
+&lt;p&gt;
+follows a &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; distribution with &lt;span class="math"&gt;\(k-1\)&lt;/span&gt; degrees of fredom, since only &lt;span class="math"&gt;\(k-1\)&lt;/span&gt; of the &lt;span class="math"&gt;\(x\)&lt;/span&gt;'s are independent.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Variance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In order to investigate the difference between the sample variance &lt;span class="math"&gt;\(s^2=\sum_i(x_i-\bar{x})^2/n-1\)&lt;/span&gt; and the assumed variance &lt;span class="math"&gt;\(\sigma^2\)&lt;/span&gt; of the distribution. We calculate
+&lt;/p&gt;
+&lt;div class="math"&gt;$$(n-1)\frac{s^2}{\sigma^2}$$&lt;/div&gt;
+&lt;p&gt;
+Remember that for a normally distributed random variable &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;, the sum &lt;span class="math"&gt;\(\sum_i(x_i-\bar{x})^2\)&lt;/span&gt; also follows a normal distribution. In particular, the combination &lt;span class="math"&gt;\(\sum_i(x_i-\bar{x})^2/\sigma^2\)&lt;/span&gt; follows a &lt;span class="math"&gt;\(\chi^2\)&lt;/span&gt; distribution with &lt;span class="math"&gt;\(n-1\)&lt;/span&gt; degrees of freedom, because we have integrated out &lt;span class="math"&gt;\(\bar{x}\)&lt;/span&gt; as explained in the beginning of the post.&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Linear regression classifier"</title><link href="/linear-regression-classifier.html" rel="alternate"></link><published>2020-06-20T00:00:00+02:00</published><updated>2020-06-20T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-06-20:/linear-regression-classifier.html</id><summary type="html">&lt;p&gt;Linear regression/classifier basics&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
 &lt;li&gt;&lt;a href="#def1"&gt;Linear regression and classification&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#python"&gt;Python implementation&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
@@ -74,19 +692,19 @@ where &lt;span class="math"&gt;\(N\)&lt;/span&gt; is the number of datapoints. N
 to find that
 &lt;/p&gt;
 &lt;div class="math"&gt;$$(X^TX)^{-1}=N^{-1}\Big[\begin{array}{cc}
-   \text{Cov}^{-1}_{\mu\nu} &amp;amp; -\sum_{\nu}\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
-    -\sum_{\mu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}&amp;amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
+   \text{Var}^{-1}_{\mu\nu} &amp;amp; -\sum_{\nu}\text{Var}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
+    -\sum_{\mu}\langle x^{\mu}\rangle\text{Var}^{-1}_{\mu\nu}&amp;amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Var}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
   \end{array}\Big]$$&lt;/div&gt;
 &lt;p&gt;
 where 
 &lt;/p&gt;
-&lt;div class="math"&gt;$$\text{Cov}_{\mu\nu}=\langle x^{\mu}x^{\nu}\rangle-\langle x^{\mu}\rangle \langle x^{\nu}\rangle$$&lt;/div&gt;
+&lt;div class="math"&gt;$$\text{Var}_{\mu\nu}=\langle x^{\mu}x^{\nu}\rangle-\langle x^{\mu}\rangle \langle x^{\nu}\rangle$$&lt;/div&gt;
 &lt;p&gt;
-is the covariance matrix. On the other hand, the weight matrix &lt;span class="math"&gt;\(w^T\)&lt;/span&gt; becomes
+is the variance matrix. On the other hand, the weight matrix &lt;span class="math"&gt;\(w^T\)&lt;/span&gt; becomes
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\Big[\begin{array}{cc}
-   \text{Cov}^{-1}_{\mu\nu} &amp;amp; -\sum_{\nu}\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
-    -\sum_{\mu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}&amp;amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Cov}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
+   \text{Var}^{-1}_{\mu\nu} &amp;amp; -\sum_{\nu}\text{Var}^{-1}_{\mu\nu}\langle x^{\nu}\rangle\\
+    -\sum_{\mu}\langle x^{\mu}\rangle\text{Var}^{-1}_{\mu\nu}&amp;amp; 1+\sum_{\mu\nu}\langle x^{\mu}\rangle\text{Var}^{-1}_{\mu\nu}\langle x^{\nu}\rangle
   \end{array}\Big] \Big[\begin{array}{c}
    \langle x^{\nu}y^k\rangle\\
    \langle y^k \rangle
