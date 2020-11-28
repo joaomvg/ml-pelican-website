@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-07-29T00:00:00+02:00</updated><entry><title>"K-Nearest Neighbors"</title><link href="/k-nearest-neighbors.html" rel="alternate"></link><published>2020-07-29T00:00:00+02:00</published><updated>2020-07-29T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-07-29:/k-nearest-neighbors.html</id><summary type="html">&lt;p&gt;The Nearest Neighbors algorithm is explained. This includes theoretical derivation, python implementation and also decision boundary.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2020-09-01T00:00:00+02:00</updated><entry><title>"Decision Tree"</title><link href="/decision-tree.html" rel="alternate"></link><published>2020-09-01T00:00:00+02:00</published><updated>2020-09-01T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-09-01:/decision-tree.html</id><summary type="html">&lt;p&gt;The decision tree is one of the most important algorithms in machine learning. We explain in detail how the algorithm works, decision boundarya and Python implementation.&lt;/p&gt;</summary><content type="html"></content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"K-Nearest Neighbors"</title><link href="/k-nearest-neighbors.html" rel="alternate"></link><published>2020-07-29T00:00:00+02:00</published><updated>2020-07-29T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-07-29:/k-nearest-neighbors.html</id><summary type="html">&lt;p&gt;The Nearest Neighbors algorithm is explained. This includes theoretical derivation, python implementation and also decision boundary.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
 &lt;li&gt;&lt;a href="#def1"&gt;KNN Algorithm&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#decision"&gt;Decision Boundary&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#curse"&gt;Curse of dimensionality&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#python"&gt;Python implementation: Classification&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
@@ -52,8 +53,28 @@ Therefore, for large values of &lt;span class="math"&gt;\(K\)&lt;/span&gt; the v
 &lt;img alt="" height="400" src="/images/knn_decision.png" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
 &lt;p&gt;To construct the decision boundary we draw lines joining each point to &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; and for each of these we draw the corresponding bisector. For example, consider the points &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(P_2\)&lt;/span&gt;. For any point along the bisector of &lt;span class="math"&gt;\(\overline{P_1P_2}\)&lt;/span&gt;, the distance to &lt;span class="math"&gt;\(P_1\)&lt;/span&gt; is the same as the distance to &lt;span class="math"&gt;\(P_2\)&lt;/span&gt;. Therefore, the polygon formed by drawing all the bisectors bounds a region in which the nearest point is &lt;span class="math"&gt;\(P_1\)&lt;/span&gt;. &lt;/p&gt;
 &lt;p&gt;For &lt;span class="math"&gt;\(K&amp;gt;1\)&lt;/span&gt;, we have to proceed slightly different. First we construct the &lt;span class="math"&gt;\(K=1\)&lt;/span&gt; decision boundary- this determines the nearest neighbor. Call this point &lt;span class="math"&gt;\(N_1\)&lt;/span&gt;, the first neighbor. Second, we pretend that the point &lt;span class="math"&gt;\(N_1\)&lt;/span&gt; is not part of the dataset and proceed as in the first step. The corresponding nearest neighbor &lt;span class="math"&gt;\(N_2\)&lt;/span&gt; is then the second nearest neighbor while including &lt;span class="math"&gt;\(N_1\)&lt;/span&gt;. We proceed iteratively after &lt;span class="math"&gt;\(K\)&lt;/span&gt; steps. The decision boundary is then determined by joining the &lt;span class="math"&gt;\(K=1\)&lt;/span&gt; polygons of each &lt;span class="math"&gt;\(N_1,N_2,\ldots N_K\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a name="curse"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;3. Curse of Dimensionality&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;In this section we discuss the K-nearest neighbors algorithm in higher dimensions. 
+Consider a sphere of radius &lt;span class="math"&gt;\(r=1\)&lt;/span&gt; in &lt;span class="math"&gt;\(d\)&lt;/span&gt; dimensions. We want to calculate the probability of finding the nearest neighbor at a distance &lt;span class="math"&gt;\(r&amp;lt;=1\)&lt;/span&gt; from centre. This probability density is calculated as follows. Let &lt;span class="math"&gt;\(p_r\)&lt;/span&gt; be the probability of finding a point at a distance &lt;span class="math"&gt;\(r\)&lt;/span&gt; and &lt;span class="math"&gt;\(p_{&amp;gt;r}\)&lt;/span&gt; the probability of finding a point at a distance &lt;span class="math"&gt;\(&amp;gt;r\)&lt;/span&gt;. Then the probability that we want can be written as 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;Np_r p_{&amp;gt;r}^{N-1}+\frac{1}{2}N(N-1)p_r^2p_{&amp;gt;r}^{N-2}+\ldots\\
+&amp;amp;=(p_r+p_{&amp;gt;r})^N-p_{&amp;gt;r}^N\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+which is the probability of finding at least one point at &lt;span class="math"&gt;\(r\)&lt;/span&gt; and none for &lt;span class="math"&gt;\(&amp;lt; r\)&lt;/span&gt;. The probability &lt;span class="math"&gt;\(p_r\)&lt;/span&gt; is infinitesimally small, since
+&lt;/p&gt;
+&lt;div class="math"&gt;$$p_r=r^{d-1}dr$$&lt;/div&gt;
+&lt;p&gt;
+while &lt;span class="math"&gt;\(p_{&amp;gt;r}=(1-r^d)\)&lt;/span&gt;. Hence, we can expand the expression above and determine the probability density
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{dP(r)}{dr}=N r^{d-1}(1-r^{d})^{N-1}$$&lt;/div&gt;
+&lt;p&gt;Take &lt;span class="math"&gt;\(d\gg1\)&lt;/span&gt;. The probability density has a maximum at 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$r^*=\frac{1}{N^{1/d}}$$&lt;/div&gt;
+&lt;p&gt;
+For the K-nearest neighbors algorithm to perform well, there should exist at each point a sufficiently large number of neighbors at distances &lt;span class="math"&gt;\(\epsilon\ll 1\)&lt;/span&gt;, so one can use the continuity property of a smooth function. Therefore if we insist that &lt;span class="math"&gt;\(r^*=\epsilon\ll 1\)&lt;/span&gt;, this implies that &lt;span class="math"&gt;\(N\)&lt;/span&gt; must be exponentially large as a function of &lt;span class="math"&gt;\(d\)&lt;/span&gt;. In other words, for higher dimensions the probability of finding a neighbor at distance &lt;span class="math"&gt;\(\epsilon\)&lt;/span&gt; is smaller because there is more "space" available. To compensate that, we need an exponentially larger number of datapoints.&lt;/p&gt;
 &lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;h3&gt;&lt;strong&gt;3. Python Implementation: Classification&lt;/strong&gt;&lt;/h3&gt;
+&lt;h3&gt;&lt;strong&gt;4. Python Implementation: Classification&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;Define KNN class with fit and call methods. The fit method memorizes the training data and the call method retrieves the predictor.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;KNN&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;

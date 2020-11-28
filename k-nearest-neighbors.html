@@ -48,6 +48,7 @@
 	<div itemprop="articleBody" class="article-body"><ol>
 <li><a href="#def1">KNN Algorithm</a></li>
 <li><a href="#decision">Decision Boundary</a></li>
+<li><a href="#curse">Curse of dimensionality</a></li>
 <li><a href="#python">Python implementation: Classification</a></li>
 </ol>
 <p><a name="def1"></a></p>
@@ -98,8 +99,28 @@ Therefore, for large values of <span class="math">\(K\)</span> the variance decr
 <img alt="" height="400" src="/images/knn_decision.png" style="display: block; margin: 0 auto" width="400"></p>
 <p>To construct the decision boundary we draw lines joining each point to <span class="math">\(P_1\)</span> and for each of these we draw the corresponding bisector. For example, consider the points <span class="math">\(P_1\)</span> and <span class="math">\(P_2\)</span>. For any point along the bisector of <span class="math">\(\overline{P_1P_2}\)</span>, the distance to <span class="math">\(P_1\)</span> is the same as the distance to <span class="math">\(P_2\)</span>. Therefore, the polygon formed by drawing all the bisectors bounds a region in which the nearest point is <span class="math">\(P_1\)</span>. </p>
 <p>For <span class="math">\(K&gt;1\)</span>, we have to proceed slightly different. First we construct the <span class="math">\(K=1\)</span> decision boundary- this determines the nearest neighbor. Call this point <span class="math">\(N_1\)</span>, the first neighbor. Second, we pretend that the point <span class="math">\(N_1\)</span> is not part of the dataset and proceed as in the first step. The corresponding nearest neighbor <span class="math">\(N_2\)</span> is then the second nearest neighbor while including <span class="math">\(N_1\)</span>. We proceed iteratively after <span class="math">\(K\)</span> steps. The decision boundary is then determined by joining the <span class="math">\(K=1\)</span> polygons of each <span class="math">\(N_1,N_2,\ldots N_K\)</span>.</p>
+<p><a name="curse"></a></p>
+<h3><strong>3. Curse of Dimensionality</strong></h3>
+<p>In this section we discuss the K-nearest neighbors algorithm in higher dimensions. 
+Consider a sphere of radius <span class="math">\(r=1\)</span> in <span class="math">\(d\)</span> dimensions. We want to calculate the probability of finding the nearest neighbor at a distance <span class="math">\(r&lt;=1\)</span> from centre. This probability density is calculated as follows. Let <span class="math">\(p_r\)</span> be the probability of finding a point at a distance <span class="math">\(r\)</span> and <span class="math">\(p_{&gt;r}\)</span> the probability of finding a point at a distance <span class="math">\(&gt;r\)</span>. Then the probability that we want can be written as 
+</p>
+<div class="math">$$\begin{aligned}&amp;Np_r p_{&gt;r}^{N-1}+\frac{1}{2}N(N-1)p_r^2p_{&gt;r}^{N-2}+\ldots\\
+&amp;=(p_r+p_{&gt;r})^N-p_{&gt;r}^N\end{aligned}$$</div>
+<p>
+which is the probability of finding at least one point at <span class="math">\(r\)</span> and none for <span class="math">\(&lt; r\)</span>. The probability <span class="math">\(p_r\)</span> is infinitesimally small, since
+</p>
+<div class="math">$$p_r=r^{d-1}dr$$</div>
+<p>
+while <span class="math">\(p_{&gt;r}=(1-r^d)\)</span>. Hence, we can expand the expression above and determine the probability density
+</p>
+<div class="math">$$\frac{dP(r)}{dr}=N r^{d-1}(1-r^{d})^{N-1}$$</div>
+<p>Take <span class="math">\(d\gg1\)</span>. The probability density has a maximum at 
+</p>
+<div class="math">$$r^*=\frac{1}{N^{1/d}}$$</div>
+<p>
+For the K-nearest neighbors algorithm to perform well, there should exist at each point a sufficiently large number of neighbors at distances <span class="math">\(\epsilon\ll 1\)</span>, so one can use the continuity property of a smooth function. Therefore if we insist that <span class="math">\(r^*=\epsilon\ll 1\)</span>, this implies that <span class="math">\(N\)</span> must be exponentially large as a function of <span class="math">\(d\)</span>. In other words, for higher dimensions the probability of finding a neighbor at distance <span class="math">\(\epsilon\)</span> is smaller because there is more "space" available. To compensate that, we need an exponentially larger number of datapoints.</p>
 <p><a name="python"></a></p>
-<h3><strong>3. Python Implementation: Classification</strong></h3>
+<h3><strong>4. Python Implementation: Classification</strong></h3>
 <p>Define KNN class with fit and call methods. The fit method memorizes the training data and the call method retrieves the predictor.</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">KNN</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">k</span><span class="p">):</span>
@@ -259,7 +280,7 @@ Therefore, for large values of <span class="math">\(K\)</span> the variance decr
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
 							<li><a href="/category/data-science.html">Data Science (1)</a></li>
-							<li><a href="/category/machine-learning.html">Machine Learning (9)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (10)</a></li>
 							<li><a href="/category/statistics.html">Statistics (2)</a></li>
 						</ul>
 					</div>
