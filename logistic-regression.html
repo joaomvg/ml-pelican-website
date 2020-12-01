@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Data Science and Machine Learning <small>Joao Gomes</small></title>
-	<meta name="description" content="Coding, scientific development, finance, data analysis, visualization, statistics, and machine learning">
+	<title>"Logistic Regression" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Logistic Regression"; Date: 2020-08-17; Author: Joao Gomes">
 	<meta name="author" content="Joao Gomes">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -25,15 +25,72 @@
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/hyperplanes-and-classification.html">
-		<h2 itemprop="name headline">"Hyperplanes and classification"</h2>
-	</a>
-	<time datetime="2020-05-01T00:00:00+02:00" itemprop="datePublished">Fri 01 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We study the <span class="math">\(\{0,1\}\)</span> classification problem in <span class="math">\(\mathbb{R}^d\)</span> using hyperplanes. We show that the VC dimension is <span class="math">\(d+1\)</span>.</p>
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Logistic Regression"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-08-17T00:00:00+02:00" itemprop="datePublished">Mon 17 August 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Logistic regression</a></li>
+<li><a href="#decision">Decision Boundary</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Logistic Regression</strong></h3>
+<p>In the logistic regression algorithm, the probability in a binary classification problem, is calculated as
+</p>
+<div class="math">$$p(0|x)=\sigma\Big(\sum_i \omega_i x^i +b\Big)$$</div>
+<p>
+where <span class="math">\(\sigma(x)\)</span> is the sigmoid function
+</p>
+<div class="math">$$\sigma(z)=\frac{1}{1+e^{-z}}$$</div>
+<p>We can represent this operation diagramatically as
+<img alt="" height="300" src="/images/logistic.png" style="display: block; margin: 0 auto" width="300"> 
+where <span class="math">\(x^i\)</span> are the features of the datapoint <span class="math">\(x\)</span>. In the diagram, the node (circle) represents the composition of a linear operation followed by a non-linear function.</p>
+<p>In the multiclass case, the probabilities have instead the form
+</p>
+<div class="math">$$p(y^k|x)=\frac{e^{z^k(x)}}{Z(x)}$$</div>
+<p>
+where <span class="math">\(z^k=-\sum_i\omega^k_i x^i-b^k\)</span> are the logits and <span class="math">\(Z(x)=\sum_l e^{z^l(x)}\)</span> is a normalization. Diagrammatically this has the form</p>
+<p><img alt="" height="200" src="/images/softmax.png" style="display: block; margin: 0 auto" width="200"> 
+The function 
+</p>
+<div class="math">$$f(w)^k=\frac{w^k}{\sum_l w^l}$$</div>
+<p>
+is known as softmax. Since it is invariant under <span class="math">\(w\rightarrow \lambda w\)</span> for non-zero <span class="math">\(\lambda\)</span>, we can fix a logit to zero. Take for example <span class="math">\(z^0=0\)</span>. This implies that <span class="math">\(\omega^0_i=0\)</span> and <span class="math">\(b^0=0\)</span>. </p>
+<p>Given a dataset <span class="math">\(S=\{(\vec{x}_0,y_0),(\vec{x}_1,y_1),\ldots (\vec{x}_N,y_N)\}\)</span> we determine the parameters <span class="math">\(\omega\)</span> and <span class="math">\(b\)</span> using maximum-likelihood estimation, that is, we minimize the loss function
+</p>
+<div class="math">$$\begin{aligned}\mathcal{L}=&amp;-\frac{1}{N}\sum_{i=1}^N \ln p(y^i|\vec{x}_i)\\
+=&amp;\frac{1}{N}\sum_i \omega^i_jx^j+b^i+\ln Z(\vec{x}_i)\end{aligned}$$</div>
+<p>One of the main advantages of using the logistic function is that it makes the loss function convex, which allows us to apply more robust optimization algorithms like the Newton-Raphson method. To see this, lets for simplicity define <span class="math">\(\omega^k\equiv(\omega^k_i,b^k)\)</span> and <span class="math">\(x\equiv(x^i,1)\)</span>. Calculating the derivatives of the loss function
+</p>
+<div class="math">$$\frac{\partial \mathcal{L}}{\partial \omega^{\mu}_{\nu}}=\langle \delta^k_{\mu}x^{\nu}\rangle_{y^k,x}-\langle x^{\nu}p_{\mu}(x)\rangle_{x}$$</div>
+<p>
+where <span class="math">\(p_{\mu}(x)\)</span> is the probability, <span class="math">\(\delta\)</span> is the Kroenecker delta function; we are taking sample averages. And the second derivatives</p>
+<div class="math">$$\frac{\partial^2 \mathcal{L}}{\partial \omega^{\mu}_{\nu} \partial \omega^{\alpha}_{\beta}}=\langle x^{\nu}x^{\beta}\delta_{\mu\alpha}p_{\mu}(x) \rangle_x -\langle x^{\nu}x^{\beta}p_{\mu}(x)p_{\alpha}(x) \rangle_x$$</div>
+<p>
+To show this is a convex optimization problem, build the quadratic polynomial at a particular point <span class="math">\(x\)</span>,
+</p>
+<div class="math">$$\begin{aligned}&amp;\sum_{\mu,\nu,\alpha,\beta}x^{\nu}x^{\beta}\delta_{\mu\alpha}p_{\mu}(x)\omega^{\mu}_{\nu}\omega^{\alpha}_{\beta}-x^{\nu}x^{\beta}p_{\mu}(x)p_{\alpha}(x)\omega^{\mu}_{\nu}\omega^{\alpha}_{\beta}=\\
+ &amp;\sum_{\mu} p_{\mu}(x)(\omega^{\mu}_{\nu}x^{\nu})^2-\Big(\sum_{\mu}p_{\mu}(x)\omega^{\mu}_{\nu}x^{\nu}\Big)^2=\langle \omega^2\rangle-\langle \omega\rangle^2\geq 0\end{aligned}$$</div>
+<p>This result implies that
+ </p>
+<div class="math">$$\sum_{\mu,\nu,\alpha,\beta}\frac{\partial^2 \mathcal{L}}{\partial \omega^{\mu}_{\nu} \partial \omega^{\alpha}_{\beta}} \omega^{\mu}_{\nu}\omega^{\alpha}_{\beta}\geq 0$$</div>
 <script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
     var align = "center",
         indent = "0em",
@@ -96,104 +153,10 @@
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
 </script></div>
-	Cover:
-	<span>
-	    <img src="/images/hyperplanes.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
+	<hr>
+	<h2>Comments</h2>
 </div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/vc-dimension.html">
-		<h2 itemprop="name headline">"VC dimension"</h2>
-	</a>
-	<time datetime="2020-04-30T00:00:00+02:00" itemprop="datePublished">Thu 30 April 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.</p></div>
-	Cover:
-	<span>
-	    <img src="/images/hyperplane_dichotomies.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/bayes-optimal-classifier.html">
-		<h2 itemprop="name headline">"Bayes Optimal Classifier"</h2>
-	</a>
-	<time datetime="2020-04-26T00:00:00+02:00" itemprop="datePublished">Sun 26 April 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>I explain the Bayes optimal classifier and provide some numerical examples.</p></div>
-	Cover:
-	<span>
-	    <img src="images/optimal_bayes.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/probably-approximately-correct-pac.html">
-		<h2 itemprop="name headline">"Probably Approximately Correct (PAC)"</h2>
-	</a>
-	<time datetime="2020-04-14T00:00:00+02:00" itemprop="datePublished">Tue 14 April 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>In this post I explain some of the fundamentals of machine learning: PAC learnability, overfitting and generalisation bounds for classification problems. I show how these concepts work in detail for the problem of learning circumferences.</p></div>
-	Cover:
-	<span>
-	    <img src="images/circle_learning_epsilon.png" alt="" width="300" height="300" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
- <div class="pagination">
-<ul>
-    <li class="prev"><a href="/author/joao-gomes2.html">&larr; Previous</a></li>
-
-    <li class=""><a href="/author/joao-gomes.html">1</a></li>
-    <li class=""><a href="/author/joao-gomes2.html">2</a></li>
-    <li class="active"><a href="/author/joao-gomes3.html">3</a></li>
-
-    <li class="next disabled"><a href="#">&rarr; Next</a></li>
-
-</ul>
-</div> 		</div>
+		</div>
 	</div> 	<!-- <hr> -->
 </div> <!-- /container -->
 <footer class="aw-footer bg-danger">

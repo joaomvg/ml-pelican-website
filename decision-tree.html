@@ -45,7 +45,284 @@
 			<a href="/tag/data-science.html" rel="tag">data science</a>
 		</span>
 	</div>
-	<div itemprop="articleBody" class="article-body"></div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">The Algorithm</a></li>
+<li><a href="#decision">Decision Boundary</a></li>
+<li><a href="#python">Python implementation: Classification</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. The algorithm</strong></h3>
+<p>The decision tree algorithm consists in a sequence of splits, or decisions, which take the form of a tree. This tree organizes the data in a way that there is a gain of information at each node. </p>
+<p>A measure of information is the Shannon entropy, defined as 
+</p>
+<div class="math">$$S=-\sum_i p_i\ln(p_i)$$</div>
+<p>
+with <span class="math">\(p_i\)</span> the probability of the element <span class="math">\(i\)</span> in a set <span class="math">\(\Omega\)</span>. The Shannon entropy is always smaller than the most entropic configuration which happens for <span class="math">\(p_i=1/|\Omega|\)</span>, with <span class="math">\(|\Omega|\)</span> the number of elements in the set. To see this, write <span class="math">\(p_i=n_i/|\Omega|\)</span> where <span class="math">\(n_i\)</span> is the number of elements in class <span class="math">\(i\)</span>. Therefore
+</p>
+<div class="math">$$-\sum_ip_i\ln(p_i)=-\sum_ip_i\ln\Big(\frac{n_i}{|\Omega|}\Big)&lt;\ln|\Omega|$$</div>
+<p> 
+This means that more diverse the set is, larger the entropy. </p>
+<p>At each node in the decision tree, a feature <span class="math">\(f_i\)</span> and a threshold <span class="math">\(t_i\)</span> is chosen so that the entropy of the left split <span class="math">\(f_i&lt; t_i\)</span> plus the entropy of the right split <span class="math">\(f_i\geq t_i\)</span> is smaller than the entropy of the initial configuration <span class="math">\(A\)</span>. That is,
+</p>
+<div class="math">$$S(A)&gt; S(A_{f_i&lt; t_i})+S(A_{f_i\geq t_i})$$</div>
+<p>In the example below we have 7 balls: 3 of color red, 2 green, 1 pink and 1 blue. 
+<img alt="" height="250" src="/images/tree1.png" style="display: block; margin: 0 auto" width="250"> </p>
+<p>The balls are distributed along the <span class="math">\(x\)</span>-axis and we want to determine a rule that predicts the color of the ball. For that purpose we build a decision tree containing splits with thresholds as function of <span class="math">\(x\)</span>.</p>
+<p><img alt="" height="300" src="/images/tree2.png" style="display: block; margin: 0 auto" width="300"> 
+Following, we show that this particular tree provides information gains at each step of the splits. The entropy of the initial configuration is 
+</p>
+<div class="math">$$S=-\frac{3}{7}\ln\big(\frac{3}{7}\big)-\frac{2}{7}\ln\big(\frac{2}{7}\big)-\frac{2}{7}\ln\big(\frac{1}{7}\big)\simeq 1.277$$</div>
+<p>
+After the first split the entropy on the left and right sides of the node is reduced to <span class="math">\(0\)</span> and <span class="math">\(1.034\)</span> respectively. Their sum is smaller than the initial entropy <span class="math">\(1.277\)</span>. The next split at <span class="math">\(x=b\)</span> results in two configurations with entropies <span class="math">\(0\)</span> on the left and <span class="math">\(0.69\)</span> on the right side of the split. The last split classifies unequivocally the configuration resulting in splits with zero entropy.</p>
+<p>The decision tree algorithm consists of the following steps:
+</p>
+<div class="math">$$\begin{aligned}
+\text{for i}&amp;=1\ldots \text{Depth}:\\
+&amp; \text{for j}=1\ldots \text{Leaves}:\\
+&amp; \;\;\text{Choose feature and threshold }(f,t)=\text{argmin}_{f,t} S(A_{f&lt; t})+S(A_{f\geq t})
+\end{aligned}$$</div>
+<p>
+That is, at each depth level we loop through each of the leaves and split if there is gain in information. Then we continue one step further in depth. The predictor consists in attributing the majority class at each ending node.</p>
+<p>In the case of regression, each split consists in chosing a feature <span class="math">\(f\)</span> and threshold <span class="math">\(t\)</span> so that the sum of the mean squared errors of the left and right split configurations is minimized. That is,
+</p>
+<div class="math">$$\text{Split }(f,t)=\text{argmin}_{f,t} \sum_{i\in A_l}(y_i-\bar{y}_l)^2+\sum_{i\in A_r}(y_i-\bar{y}_r)^2$$</div>
+<p>
+where <span class="math">\(A_l,A_r\)</span> are the left and right split configurations, and <span class="math">\(\bar{y}_l,\bar{y}_r\)</span> are the average values in each of the configurations.</p>
+<p><strong>Other measures of information gain</strong></p>
+<p>The gini index, defined as 
+</p>
+<div class="math">$$G=1-\sum_ip_i^2$$</div>
+<p>
+provides another measure of information. The gini index is a bounded quantity that is <span class="math">\(0\leq G&lt;1\)</span>, unlike the Shannon entropy. Noting that <span class="math">\(\sum_i p_i=1\)</span> we can write <span class="math">\(G=\sum_i p_i(1-p_i)\)</span>. For <span class="math">\(p_i=1-\epsilon\)</span> with <span class="math">\(\epsilon\ll 1\)</span> we can approximate <span class="math">\(-p_i\ln p_i\simeq \epsilon(1-\epsilon)=p_i(1-p_i)\)</span>. Analogously for <span class="math">\(p_i\simeq \epsilon\)</span> we can approximate <span class="math">\(p_i(1-p_i)\simeq -(1-p_i)\ln(1-p_i)\)</span>. Therefore for distributions which are concentrated in a particular class the gini index is an approximation to the Shannon entropy. 
+One of the advantages of using the gini index is its simpler computational complexity due to its polynomial form as compared to the logarithm in the Shannon entropy.</p>
+<p><strong>Time complexity</strong></p>
+<p>Take a node as an example. An effective algorithm for the split consists, first in sorting the data for each of the features and then choose the threshold that produces higher gains in information. Calculating the frequencies for each threshold is of order <span class="math">\(\mathcal{O}(N)\)</span>, with <span class="math">\(N\)</span> the number of samples. Therefore, finding the right split is of order <span class="math">\(\mathcal{O}(dN\log N)\)</span>, with <span class="math">\(d\)</span> the number of features. The number of splits increases exponentially with the depth, but the number of samples per node decreases also exponientially which gives a net effect of <span class="math">\(\mathcal{O}(dN\log N)\)</span> at each depth. Since the maximum depth attainable is of order <span class="math">\(\log N\)</span>, the total time complexity of training a decision tree should be at most <span class="math">\(\mathcal{O}(dN\log^2 N)\)</span> </p>
+<p><strong>Sample complexity</strong></p>
+<p>Consider a binary classification problem where the feature space is of the form <span class="math">\(\chi=\{0,1\}^d\)</span>, with <span class="math">\(d\)</span> the dimension. It is easy to see that a tree with depth <span class="math">\(d\)</span> has <span class="math">\(2^d\)</span> leaves and can represent all datapoints in <span class="math">\(\chi\)</span>. The <span class="math">\(\text{VC}\)</span>-dimension is therefore <span class="math">\(\text{VC}_{dim}=2^d\)</span>.</p>
+<p><a name="decision"></a></p>
+<h3><strong>2. Decision Boundary</strong></h3>
+<p>Below we depict the sucession of splits for a 2-dimensional feature space. As we can see the tree divides the feature space into successive rectangles.</p>
+<p><img alt="" height="600" src="/images/tree_decision.png" style="display: block; margin: 0 auto" width="600"> </p>
+<p>For large depth the tree can lead to highly non-linear decision bondaries.</p>
+<p><a name="python"></a></p>
+<h3><strong>3. Python implementation</strong></h3>
+<p>First we create a Binary-Search-Tree data structure. This tree is composed of a main node, and pointers to a left and right nodes, which are generated during the split. The main node contains a subset of the data, the corresponding Shannon-entropy, the depth of the node, the selected feature and threshold, and the predicted class.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cl_dic</span><span class="p">,</span><span class="n">entropy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">feature</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="o">=</span><span class="n">feature</span> <span class="c1"># (feature_num, threshold)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idx_subset</span><span class="o">=</span><span class="n">idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="o">=</span><span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="o">=</span><span class="n">entropy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cl_dic</span><span class="o">=</span><span class="n">cl_dic</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="c1">#method cross_entropy determines the Shannon-entropy of the subset at the main node</span>
+    <span class="k">def</span> <span class="nf">cross_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">idx</span><span class="p">):</span>
+        <span class="n">subset</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">:</span>
+            <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+            <span class="n">z</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+
+        <span class="n">pred</span><span class="o">=</span><span class="n">z</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="o">/</span><span class="n">z</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">z</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">=-</span><span class="n">z</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">ent</span><span class="o">=</span><span class="n">ent</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">pred</span><span class="p">,</span><span class="n">ent</span>
+
+    <span class="c1">#the entropy_split method takes in an array of frequencies and returns the best split that leads to the highest gains in information</span>
+    <span class="k">def</span> <span class="nf">entropy_split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">freq</span><span class="p">):</span>
+
+        <span class="n">z</span><span class="o">=</span><span class="n">freq</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">w</span><span class="o">=</span><span class="n">freq</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">w</span><span class="o">=</span><span class="n">w</span><span class="o">/</span><span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">w</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">w</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">entropy1</span><span class="o">=-</span><span class="n">w</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+        <span class="n">entropy1</span><span class="o">=</span><span class="n">entropy1</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">z</span>
+        <span class="n">s</span><span class="o">=</span><span class="n">z</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="o">/</span><span class="n">s</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">z</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="n">entropy2</span><span class="o">=-</span><span class="n">z</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="n">entropy2</span><span class="o">=</span><span class="n">entropy2</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">total</span><span class="o">=</span><span class="n">entropy1</span><span class="o">+</span><span class="n">entropy2</span>
+        <span class="n">j</span><span class="o">=</span><span class="n">total</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">j</span><span class="p">,</span><span class="n">entropy1</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">entropy2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+    <span class="c1">#the method best_feature loops through all the features and chooses the best split</span>
+    <span class="k">def</span> <span class="nf">best_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">idx_subset</span><span class="p">):</span>
+
+        <span class="n">w</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">indices</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">pos</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="n">f</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">y_sort</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">)))</span>
+            <span class="n">cum</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y_sort</span><span class="p">):</span>
+                <span class="n">k</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                <span class="n">cum</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">cum</span><span class="p">[:]</span>
+            <span class="n">j</span><span class="p">,</span><span class="n">e1</span><span class="p">,</span><span class="n">e2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">entropy_split</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="n">pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">w</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">=</span><span class="n">e1</span><span class="o">+</span><span class="n">e2</span>
+
+
+        <span class="n">num</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="c1">#best feature index</span>
+        <span class="n">idx</span><span class="o">=</span><span class="n">indices</span><span class="p">[</span><span class="n">num</span><span class="p">]</span>
+        <span class="n">j</span><span class="o">=</span><span class="n">pos</span><span class="p">[</span><span class="n">num</span><span class="p">]</span>
+        <span class="n">value</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">j</span><span class="p">,</span><span class="n">num</span><span class="p">]</span>
+        <span class="c1">#multiple values for the same feature</span>
+        <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">while</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="n">i</span><span class="p">,</span><span class="n">num</span><span class="p">]</span><span class="o">==</span><span class="n">value</span><span class="p">:</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">value</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="n">j</span><span class="p">:</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="n">num</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">idx_left</span><span class="o">=</span><span class="n">idx_subset</span><span class="p">[</span><span class="n">idx</span><span class="p">[:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">idx_right</span><span class="o">=</span><span class="n">idx_subset</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:]]</span>
+
+        <span class="n">pred_l</span><span class="p">,</span><span class="n">entropy_left</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">idx</span><span class="p">[:</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">pred_r</span><span class="p">,</span><span class="n">entropy_right</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">idx</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">j</span><span class="o">=</span><span class="n">pos</span><span class="p">[</span><span class="n">num</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">num</span><span class="p">,</span><span class="n">value</span><span class="p">,</span><span class="n">pred_l</span><span class="p">,</span><span class="n">entropy_left</span><span class="p">,</span><span class="n">pred_r</span><span class="p">,</span><span class="n">entropy_right</span><span class="p">,</span><span class="n">idx_left</span><span class="p">,</span><span class="n">idx_right</span>
+
+    <span class="c1"># the split method runs through all the nodes in the tree and splits them</span>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">entropy</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">feature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#split</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">idx_subset</span>
+            <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">pl</span><span class="p">,</span><span class="n">el</span><span class="p">,</span><span class="n">pr</span><span class="p">,</span><span class="n">er</span><span class="p">,</span><span class="n">idl</span><span class="p">,</span><span class="n">idr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">best_feature</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span><span class="n">idx</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">feature</span><span class="o">=</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">=</span><span class="n">Node</span><span class="p">(</span><span class="n">entropy</span><span class="o">=</span><span class="n">er</span><span class="p">,</span><span class="n">idx</span><span class="o">=</span><span class="n">idr</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">cl_dic</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">prediction</span><span class="o">=</span><span class="n">pr</span> <span class="c1">#prediction</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">=</span><span class="n">Node</span><span class="p">(</span><span class="n">entropy</span><span class="o">=</span><span class="n">el</span><span class="p">,</span><span class="n">idx</span><span class="o">=</span><span class="n">idl</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">depth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">cl_dic</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">cl_dic</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">prediction</span><span class="o">=</span><span class="n">pl</span> <span class="c1">#prediction</span>
+        <span class="k">elif</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">feature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">#go down on tree</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The Decision Tree classifier is build upon the Node class with a fit and a predict methods.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DTreeClassifier</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;entropy&#39;</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;entropy&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using entropy criterion&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="o">=</span><span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cl_dic</span><span class="o">=</span><span class="p">{</span><span class="n">c</span><span class="p">:</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)}</span>
+        <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="n">Node</span><span class="p">(</span><span class="n">cl_dic</span><span class="o">=</span><span class="n">cl_dic</span><span class="p">,</span><span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span><span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">entropy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_depth</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1">#private method</span>
+    <span class="k">def</span> <span class="nf">__recurrence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">node</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">feature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">node</span><span class="o">.</span><span class="n">feature</span>
+            <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">&gt;</span><span class="n">threshold</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__recurrence</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__recurrence</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">feature</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">prediction</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">xi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__recurrence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">,</span><span class="n">xi</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
 	<hr>
 	<h2>Comments</h2>
 </div>
@@ -76,7 +353,7 @@
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
 							<li><a href="/category/data-science.html">Data Science (1)</a></li>
-							<li><a href="/category/machine-learning.html">Machine Learning (10)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (11)</a></li>
 							<li><a href="/category/statistics.html">Statistics (2)</a></li>
 						</ul>
 					</div>
