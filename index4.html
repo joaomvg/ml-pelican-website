@@ -25,18 +25,18 @@
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/gradient-boosting.html">
-		<h2 itemprop="name headline">"Gradient Boosting"</h2>
+	<a href="/vc-dimension.html">
+		<h2 itemprop="name headline">"VC dimension"</h2>
 	</a>
-	<time datetime="2020-10-13T00:00:00+02:00" itemprop="datePublished">Tue 13 October 2020</time>
+	<time datetime="2020-04-30T00:00:00+02:00" itemprop="datePublished">Thu 30 April 2020</time>
 	&nbsp;—&nbsp;
 	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
 		<span itemprop="name">Joao Gomes</span>
 	</span>
-	<div class="summary"><p>Gradient boosting is another type of boosting algorithm. It uses gradient descent to minimize the loss function and hence the name. However, unlike other algorithms, the learning rate is adjusted at every step, by solving a one-dimensional optmization problem.</p></div>
+	<div class="summary"><p>The VC dimension is a very important concept in machine learning theory. It gives a measure of complexity based on combinatorial aspects. This concept is used to show how certain infinite hypothesis classes are PAC-learnable. Some of the main concepts are explained: growth function and shattering. I give examples and show how the VC dimension is used to bound the generalisation error.</p></div>
 	Cover:
 	<span>
-	    <img src="/images/gradboost_30.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
+	    <img src="/images/hyperplane_dichotomies.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
 	</span>
 	Category:
 	<span itemprop="articleSection">
@@ -49,18 +49,18 @@
 </div>
 <hr>
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/adaboost.html">
-		<h2 itemprop="name headline">"AdaBoost"</h2>
+	<a href="/bayes-optimal-classifier.html">
+		<h2 itemprop="name headline">"Bayes Optimal Classifier"</h2>
 	</a>
-	<time datetime="2020-09-27T00:00:00+02:00" itemprop="datePublished">Sun 27 September 2020</time>
+	<time datetime="2020-04-26T00:00:00+02:00" itemprop="datePublished">Sun 26 April 2020</time>
 	&nbsp;—&nbsp;
 	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
 		<span itemprop="name">Joao Gomes</span>
 	</span>
-	<div class="summary"><p>Boosting is an algorithm whereby a set of weak learners is fit sequentially to the data. This allows that each step a new learner can focus on the wrongly classified datapoints. AdaBoost or adaptive boosting fits a low-complex classifier to the data in a sequential manner while using different sample weights.</p></div>
+	<div class="summary"><p>I explain the Bayes optimal classifier and provide some numerical examples.</p></div>
 	Cover:
 	<span>
-	    <img src="/images/adaboost_.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
+	    <img src="images/optimal_bayes.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
 	</span>
 	Category:
 	<span itemprop="articleSection">
@@ -73,66 +73,18 @@
 </div>
 <hr>
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/random-forest.html">
-		<h2 itemprop="name headline">"Random Forest"</h2>
+	<a href="/probably-approximately-correct-pac.html">
+		<h2 itemprop="name headline">"Probably Approximately Correct (PAC)"</h2>
 	</a>
-	<time datetime="2020-09-13T00:00:00+02:00" itemprop="datePublished">Sun 13 September 2020</time>
+	<time datetime="2020-04-14T00:00:00+02:00" itemprop="datePublished">Tue 14 April 2020</time>
 	&nbsp;—&nbsp;
 	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
 		<span itemprop="name">Joao Gomes</span>
 	</span>
-	<div class="summary"><p>A random forest is an ensemble of decision trees. The trees are fitted in random samples of the training set, helping preventing overfitting and reducing variance.</p></div>
+	<div class="summary"><p>In this post I explain some of the fundamentals of machine learning: PAC learnability, overfitting and generalisation bounds for classification problems. I show how these concepts work in detail for the problem of learning circumferences.</p></div>
 	Cover:
 	<span>
-	    <img src="/images/randomforest.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/decision-tree.html">
-		<h2 itemprop="name headline">"Decision Tree"</h2>
-	</a>
-	<time datetime="2020-09-01T00:00:00+02:00" itemprop="datePublished">Tue 01 September 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>The decision tree is one of the most robust algorithms in machine learning. We explain in detail how the algorithm works, the type of decision boundary and a Python implementation.</p></div>
-	Cover:
-	<span>
-	    <img src="/images/tree2.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/linear-discriminant-analysis.html">
-		<h2 itemprop="name headline">"Linear Discriminant Analysis"</h2>
-	</a>
-	<time datetime="2020-08-20T00:00:00+02:00" itemprop="datePublished">Thu 20 August 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>Linear discriminant analysis is an algorithm whereby one fits the data using a Gaussian classifier. LDA can also be used to perform dimensional reduction of the data. We explain theoretical analysis, dimensionality reduction as well as a Python implementation from scratch.</p></div>
-	Cover:
-	<span>
-	    <img src="/images/lda_projection.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
+	    <img src="images/circle_learning_epsilon.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
 	</span>
 	Category:
 	<span itemprop="articleSection">
@@ -146,14 +98,14 @@
 <hr>
  <div class="pagination">
 <ul>
-    <li class="prev disabled"><a href="#">&larr; Previous</a></li>
+    <li class="prev"><a href="/index3.html">&larr; Previous</a></li>
 
-    <li class="active"><a href="/index.html">1</a></li>
+    <li class=""><a href="/index.html">1</a></li>
     <li class=""><a href="/index2.html">2</a></li>
     <li class=""><a href="/index3.html">3</a></li>
-    <li class=""><a href="/index4.html">4</a></li>
+    <li class="active"><a href="/index4.html">4</a></li>
 
-    <li class="next"><a href="/index2.html">Next &rarr;</a></li>
+    <li class="next disabled"><a href="#">&rarr; Next</a></li>
 
 </ul>
 </div> 		</div>

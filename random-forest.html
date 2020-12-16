@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Random Forest" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Random Forest"; Date: 2020-09-13; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Random Forest"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-09-13T00:00:00+02:00" itemprop="datePublished">Sun 13 September 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Bagging and Decision Trees</a></li>
+<li><a href="#forest">Ensembles and Random forest</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Bagging and Decision Trees</strong></h3>
+<p>Bagging, short for bootstrap aggregating, is the process by which we train an ensemble of machine learning models using datasets sampled from the empirical distribution. This process helps reduce variance and overfitting. Given a dataset <span class="math">\(S\)</span>, we generate <span class="math">\(m\)</span> samples <span class="math">\(S'\)</span> of size <span class="math">\(n\)</span>, by drawing datapoints from <span class="math">\(S\)</span> uniformly and with replacement. We can then create an ensemble by fitting <span class="math">\(m\)</span> models on each sample and averaging (regression) or voting (classification) the result of each of the models. If each of these models is a decision tree then this ensemble is a random forest.</p>
+<p>To take advantage of the bootstrapping mechanism, it is necessary that each of the models in the ensemble is independent from each other. This is not always the case because usually there are features the model learns more strongly than others, effectively making the different models depend on each other. To remediate this, we do not allow the decision tree to learn on all the features. Instead each of the models learns on different subsets of features.  After fitting the models, the predicted class is given by majority vote. In the case of regression we average each of the predictions. </p>
+<p><a name="forest"></a></p>
+<h3><strong>2. Ensembles and Random forest</strong></h3>
+<p>We analyze the effect of bootstrapping decision trees on the generalization error and bias/variance tradeoff. </p>
+<p>Suppose we have <span class="math">\(m\)</span> models <span class="math">\(V^{a}\)</span>, with <span class="math">\(a=1\ldots m\)</span>. In the case of regression, consider the model average 
+</p>
+<div class="math">$$\bar{V}(x)=\sum_a \omega_a V^a(x)$$</div>
+<p>
+where <span class="math">\(\omega_a\)</span> are some weights. The ambiguity <span class="math">\(A(x)^a\)</span> for the model <span class="math">\(a\)</span> is defined as 
+</p>
+<div class="math">$$A^a(x)=(V^a(x)-\bar{V}(x))^2$$</div>
+<p>
+and the ensemble ambiguity <span class="math">\(A(x)\)</span> is obtained by taking the ensemble average
+</p>
+<div class="math">$$A(x)=\sum_a \omega_aA^a(x)=\sum_a \omega_a(V^a(x)-\bar{V}(x))^2$$</div>
+<p>
+The error of a model and the ensemble, respectively <span class="math">\(\epsilon^a\)</span> and <span class="math">\(\epsilon\)</span>, are
+</p>
+<div class="math">$$\begin{aligned}&amp;\epsilon^a(x)=(y(x)-V^a(x))^2 \\
+&amp;\epsilon= (y(x)-\bar{V}(x))^2
+\end{aligned}$$</div>
+<p>
+One can easily show that
+</p>
+<div class="math">$$A(x)=\sum_a \omega_a\epsilon^a(x)-\epsilon(x)=\bar{\epsilon}(x)-\epsilon(x)$$</div>
+<p>
+where we defined the ensemble average <span class="math">\(\bar{\epsilon}=\sum_a \omega_a\epsilon^a\)</span>. Averaging this quantities over the distribution of <span class="math">\(x\)</span>, <span class="math">\(D(x)\)</span>, we obtain an equation involving the generalization error of the ensemble and of the individual components, that is
+</p>
+<div class="math">$$E=\bar{E}-A$$</div>
+<p>
+where <span class="math">\(E=\int dx \epsilon(x) D(x)\)</span> is the generalization error and <span class="math">\(A=\int dx A(x) D(x)\)</span> is the total ambiguity.</p>
+<p>Note that the ambiguity <span class="math">\(A\)</span> only depends on the models <span class="math">\(V^a\)</span> and not on labeled data. It measures how the different models correlate with the average. Since <span class="math">\(A\)</span> is always positive we can already conclude that the generalization error is always smaller than the average error. </p>
+<p>If the models are highly biased then one expects similar predictions across the ensemble thus making <span class="math">\(A\)</span> small. In this case the generalization error will be essentially the same as the average of the generalization errors. However, if the predictions vary a lot from one model to the other, the ambiguity will be higher, therefore making the generalization smaller than the average. So we want the models to disagree! In the case of random forests, this can be achieved by letting each decision tree learn on a different subset of features at every split. This results in a set of trees with different split structure: </p>
+<p><img alt="" height="400" src="/images/randomforest.png" style="display: block; margin: 0 auto" width="400"> </p>
+<p>Another important aspect of ensemble methods is that they do not increase the bias of the model. For instance 
+</p>
+<div class="math">$$\begin{aligned}\text{Bias}=f(x)-\mathbb{E}\bar{V}(x)=\sum_a \omega_a (f(x)-\mathbb{E}V^a(x))=\sum_a \omega_a \text{Bias}^a=\text{bias}
+\end{aligned}$$</div>
+<p>
+where <span class="math">\(\text{bias}\)</span> is the bias of an individual model, assuming that each model has similar bias. On the other hand, the variance 
+</p>
+<div class="math">$$\mathbb{E}(\bar{V}(x)-\mathbb{E}\bar{V}(x))^2=\sum_a \omega_a^2(V^a-\mathbb{E}V^a)^2+\sum_{a\neq b}\omega_a\omega_b(V^a-\mathbb{E}V^a)(V^b-\mathbb{E}V^b)$$</div>
+<p>
+We do not expect the quantities <span class="math">\((V^a-\mathbb{E}V^a)^2\)</span> and <span class="math">\((V^a-\mathbb{E}V^a)(V^b-\mathbb{E}V^b)\)</span> to differ significantly across the models, and so defining
+</p>
+<div class="math">$$\text{Var}\equiv (V^a-\mathbb{E}V^a)^2,\; \rho(x)\equiv\frac{(V^a-\mathbb{E}V^a)(V^b-\mathbb{E}V^b)}{\text{Var}(x)}$$</div>
+<p>
+we obtain
+</p>
+<div class="math">$$\mathbb{E}(\bar{V}(x)-\mathbb{E}\bar{V}(x))^2=\text{Var}(x)\sum_a \omega_a^2 + \rho(x)\text{Var}(x) \sum_{a\neq b}\omega_a\omega_b=\text{Var}(x)(1-\rho(x))\sum_a\omega_a^2+\rho(x)\text{Var}(x)&lt;\text{Var}(x)$$</div>
+<p>
+This quantity has a lower bound at <span class="math">\(\omega_a=1/m\)</span>, the uniform distribution. This means that
+</p>
+<div class="math">$$\text{Var}(x)\frac{(1-\rho(x))}{m}+\rho(x)\text{Var}(x)\leq \mathbb{E}(\bar{V}(x)-\mathbb{E}\bar{V}(x))^2\leq \text{Var}(x)$$</div>
+<p>
+In particular, if the models are averaged uniformly then <span class="math">\(\sum_a \omega_a^2\)</span> tends to zero as <span class="math">\(m\rightarrow \infty\)</span>, and the variance is given by the product of the correlation <span class="math">\(\rho(x)\)</span> and the individual model variance.</p>
+<p><a name="python"></a></p>
+<h3><strong>3. Python Implementation</strong></h3>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RandomForest</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n_estimators</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="o">=</span><span class="n">n_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">=</span><span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">n_instances</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_estimators</span><span class="p">):</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_instances</span><span class="p">)</span>
+            <span class="n">idx_sample</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">n_instances</span><span class="p">,</span><span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">xsample</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">idx_sample</span><span class="p">]</span>
+            <span class="n">ysample</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">idx_sample</span><span class="p">]</span>
+            <span class="n">tree</span><span class="o">=</span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span><span class="n">max_features</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">xsample</span><span class="p">,</span><span class="n">ysample</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">classes_</span>
+        <span class="n">dic</span><span class="o">=</span><span class="p">{</span><span class="n">i</span><span class="p">:</span><span class="n">cl</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">cl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes</span><span class="p">)}</span>
+        <span class="n">ypred</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">ypred</span><span class="o">+=</span><span class="n">tree</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">ypred</span><span class="o">=</span><span class="n">ypred</span>
+        <span class="n">ypred</span><span class="o">=</span><span class="n">ypred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ypred</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">dic</span><span class="o">.</span><span class="n">get</span><span class="p">)(</span><span class="n">ypred</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ypred</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (15)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

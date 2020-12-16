@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Gradient Boosting" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Gradient Boosting"; Date: 2020-10-13; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Gradient Boosting"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-10-13T00:00:00+02:00" itemprop="datePublished">Tue 13 October 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Gradient boosting</a></li>
+<li><a href="#decision">Decision boundary</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Gradient boosting</strong></h3>
+<p>In gradient boosting, much like in adaboost, we fit a sequence of weak learners in an iterative manner. In this way, the predictor at the mth-step is given as a sum of the predictors from previoues iterations, that is,
+</p>
+<div class="math">$$F_m(x)=\gamma_0+\gamma_1 w_1(x)+\ldots+\gamma_m w_m(x)$$</div>
+<p>
+where <span class="math">\(w_i(x)\)</span> is the weak-learner predictor and <span class="math">\(\gamma_0\)</span> is a constant.</p>
+<p>To motivate the gradient we consider the Taylor approximation of the loss function around <span class="math">\(F_{m-1}\)</span>, that is,
+</p>
+<div class="math">$$L(F_m)=L(F_{m-1})+\frac{\partial L}{\partial F}\Bigr|_{F_{m-1}}(F_m-F_{m-1})+\ldots$$</div>
+<p>
+In the gradient descent algorithm we take a step of magnitude proportional to  <span class="math">\(F_m-F_{m-1}\propto-\frac{\partial L}{\partial F_{m-1}}\)</span>. The constant of proportionality is the learning rate. Since <span class="math">\(F_m-F_{m-1}\propto w(x)\)</span>, the best we can do is to fit <span class="math">\(w(x)\)</span> to the gradient descent direction, that is,
+</p>
+<div class="math">$$w(x)\sim -\frac{\partial L}{\partial F_{m-1}}$$</div>
+<p>
+where <span class="math">\(\sim\)</span> means that we fit the learner. In order to fix <span class="math">\(\gamma_m\)</span>, effectively the learning rate, we solve the one-dimensional optimization problem
+</p>
+<div class="math">$$\gamma_m=\text{argmin}_{\gamma_m} L(y,F_{m-1}+\gamma_m w(x))$$</div>
+<p>
+where <span class="math">\(y\)</span> is the target array. We repeat this process until the solution is sufficiently accurate.</p>
+<p>To exemplify how this works in practice, consider a binary classification problem. In this case, the want to determine the logit function using the boosting algorithm. In other words, we assume that the likelihood <span class="math">\(p(y=0|x)\)</span> has the form
+</p>
+<div class="math">$$p(y=0|x)=\frac{1}{1+e^{-F_m(x)}}$$</div>
+<p>
+with <span class="math">\(F_m(x)\)</span> given as above. The loss <span class="math">\(L\)</span> is the the log-loss function. The gradient descent direction is given by the variational derivative, that is,
+</p>
+<div class="math">$$r^i\equiv-\frac{\partial L}{\partial F_{m-1}}\Bigr|_{x^i}=\frac{e^{-F_{m-1}(x^i)}}{1+e^{-F_{m-1}(x^i)}}-y^i$$</div>
+<p>
+and we fit <span class="math">\(w_m(x)\)</span> to <span class="math">\(r^i\)</span>. Then we are left with the minimization problem
+</p>
+<div class="math">$$\text{argmin}_{\gamma_m} \sum_{y^i=0}\ln\Big( 1+e^{-F_{m-1}(x^i)-\gamma_m w_m(x^i)}\Big) -\sum_{y^i=1}\ln \Big(\frac{e^{-F_{m-1}(x^i)-\gamma_m w(x^i)}}{1+e^{-F_{m-1}(x^i)-\gamma_m w(x^i)}}\Big)$$</div>
+<p>
+which determines the learning rate, that is, <span class="math">\(\gamma_m\)</span>. This is a convex optimization problem and can be solved using the Newton-Raphson method.</p>
+<p><a name="decision"></a></p>
+<h3><strong>2. Decision Boundary</strong></h3>
+<p>We fit an GradBoost classifier to a dataset consisting of two sets of points, red and blue, which are normally distributed. Below is the Gradient boosting prediction after six steps.
+<img alt="" height="400" src="/images/gradboost_6.png" style="display: block; margin: 0 auto" width="400"> </p>
+<p>And below we present the prediction at each step of training, from left to right
+<img alt="" height="800" src="/images/gradboost_seq.png" style="display: block; margin: 0 auto" width="800"> </p>
+<p>One can see that the algorithm is trying to overfit the data by drawing a more complex decision boundary at each step. If we let the algorithm run with 30 estimators the decision boundary becomes very complex</p>
+<p><img alt="" height="400" src="/images/gradboost_30.png" style="display: block; margin: 0 auto" width="400"></p>
+<p><a name="python"></a></p>
+<h3><strong>3. Python implementation</strong></h3>
+<p>The class node encapsulates the data structure that we will use to store fitted models.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">node</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">gamma</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">=</span><span class="n">tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tree</span><span class="p">,</span><span class="n">gamma</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="o">=</span><span class="n">node</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The GradBoostClassifier class implements the boosting algorithm. We use the Newton-Raphson method to determine <span class="math">\(\gamma\)</span> at each step in the iteration.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GradBoostClassifier</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">n_iter</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">prob</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">prob</span>
+
+    <span class="k">def</span> <span class="nf">__minima</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">F</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">g</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="n">g_prev</span><span class="o">=</span><span class="mf">0.1</span>
+        <span class="n">cl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">not_converged</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">while</span> <span class="n">not_converged</span><span class="p">:</span>
+            <span class="n">prob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigmoid</span><span class="p">(</span><span class="n">F</span><span class="o">+</span><span class="n">g</span><span class="o">*</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">grad_dd</span><span class="o">=</span><span class="n">h</span><span class="o">*</span><span class="n">h</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">grad_dd</span><span class="o">=</span><span class="n">grad_dd</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">grad_d</span><span class="o">=</span><span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="n">p</span><span class="o">-</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">grad_d</span><span class="o">=</span><span class="n">grad_d</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+            <span class="n">delta</span><span class="o">=-</span><span class="n">grad_d</span><span class="o">/</span><span class="n">grad_dd</span>
+            <span class="n">g</span><span class="o">+=</span><span class="n">delta</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">g_prev</span><span class="o">-</span><span class="n">g</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">0.01</span><span class="p">:</span>
+                <span class="n">not_converged</span><span class="o">=</span><span class="kc">False</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">10000</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">g_prev</span><span class="o">=</span><span class="n">g</span>
+
+        <span class="k">return</span> <span class="n">g</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">=</span><span class="n">node</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_dic</span><span class="o">=</span><span class="p">{</span><span class="n">c</span><span class="p">:</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">)}</span>
+        <span class="n">cl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">yc</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">yc</span><span class="p">[</span><span class="n">y</span><span class="o">==</span><span class="n">cl</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">yc</span><span class="p">[</span><span class="n">y</span><span class="o">!=</span><span class="n">cl</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+        <span class="n">n1</span><span class="o">=</span><span class="p">(</span><span class="n">yc</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">n0</span><span class="o">=</span><span class="p">(</span><span class="n">yc</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n1</span><span class="o">/</span><span class="n">n0</span><span class="p">)</span>
+
+        <span class="c1">#1st STEP</span>
+        <span class="n">F</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">n1</span><span class="o">/</span><span class="p">(</span><span class="n">n1</span><span class="o">+</span><span class="n">n0</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">res</span><span class="o">=-</span><span class="n">p</span><span class="o">+</span><span class="n">yc</span>
+        <span class="n">tree</span><span class="o">=</span><span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">res</span><span class="p">)</span>
+        <span class="n">h</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__minima</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">F</span><span class="p">,</span><span class="n">yc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">tree</span><span class="o">=</span><span class="n">tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">):</span>
+            <span class="n">F</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigmoid</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">=-</span><span class="n">p</span><span class="o">+</span><span class="n">yc</span>
+            <span class="n">tree</span><span class="o">=</span><span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">res</span><span class="p">)</span>
+            <span class="n">h</span><span class="o">=</span><span class="n">tree</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__minima</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="n">F</span><span class="p">,</span><span class="n">yc</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigmoid</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">ycl</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">ypred</span><span class="o">=</span><span class="n">ycl</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">ypred</span><span class="p">[</span><span class="n">ycl</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ypred</span><span class="p">[</span><span class="n">ycl</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">ypred</span> 
+
+    <span class="k">def</span> <span class="nf">predict_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma0</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">output</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigmoid</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (15)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
