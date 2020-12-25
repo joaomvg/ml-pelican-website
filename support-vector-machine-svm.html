@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Support Vector Machine (SVM)" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Support Vector Machine (SVM)"; Date: 2020-10-31; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Support Vector Machine (SVM)"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-10-31T00:00:00+01:00" itemprop="datePublished">Sat 31 October 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Linear SVM</a></li>
+<li><a href="#gen">Generalization properties</a></li>
+<li><a href="#non-linear">Non-linear decision boundary</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Linear SVM</strong></h3>
+<p>The Support Vector Machine is a learning algorithm that whose primary goal is to find the optimal decision boundary. In the separable case, when the decision boundary is a hyperplane, it can be shown that the solution only depends on a few datapoints, which are known as support vectors, and hence the name.</p>
+<ul>
+<li><strong>Linearly separable case:</strong></li>
+</ul>
+<p>Lets say we are in two dimensions and we have a dataset with two labels. We want to find the line that achieves maximal separation between the two classes. That is, of all the separating lines, we want to find the one that maximizes the margin <span class="math">\(\rho\)</span>, as depicted below.</p>
+<p><img alt="" height="250" src="/images/svm.png" style="display: block; margin: 0 auto" width="250"> </p>
+<p>A line has equation
+</p>
+<div class="math">$$\omega^T\cdot x+b=0$$</div>
+<p>
+where <span class="math">\(x=(x_1,x_2)\)</span> are the 2d coordinates and <span class="math">\(\omega\)</span> is the normal vector.
+The distance between a point with coordinates <span class="math">\(x\)</span> and the line is given by <span class="math">\(\omega^T(x-x_0)/{\lVert\omega\rVert}\)</span>, where <span class="math">\(x_0\)</span> is a point on the plane. Since <span class="math">\(\omega^T\cdot x_0=-b\)</span>, the signed distance is
+</p>
+<div class="math">$$d=\frac{\omega^T\cdot x+b}{\lVert\omega\rVert}$$</div>
+<p>The margin is defined as a the minimum distance <span class="math">\(C\)</span> from the separating line, that is, <span class="math">\(C=\text{Min }\{y_i d_i\}\)</span>. The optimal separating line maximizes this margin, that is,
+</p>
+<div class="math">$$y_i\frac{\omega^T\cdot x_i+b}{\lVert\omega\rVert}\geq \text{Max }C=\rho,\;\forall (x_i,y_i)$$</div>
+<p>
+We have multiplied by the target <span class="math">\(y_i\in\{-1,1\}\)</span> to guarantee that each term is always positive on both sides of the separating line. Since the line equation is invariant under rescaling <span class="math">\((\omega,b)\rightarrow (\lambda \omega,\lambda b)\)</span> we can choose <span class="math">\(\lVert\omega\rVert=1/\rho\)</span>. This means that maximizing <span class="math">\(\rho\)</span> as above is equivalent to
+</p>
+<div class="math">$$\text{Min }\lVert\omega\rVert,\;\;y_i(\omega^T\cdot x_i+b)\geq 1,\;\forall (x_i,y_i)$$</div>
+<p>We can translate this minization problem to finding the minima of the loss function
+</p>
+<div class="math">$$L=\frac{1}{2}\sum_{k=1}^d \omega_k^2 -\sum_{i=1}^N\alpha_i[ y_i(\omega^T\cdot x_i+b)-1],\;\alpha_i\geq 0$$</div>
+<p>
+where <span class="math">\(\alpha_i\)</span> are Lagrange multipliers, <span class="math">\(d\)</span> is the number of dimensions and <span class="math">\(N\)</span> is the number of datapoints. The local minima solves the equations
+</p>
+<div class="math">$$\begin{aligned}&amp;\frac{\partial L}{\partial \omega_k}=\omega_k -\sum_{i=1}^N\alpha_i y_ix^k_i=0\\
+&amp;\frac{\partial L}{\partial b}=\sum_i\alpha_iy_i=0\\
+&amp;\frac{\partial L}{\partial \alpha_i}= y_i(\omega^T\cdot x_i+b)-1=0
+\end{aligned}$$</div>
+<p>
+Provided <span class="math">\(\alpha_i&gt;0\)</span> for which the loss function is differentiable in <span class="math">\(\alpha\)</span>. If <span class="math">\(\alpha_i=0\)</span> then the we only have the first two equations. This means that <span class="math">\(\alpha_i&gt;0\)</span> corresponds to points that sit exactly on the margin, and the remaining equations depend only on these points. These are known as support vectors.</p>
+<p>If we replace <span class="math">\(\omega\)</span> by its equation in the loss function <span class="math">\(L\)</span> we obtain the dual problem</p>
+<div class="math">$$\hat{L}=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j x_i^T\cdot x_j,\;\alpha_i\geq 0 $$</div>
+<p>where we have used that <span class="math">\(\sum_i\alpha_iy_i=0\)</span>. The problem with <span class="math">\(-\hat{L}\)</span> is actually a convex minimization problem and can be solved using traditional methods. The solution of the dual problem must suplemented with the additional conditions:
+</p>
+<div class="math">$$\begin{aligned}&amp;y_i(\omega^T\cdot x_i+b)=1,\;\alpha_i&gt;0\\
+&amp;y_i(\omega^T\cdot x_i+b)&gt;1,\;\alpha_i=0\\
+&amp;\sum_i\alpha_i y_i=0\end{aligned}$$</div>
+<p>Support vectors live on the margin and thus <span class="math">\(y_i(\omega^T\cdot x_i+b)=1\)</span>. Given a support vector <span class="math">\(x_s,y_s\)</span>, we can use this equation to determine <span class="math">\(b\)</span>
+</p>
+<div class="math">$$b=y_s-\sum_{i=1}^m\alpha_p y_px_p^T\cdot x_s$$</div>
+<p>
+where <span class="math">\(p=1\ldots m\)</span> runs over the support vectors. <span class="math">\(\hat{L}\)</span> is maximized by the solution and as such
+</p>
+<div class="math">$$\frac{\partial\hat{L}}{\partial \alpha_s}=1-y_s\sum_{p=1}^m\alpha_py_px_p^T\cdot x_s=0$$</div>
+<p> 
+Multiplying this equation by <span class="math">\(\alpha_s\)</span> and summing over <span class="math">\(s\)</span> we obtain
+</p>
+<div class="math">$$\sum_{s=1}^m\alpha_s-\sum_{s=1}^m\sum_{p=1}^m\alpha_s\alpha_py_sy_px_p^T\cdot x_s=0\iff \lVert\omega\rVert^2=\sum_{s=1}^m\alpha_s=\lVert\alpha\rVert_1$$</div>
+<p>
+So the margin is inversely proportional to the linear norm of <span class="math">\(\alpha\)</span>.</p>
+<ul>
+<li><strong>Non-linearly separable case:</strong></li>
+</ul>
+<p><img alt="" height="250" src="/images/svm3.png" style="display: block; margin: 0 auto" width="250"> </p>
+<p>In the non-linearly separable case one cannot find a hyperplane that separates the classes. That is, for any hyperplane there exists <span class="math">\(x_i,y_i\)</span> such that</p>
+<div class="math">$$y_i(\omega^T\cdot x_i +b)\ngtr 1$$</div>
+<p>
+See picture above.</p>
+<p>However, one can formulate a relaxed version of the constraints using <em>slack variables</em> <span class="math">\(\xi_i\geq 0\)</span>
+</p>
+<div class="math">$$y_i(\omega^T\cdot x_i +b)\geq 1-\xi_i$$</div>
+<p>
+If we remove the points for which <span class="math">\(0 &lt; y_i(\omega^T\cdot x_i +b)&lt;1\)</span> then the data is linearly separable. With the remaining data we can define a margin, which is called a soft-margin instead of a hard-margin as in the separable case. The points for which <span class="math">\(\xi_i\)</span> is non-zero can be considered as outliers. </p>
+<p>As before, we want to minimize <span class="math">\(\lVert\omega\rVert\)</span>, but at the same time we want to use the smallest possible number of <span class="math">\(\xi\)</span> with the smallest values possible. This can be written as
+ </p>
+<div class="math">$$\frac{1}{2}\lVert\omega\rVert^2+\lambda \sum_i \xi_i^p-\sum_i\alpha_i[y_i(\omega^T\cdot x_i +b)- 1+\xi_i],\;\alpha_i\geq 0,\xi_i\geq 0$$</div>
+<p>
+The term <span class="math">\(\lambda \sum_i \xi_i^p\)</span> with <span class="math">\(\lambda&gt;0\)</span> works as a regulator, which prevents <span class="math">\(\xi_i\)</span> from taking large values as well as having a large number of non-zero <span class="math">\(\xi_i\)</span>. The exponent <span class="math">\(p\)</span> defines different types of regularization. For <span class="math">\(p=1\)</span> the loss function becomes the <em>Hinge loss function</em></p>
+<div class="math">$$\frac{1}{2}\lVert\omega\rVert^2+\lambda\sum_i \text{max}(0,1-y_i(\omega^T\cdot x_i +b))$$</div>
+<p>The next steps are very similar to the separable case. One can build a dual problem and determine the support vectors and outliers.</p>
+<p><a name="gen"></a></p>
+<h3><strong>2. Generalization properties</strong></h3>
+<p>Given the separating hyperplane we can build the predictor
+</p>
+<div class="math">$$h(x)=\text{sign}(\omega\cdot x+b)$$</div>
+<p>
+We want to bound the generalization error <span class="math">\(R(h_S)=\sum_{x,y} 1_{h(x)\neq y}D(x)\)</span>. To do this we can explore the leave-one-out error <span class="math">\(R_{LOO}\)</span>. The <span class="math">\(R_{LOO}(x)\)</span> is the error on a point <span class="math">\(x\)</span> provided we train the algorithm on the remaining <span class="math">\(S\setminus{x}\)</span> dataset, that is, with the point <span class="math">\(x\)</span> excluded. The empirical <span class="math">\(\hat{R}_{LLO}\)</span> is obtained by averaging over all points of the dataset <span class="math">\(S\)</span>, that is,
+</p>
+<div class="math">$$\hat{R}_{LLO}=\frac{1}{m}\sum_{x} R_{LLO}(x)$$</div>
+<p>
+One can show that the average of <span class="math">\(\hat{R}_{LLO}\)</span> is an unbiased estimate of the generalization error. That is,
+</p>
+<div class="math">$$\mathbb{E}_{S\sim D^m} \hat{R}_{LLO}=\mathbb{E}_{S'\sim D^{m-1}}(R(h_{S'}))$$</div>
+<p>
+In more detail,
+</p>
+<div class="math">$$\begin{aligned}\mathbb{E}_{S\sim D^m} \hat{R}_{LLO}&amp;=\mathbb{E}_{S\sim D^m}\frac{1}{m}\sum_{x} R_{LLO}(x)\\
+&amp;=\mathbb{E}_{S\sim D^m}1_{h_{S'}(x)\neq y}\\
+&amp;=\mathbb{E}_{S'\sim D^{m-1},x\sim D}1_{h_{S'}(x)\neq y}\\
+&amp;=\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})
+\end{aligned}$$</div>
+<p>Lets estimate <span class="math">\(R_{LLO}(x)\)</span> for the SVM in the separable case. If <span class="math">\(x\)</span> is above the margin then the error is zero, because if we remove this point the predictor will not change as it depends only on the support vectors. However if <span class="math">\(x\)</span> is exactly on the margin, then the support vectors of the new predictor will change. This point <span class="math">\(x\)</span> may or may not be correctly classified, and so the maximum number of points that can be misclassified by this procedure is the same as the number of support vectors. This means that,
+</p>
+<div class="math">$$\hat{R}_{LLO}\leq \frac{NV(S)}{m}$$</div>
+<p>
+where <span class="math">\(NV\)</span> is the number of support vectors for the dataset <span class="math">\(S\)</span>. We may therefore conclude that the average generalization error is bounded by the average number of support vectors, that is,
+</p>
+<div class="math">$$\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})\leq \frac{\mathbb{E}_{S\sim D^m}NV(S)}{m}$$</div>
+<p>Assuming that <span class="math">\(NV\)</span> remains small for different datasets, the above result implies that the average error also remains small.</p>
+<p><a name="non-linear"></a></p>
+<h3><strong>3. Non-linear decision boundary</strong></h3>
+<p>It is possible that the dataset is separable but the decision boundary is not a hyperplane.
+In this case, there should exist a map <span class="math">\(\phi: x\rightarrow x'\)</span> that makes the problem linearly separable.
+All the previous steps follow except that we use <span class="math">\(x'\)</span> instead of <span class="math">\(x\)</span>. The problem is in determining the map <span class="math">\(\phi\)</span>, which is usual a difficult problem. </p>
+<p><img alt="" height="300" src="/images/svm2.png" style="display: block; margin: 0 auto" width="300"> </p>
+<p>Kernel methods are used to address solutions of this type. Suppose we find such a map. Then we have a new set of features <span class="math">\(\phi(x_1),\phi(x_2),\ldots \phi(x_n)\)</span>. The dual problem becomes</p>
+<div class="math">$$L_D=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j \phi(x_i)^T\cdot \phi(x_j),\;\alpha_i\geq 0 $$</div>
+<p>and the predictor</p>
+<div class="math">$$\begin{aligned}G(x)&amp;=\text{sign} \big(\omega^T\phi(x)+b\big)\\
+&amp;=\text{sign} \big(\sum_{i=1}^N\alpha_i y_i\phi(x)^T\cdot\phi(x_i)+b\big)
+\end{aligned}$$</div>
+<p>
+The constant <span class="math">\(b\)</span> can be determined from the location of a support vector. So we see that the solution only depends on the scalar <span class="math">\(K(x,x')=\phi(x)^T\cdot \phi(x')\)</span>. The function <span class="math">\(K(x,x')\)</span> is a Kernel function and obeys the following conditions</p>
+<ul>
+<li>It is symmetric: <span class="math">\(K(x,x')=K(x',x)\)</span></li>
+<li>It is positive semi-definite: <span class="math">\(\sum_{i,j}K(x_i,x_j)\lambda_i\lambda_j\geq 0,\; \forall \lambda_i\)</span></li>
+</ul>
+<p>Instead of looking for the map <span class="math">\(\phi\)</span> we can search for the Kernel which is a scalar function. 
+For example, lets consider the gaussian Kernel
+</p>
+<div class="math">$$K(x,y)=e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}$$</div>
+<p>
+Since this is a positive and symmetric function, it is easy to see that above conditions are satisfied. But can we find the map <span class="math">\(\phi\)</span> such that <span class="math">\(K(x,x')=\phi(x)^T\phi(x')\)</span>? Note that</p>
+<div class="math">$$e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}=e^{-\frac{x^2+y^2}{2\sigma^2}}\sum_{n=1}^{\infty}\frac{(xy)^n}{(2\sigma^2)^n n!}$$</div>
+<p>For each polynomial term in the expansion</p>
+<div class="math">$$\begin{aligned}(x y)^n=(\sum_{i=1}^d x_iy_i)^n&amp;=\sum_{\sum_i k_i=n}\frac{n!}{k_1!k_2!\ldots k_d!}(x_1y_1)^{k_1}(x_2y_2)^{k_2}\ldots (x_dy_d)^{k_d}\\
+&amp;=\sum_{\sum_i k_i=n}\frac{n!}{k_1!k_2!\ldots k_d!} x_1^{k_1}x_2^{k_2}\ldots x_d^{k_d} y_1^{k_1}y_2^{k_2}\ldots y_d^{k_d}\\
+&amp;=h_n(x)^T\cdot h_n(y)
+\end{aligned}$$</div>
+<p>
+where 
+</p>
+<div class="math">$$h_n(x)=(x_1^n,\sqrt{n} x_1^{n-1}x_2,\sqrt{n} x_1^{n-1}x_3,\ldots,\sqrt{\frac{n!}{k_1!k_2!\ldots k_d!}} x_1^{k_1}x_2^{k_2}\ldots x_d^{k_d},\ldots x_d^n)$$</div>
+<p>This means that for the gaussian Kernel the map <span class="math">\(\phi\)</span> is infinite dimensional. This shows how powerful Kernel methods can be.</p>
+<p><a name="python"></a></p>
+<h3><strong>4. Python implementation</strong></h3>
+<ul>
+<li>The CVXOPT library can be used to solve quadratic optimization problems with constraints.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cvxopt</span>
+
+<span class="k">class</span> <span class="nc">LinearSVM</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">num_iter</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coef_</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intercept_</span><span class="o">=</span><span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight_</span><span class="o">=</span><span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">support_vectors_</span><span class="o">=</span><span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_iter</span><span class="o">=</span><span class="n">num_iter</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">y_aux</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_aux</span><span class="o">=</span><span class="n">y_aux</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">cvxopt</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;show_progress&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">pairs</span><span class="o">=</span><span class="p">[[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="k">if</span> <span class="n">j</span><span class="o">&gt;</span><span class="n">i</span><span class="p">]]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
+            <span class="n">idx</span><span class="o">=</span><span class="p">(</span><span class="n">y_aux</span><span class="o">==</span><span class="n">i</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y_aux</span><span class="o">==</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">idx</span><span class="o">=</span><span class="n">idx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+            <span class="n">x_temp</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">y_temp</span><span class="o">=</span><span class="n">y_aux</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">y_temp</span><span class="p">[</span><span class="n">y_temp</span><span class="o">==</span><span class="n">j</span><span class="p">]</span><span class="o">=-</span><span class="mf">1.0</span>
+            <span class="n">y_temp</span><span class="p">[</span><span class="n">y_temp</span><span class="o">==</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span>
+
+            <span class="n">z</span><span class="o">=</span><span class="n">y_temp</span><span class="o">*</span><span class="n">x_temp</span>
+            <span class="n">Q</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">[(</span><span class="mi">1</span><span class="p">),(</span><span class="mi">1</span><span class="p">)])</span>
+            <span class="n">Q</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">p</span><span class="o">=-</span><span class="mi">1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x_temp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">p</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">G</span><span class="o">=-</span><span class="mi">1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">x_temp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">G</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">h</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x_temp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">h</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">A</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">y_temp</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">b</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">sol</span><span class="o">=</span><span class="n">cvxopt</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">qp</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+            <span class="n">sol</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sol</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+
+            <span class="c1">#support vectors</span>
+            <span class="n">sup_vec_loc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">sol</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+            <span class="n">sol</span><span class="p">[</span><span class="n">sup_vec_loc</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">sup_vec_loc</span><span class="o">=</span><span class="n">sup_vec_loc</span><span class="o">!=</span><span class="mi">0</span>
+            <span class="n">sup_vec</span><span class="o">=</span><span class="n">x_temp</span><span class="p">[</span><span class="n">sup_vec_loc</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">support_vectors_</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span><span class="o">=</span><span class="n">sup_vec</span>
+
+            <span class="c1">#margin</span>
+            <span class="n">w</span><span class="o">=</span><span class="p">((</span><span class="n">sol</span><span class="o">*</span><span class="n">y_temp</span><span class="p">)</span><span class="o">*</span><span class="n">x_temp</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">y_s</span><span class="o">=</span><span class="n">y_temp</span><span class="p">[</span><span class="n">sup_vec_loc</span><span class="p">]</span>
+            <span class="n">v</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sup_vec</span><span class="p">,</span><span class="n">w</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">coef</span><span class="o">=</span><span class="p">(</span><span class="n">y_s</span><span class="o">*</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">y_s</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">coef</span><span class="o">=</span><span class="n">coef</span><span class="o">/</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">var</span><span class="p">())</span>
+            <span class="n">intercept</span><span class="o">=</span><span class="n">y_s</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">coef</span><span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">intercept_</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span><span class="o">=</span><span class="n">intercept</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight_</span><span class="p">[</span><span class="n">pair</span><span class="p">]</span><span class="o">=</span><span class="n">coef</span><span class="o">*</span><span class="n">w</span>
+</pre></div>
+
+
+<ul>
+<li>SMO algorithm</li>
+</ul>
+<p>In the SMO algorithm, or sequential minimal optimization, we solve the dual minimization problem iteratively. First we randomly initialize all <span class="math">\(\alpha_i\)</span>. Then we choose a random pair of <span class="math">\(\alpha\)</span>'s, say <span class="math">\(\alpha_0,\alpha_1\)</span> and solve for the minimum of <span class="math">\(L(\alpha_0,\alpha_1)\)</span> with the other <span class="math">\(\alpha\)</span> fixed. This is easy to do because the function <span class="math">\(L(\alpha_0,\alpha_1)\)</span> is actually one dimensional after using the constraint <span class="math">\(\sum_i \alpha_i y_i=0\)</span>. Then we proceed with a different pair of <span class="math">\(\alpha\)</span>'s  and repeat until the solution converges.</p>
+<div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Ensure that the target y has values -1,1</span>
+<span class="sd">    Step 1): generate all (i,j) to get access to alpha pairs</span>
+<span class="sd">    Step 2):</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+<span class="n">l</span><span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<span class="n">samples</span><span class="o">=</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">j</span><span class="p">]</span>
+<span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+<span class="n">num_iter</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">threshold</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+<span class="n">alpha_prev</span><span class="o">=</span><span class="n">alpha</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">T</span><span class="o">=</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">Z</span><span class="o">=</span><span class="p">(</span><span class="n">alpha</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">not_converged</span><span class="o">=</span><span class="kc">True</span>
+<span class="k">while</span> <span class="n">not_converged</span> <span class="ow">and</span> <span class="n">num_iter</span><span class="o">&lt;</span><span class="mi">5</span><span class="o">*</span><span class="n">threshold</span><span class="p">:</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+
+        <span class="n">alpha0</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">alpha1</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y0</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1">#If constraint is possible to be solved continue</span>
+        <span class="n">k</span><span class="o">=-</span><span class="n">T</span><span class="o">+</span><span class="n">alpha0</span><span class="o">*</span><span class="n">y0</span><span class="o">+</span><span class="n">alpha1</span><span class="o">*</span><span class="n">y1</span>
+        <span class="k">if</span> <span class="n">y1</span><span class="o">*</span><span class="n">k</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">y0</span><span class="o">*</span><span class="n">y1</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Solve 2-dimensional optimization problem with constraint</span>
+        <span class="n">A</span><span class="o">=</span><span class="n">Z</span><span class="o">-</span><span class="n">alpha0</span><span class="o">*</span><span class="n">y0</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">alpha1</span><span class="o">*</span><span class="n">y1</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">B</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">y0</span><span class="o">*</span><span class="n">y1</span><span class="o">-</span><span class="n">y0</span><span class="o">*</span><span class="n">k</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">-</span><span class="n">y0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">B</span><span class="p">))</span>
+
+        <span class="n">alpha0</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">alpha1</span><span class="o">=</span><span class="n">y1</span><span class="o">*</span><span class="n">k</span><span class="o">-</span><span class="n">alpha0</span><span class="o">*</span><span class="n">y0</span><span class="o">*</span><span class="n">y1</span>
+        <span class="k">if</span> <span class="n">alpha1</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">alpha1</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">alpha0</span><span class="o">=</span><span class="n">k</span><span class="o">*</span><span class="n">y0</span>
+
+        <span class="c1">#update alpha</span>
+        <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">alpha0</span>
+        <span class="n">alpha</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">alpha1</span>
+
+        <span class="n">T</span><span class="o">=-</span><span class="n">k</span><span class="o">+</span><span class="n">alpha0</span><span class="o">*</span><span class="n">y0</span><span class="o">+</span><span class="n">alpha1</span><span class="o">*</span><span class="n">y1</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">A</span><span class="o">+</span><span class="n">alpha0</span><span class="o">*</span><span class="n">y0</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">alpha1</span><span class="o">*</span><span class="n">y1</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="c1"># verify if alpha converges</span>
+        <span class="n">error</span><span class="o">=</span><span class="n">alpha</span><span class="o">-</span><span class="n">alpha_prev</span>    
+        <span class="n">error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">error</span><span class="o">&lt;</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">)</span> <span class="ow">and</span> <span class="n">num_iter</span><span class="o">&gt;</span><span class="mi">3</span><span class="o">*</span><span class="n">threshold</span><span class="p">:</span>
+            <span class="n">not_converged</span><span class="o">=</span><span class="kc">False</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;converged&#39;</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="n">alpha_prev</span><span class="o">=</span><span class="n">alpha</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">num_iter</span><span class="o">+=</span><span class="mi">1</span>
+</pre></div>
+
+
+<h3><strong>References</strong></h3>
+<p><br/></p>
+<p>[1] <em>Understanding Machine Learning: from Theory to Algorithms</em>, Shai Ben-David and Shai Shalev-Shwartz</p>
+<p>[2] <em>The elements of statistical learning</em>, T. Hastie, R. Tibshirani, J. Friedman</p>
+<p>[3] <em>Foundations of machine learning</em>, M. Mohri, A. Rostamizadeh, A. Talwalkar</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (17)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

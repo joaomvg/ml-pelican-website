@@ -1,5 +1,632 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-10-13T00:00:00+02:00</updated><entry><title>"Gradient Boosting"</title><link href="/gradient-boosting.html" rel="alternate"></link><published>2020-10-13T00:00:00+02:00</published><updated>2020-10-13T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-10-13:/gradient-boosting.html</id><summary type="html">&lt;p&gt;Gradient boosting is another type of boosting algorithm. It uses gradient descent to minimize the loss function and hence the name. However, unlike other algorithms, the learning rate is adjusted at every step, by solving a one-dimensional optmization problem.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-11-12T00:00:00+01:00</updated><entry><title>"Neural Network"</title><link href="/neural-network.html" rel="alternate"></link><published>2020-11-12T00:00:00+01:00</published><updated>2020-11-12T00:00:00+01:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-11-12:/neural-network.html</id><summary type="html">&lt;p&gt;A neural network is a graphical representation of a set of linear and non-linear operations. In a feed forward neural network, we stack several layers composed of nodes that transform the data non-linearly. The data crosses multiple layers, changing its feature's representation along the way. This process allows to create very complex output functions.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;&lt;a href="#def1"&gt;Neural Network&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#training"&gt;Backpropagation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#gen"&gt;VC-dimension&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#decision"&gt;Decision boundary&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#python"&gt;Python implementation&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Neural Network&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;img alt="" height="350" src="/images/nn.png" style="display: block; margin: 0 auto" width="350"&gt; &lt;/p&gt;
+&lt;p&gt;A neural network is a graph composed of nodes and edges. The edges implement linear operations while the nodes aggregate the contribution from each edge before composing by an activation function &lt;span class="math"&gt;\(g\)&lt;/span&gt;. This process is replicated to the next layer. Note that within each layer the nodes do not interact with each other, that is, there is no edge between nodes. Mathematically we have the following series of operations&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;z^{(l)}_i=g(\omega^{(l)}_{ij}z^{(l-1)}_j+b^{(l)}_j)\\
+&amp;amp;z^{(l-1)}_j=g(\omega^{(l-1)}_{jk}z^{(l-2)}_k+b^{(l-1)}_j)\\
+&amp;amp;\ldots\\
+&amp;amp;z^{(1)}_p = g(\omega^{(1)}_{pr}x_r+b^{(0)}_l)
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+The activation function &lt;span class="math"&gt;\(g\)&lt;/span&gt; is a non-linear function with support on the real line. A common choice is the sigmoid function but the sign function also works. This sequence of compositions is known as forward pass. &lt;/p&gt;
+&lt;p&gt;A neural network is a type of universal approximator. Cybenko (1989) has shown that any continuous function &lt;span class="math"&gt;\(f\)&lt;/span&gt; in &lt;span class="math"&gt;\(I_n\)&lt;/span&gt;, the n-dimensional unit cube, can be approximated with arbitrary accuracy by a sum of the form
+&lt;/p&gt;
+&lt;div class="math"&gt;$$C=\sum_{i=1}^N \alpha_i\sigma(\beta_i^T\cdot x+b_i) $$&lt;/div&gt;
+&lt;p&gt;
+That is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$|C(x)-f(x)|&amp;lt;\epsilon,\;\forall x\in I_n$$&lt;/div&gt;
+&lt;p&gt;
+for any &lt;span class="math"&gt;\(\epsilon&amp;gt;0\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;The network architecture has two major parameters that we need to tune: the width of the layers, that is, the number of neurons per layer and the depth or number of layers. Clearly increasing the number of neurons in a layer adds complexity to the neural network, because we are adding more parameters to fit. And the depth does it too. However, adding depth to the neural network increases the number of parameters more rapidily than adding neurons in the same layer. Suppose we have one hidden layer with &lt;span class="math"&gt;\(n\)&lt;/span&gt; neurons. The number of edges flowing ot this layer is &lt;span class="math"&gt;\(n(d+1)\)&lt;/span&gt; where &lt;span class="math"&gt;\(d\)&lt;/span&gt; is the dimension of the input. Instead, if we consider two hidden layers with &lt;span class="math"&gt;\(n/2\)&lt;/span&gt; neurons each, we have in total &lt;span class="math"&gt;\(n(n/2+1)/2+n(d+1)/2\)&lt;/span&gt; edges flowing to the hidden layers. This number scales quadratically with &lt;span class="math"&gt;\(n\)&lt;/span&gt;, while for a single hidden layer it scales linearly.  &lt;/p&gt;
+&lt;p&gt;But adding depth has an additional effect. We can see the output at a layer as a different feature representation of the data. So adding layers also allows the neural network to learn different representations of the data which may help performance. The neural network can be trained beforehand on very large datasets and learn very complex features. We can take the last hidden layer feature representation as a new input feature and train only the last layer weights. Training the last layer allows us to use the neural network on datasets that may differ, in population, from training dataset. Instead, if we were to train a neural network with only one hidden layer, we would need to add increasing number of neurons to capture more complex functions. However, the effect of having a large amount of neurons may be prejudicial as we are increasing the dimension of the hidden feature space, which may suffer from dimensionality issues. In contrast, adding depth increases complexity while keeping the dimensionality of the hidden space under control.&lt;/p&gt;
+&lt;p&gt;Although depth helps learning, it brings other shortcomings in terms of training. With more depth the derivatives of the loss function with respect to the parameters can be difficult to calculate. As we see next section, using the backpropagation algorithm the derivatives contain multiple products coming from each layer. While the parameters of the last layers are more easily to learn, the parameters coming from the first layers can be hard to learn. Having a very large number of products will eventually make the derivative approach zero or become quite large, which hinders training.&lt;/p&gt;
+&lt;p&gt;&lt;a name="training"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Backpropagation&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Lets consider a binary classification problem with classes &lt;span class="math"&gt;\(y=\{0,1\}\)&lt;/span&gt;. In this case we want to model the probability &lt;span class="math"&gt;\(p(x)\equiv p(y=1|x)\)&lt;/span&gt;. The loss function is the log-loss function given by
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L=-\sum_iy_i\ln p(x_i)+(1-y_i)\ln(1-p(x_i))$$&lt;/div&gt;
+&lt;p&gt;
+and we model &lt;span class="math"&gt;\(p(x)\)&lt;/span&gt; with a neural network with one hidden layer, that is,&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="250" src="/images/nn2.png" style="display: block; margin: 0 auto" width="250"&gt; 
+So we have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp; p(x)=\sigma(\omega^{(2)}_{i}z^{(1)}_i+b^{(2)})\\
+&amp;amp;z^{(1)}_j = \sigma( \omega^{(1)}_{jk}x_k+b^{(1)}_j)
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;
+where implicit contractions are in place.&lt;/p&gt;
+&lt;p&gt;The loss function depends on the weights &lt;span class="math"&gt;\( \omega^{(2)}_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(\omega^{(1)}_{ij}\)&lt;/span&gt; in a very complicated way. To calculate the minimum of the loss function we use the gradient descent algorithm. So we calculate the derivatives of the loss function with respect to the weights,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\frac{\partial L}{\partial \omega^{(2)}_i}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})z^{(1)}_i\\
+&amp;amp;\frac{\partial L}{\partial b^{(2)}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\\
+&amp;amp;\frac{\partial L}{\partial \omega^{(1)}_{ij}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\omega^{(2)}_i \dot{\sigma}(\omega^{(1)}_{ik} x_k+b^{(1)}_i)x_j\\
+&amp;amp;\frac{\partial L}{\partial b^{(1)}_{i}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\omega^{(2)}_i \dot{\sigma}(\omega^{(1)}_{ik} x_k+b^{(1)}_i)
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+We see that as we go down in the layer level, we need to propagate back the composition of the forward pass in order to calculate the derivatives. That is, first we calculate the derivatives of the weights in the higher levels, and progress downwards towards lower levels. This process can be done in an iterative way, and is known as backpropagation algorithm. More generally we have&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\frac{\partial p_k(x)}{\partial \omega^{(n)}_{ij}}=\dot{g}^{(l)}_k\omega^{(l)}_{kk_1} \dot{g}^{(l-1)}_{k_1}\omega^{(l-1)}_{k_1k_2}\ldots \dot{g}^{(n)}_i z^{(n-1)}_j\\
+&amp;amp;\frac{\partial p_k(x)}{\partial b^{(n)}_{i}}=\dot{g}^{(l)}_k\omega^{(l)}_{kk_1} \dot{g}^{(l-1)}_{k_1}\omega^{(l-1)}_{k_1k_2}\ldots \dot{g}^{(n)}_i
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where again sums over indices are implicit.&lt;/p&gt;
+&lt;p&gt;&lt;a name="gen"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;3. VC-dimension&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;We can estimate the VC-dimension of a neural network with activation the sign function. Recall the growth function definition: &lt;span class="math"&gt;\(\text{max}_{C\in \chi: |C|=m}|\mathcal{H}_C|\)&lt;/span&gt; where &lt;span class="math"&gt;\(\mathcal{H}_C\)&lt;/span&gt; is the restriction of the neural network hypotheses from the set &lt;span class="math"&gt;\(C\)&lt;/span&gt; to &lt;span class="math"&gt;\(\{0,1\}\)&lt;/span&gt;. Between adjacent layers &lt;span class="math"&gt;\(L^{t-1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(L^{t}\)&lt;/span&gt; one can define a mapping between &lt;span class="math"&gt;\(\mathcal{H}^t:\,\mathbb{R}^{|L^{t-1}|}\rightarrow \mathbb{R}^{|L^{t}|}\)&lt;/span&gt;, where &lt;span class="math"&gt;\(|L^{t-1}|\)&lt;/span&gt; and &lt;span class="math"&gt;\(|L^t|\)&lt;/span&gt; are the number of neurons in the layers, respectively. Then the hypothesis class can be written as the composition of each of these maps, that is, &lt;span class="math"&gt;\(\mathcal{H}=\mathcal{H}^T\circ \ldots \circ \mathcal{H}^1\)&lt;/span&gt;. The growth function can thus be bounded by
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi_{\mathcal{H}}(m)\leq \prod_{t=1}^T\Pi_{\mathcal{H^t}}(m)$$&lt;/div&gt;
+&lt;p&gt;In turn, for each layer the class &lt;span class="math"&gt;\(\mathcal{H}^t\)&lt;/span&gt; can be written as the product of each neuron class, that is, &lt;span class="math"&gt;\(\mathcal{H}^t=\mathcal{H}^{t,1}\times \ldots \times \mathcal{H}^{t,i}\)&lt;/span&gt; where &lt;span class="math"&gt;\(i\)&lt;/span&gt; is the number of neurons in that layer. Similarly we can bound the growth function of each layer class
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi_{\mathcal{H}^t}(m)\leq \prod_{i=1}^{|L^t|}\Pi_{\mathcal{H^{t,i}}}(m)$$&lt;/div&gt;
+&lt;p&gt;Each neuron is a homogeneous halfspace class, and we have seen that the VC-dimension of this class is the dimension of their input plus one (VC-dimension of a separating hyperplane). If we count the bias constant as a single edge, then this dimension is just the number of edges flowing in to the node &lt;span class="math"&gt;\(i\)&lt;/span&gt;, which we denote as &lt;span class="math"&gt;\(d_{t,i}\)&lt;/span&gt;. Using Sauer's Lemma we have
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi_{\mathcal{H}^{t,i}}\leq \Big(\frac{em}{d_{t,i}}\Big)^{d_{t,i}}&amp;lt;(em)^{d_{t,i}}$$&lt;/div&gt;
+&lt;p&gt;Putting all these factors together we obtain the bound
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\Pi_{\mathcal{H}}(m)\leq \prod_{t,i} (em)^{d_{t,i}}=(em)^{|E|}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(|E|\)&lt;/span&gt; is the total number of edges, which is also the total number of parameters in the network. For &lt;span class="math"&gt;\(m^*=\text{VC-dim}\)&lt;/span&gt; we have &lt;span class="math"&gt;\(\Pi_{\mathcal{H}}=2^{m^*}\)&lt;/span&gt;, therefore&lt;/p&gt;
+&lt;div class="math"&gt;$$2^{m^*}\leq (em^*)^{|E|}$$&lt;/div&gt;
+&lt;p&gt;
+It follows that &lt;span class="math"&gt;\(m^*\)&lt;/span&gt; must be of the order &lt;span class="math"&gt;\(\mathcal{O}(|E|\log_2|E|)\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;If the activation function is the sigmoid, the proof is out of scope. One can though give a rough estimate. The VC-dimension should be of the order of the number of tunable parameters. This is the number of edges &lt;span class="math"&gt;\(|E|\)&lt;/span&gt;, counting the bias parameters. &lt;/p&gt;
+&lt;p&gt;&lt;a name="decision"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;4. Decision Boundary &lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Below we plot the decision boundary for a neural network with one hidden layer after several iterations, that is, the number of gradient descent steps:
+&lt;img alt="" height="300" src="/images/nn_decision.png" style="display: block; margin: 0 auto" width="300"&gt; &lt;/p&gt;
+&lt;p&gt;The neural network has enough capacity to draw complicated decision boundaries. Below we show the decision boundary at different stages of learning. &lt;/p&gt;
+&lt;p float="left"&gt;
+  &lt;img src="/images/nn_decision_200.png" width="230" /&gt;
+  &lt;img src="/images/nn_decision_1000.png" width="230" /&gt;
+  &lt;img src="/images/nn_decision_2000.png" width="230" /&gt;
+&lt;/p&gt;
+
+&lt;p float="center"&gt;
+  &lt;img src="/images/nn_decision_3000.png" width="230" /&gt;
+  &lt;img src="/images/nn_decision_4000.png" width="230" /&gt;
+  &lt;img src="/images/nn_decision_30k.png" width="230" /&gt;
+&lt;/p&gt;
+
+&lt;p&gt;Waiting long enough, allows the neural network to overfit the data as we see in the last picture. &lt;/p&gt;
+&lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;5. Python implementation&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Define classes for linear layer and sigmoid activation function:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;LinearLayer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_in&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;n_in&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;dim_in&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;n_out&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weights&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;normal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.01&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;dim_in&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bias&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;normal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mf"&gt;0.01&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matmul&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weights&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bias&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;out&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;dL&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;Sigmoid&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="s2"&gt;&amp;quot;sigmoid function&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;out&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;out&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Class NN: implements neural network&lt;/p&gt;
+&lt;p&gt;Class logloss: returns loss function object which contains backward derivates for gradient descent&lt;/p&gt;
+&lt;p&gt;Class optimizer: implements gradiend descent step with specified learning rate&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;NN&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot; Neural Network with one hidden layer&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_in&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;hidden_dim&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;LinearLayer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dim_in&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;hidden_dim&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;LinearLayer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hidden_dim&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dim_out&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;Sigmoid&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;delta&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer1&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_s1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer2&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_s1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_s2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_s2&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;predict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;pred&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;astype&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;int&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;pred&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;logloss&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__call__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;dw2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;db2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_s1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+        &lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weights&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sig&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;out_l1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;db1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;dL&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;delta&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;db1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;db2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dw2&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;optimizer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.01&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;step&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+        &lt;span class="n"&gt;db1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;db2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;dw2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;delta&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bias&lt;/span&gt;&lt;span class="o"&gt;-=&lt;/span&gt;&lt;span class="n"&gt;db1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weights&lt;/span&gt;&lt;span class="o"&gt;-=&lt;/span&gt;&lt;span class="n"&gt;dw1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bias&lt;/span&gt;&lt;span class="o"&gt;-=&lt;/span&gt;&lt;span class="n"&gt;db2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;layer2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weights&lt;/span&gt;&lt;span class="o"&gt;-=&lt;/span&gt;&lt;span class="n"&gt;dw2&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lr&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Training for loop:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;train&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;optimizer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;loss&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+        &lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;loss&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;loss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;backward&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;xtrain&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;ytrain&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;optimizer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;step&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;%&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Iteration &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;, loss: &amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;L&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;[1] &lt;em&gt;Understanding Machine Learning: from Theory to Algorithms&lt;/em&gt;, Shai Ben-David and Shai Shalev-Shwartz&lt;/p&gt;
+&lt;p&gt;[2] &lt;em&gt;The elements of statistical learning&lt;/em&gt;, T. Hastie, R. Tibshirani, J. Friedman&lt;/p&gt;
+&lt;p&gt;[3] &lt;em&gt;Approximation by superpositions of a sigmoidal function&lt;/em&gt;, Cybenko, G. (1989) &lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Support Vector Machine (SVM)"</title><link href="/support-vector-machine-svm.html" rel="alternate"></link><published>2020-10-31T00:00:00+01:00</published><updated>2020-10-31T00:00:00+01:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-10-31:/support-vector-machine-svm.html</id><summary type="html">&lt;p&gt;A SVM algorithm learns the data by engineering the optimal separating line/curve between the classes. Compare with the other algorithms which try to do this by first determining the Bayes predictor. The SVM has robust generalization properties. However, they are usually very hard to train.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;&lt;a href="#def1"&gt;Linear SVM&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#gen"&gt;Generalization properties&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#non-linear"&gt;Non-linear decision boundary&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#python"&gt;Python implementation&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. Linear SVM&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;The Support Vector Machine is a learning algorithm that whose primary goal is to find the optimal decision boundary. In the separable case, when the decision boundary is a hyperplane, it can be shown that the solution only depends on a few datapoints, which are known as support vectors, and hence the name.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Linearly separable case:&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Lets say we are in two dimensions and we have a dataset with two labels. We want to find the line that achieves maximal separation between the two classes. That is, of all the separating lines, we want to find the one that maximizes the margin &lt;span class="math"&gt;\(\rho\)&lt;/span&gt;, as depicted below.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="250" src="/images/svm.png" style="display: block; margin: 0 auto" width="250"&gt; &lt;/p&gt;
+&lt;p&gt;A line has equation
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\omega^T\cdot x+b=0$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(x=(x_1,x_2)\)&lt;/span&gt; are the 2d coordinates and &lt;span class="math"&gt;\(\omega\)&lt;/span&gt; is the normal vector.
+The distance between a point with coordinates &lt;span class="math"&gt;\(x\)&lt;/span&gt; and the line is given by &lt;span class="math"&gt;\(\omega^T(x-x_0)/{\lVert\omega\rVert}\)&lt;/span&gt;, where &lt;span class="math"&gt;\(x_0\)&lt;/span&gt; is a point on the plane. Since &lt;span class="math"&gt;\(\omega^T\cdot x_0=-b\)&lt;/span&gt;, the signed distance is
+&lt;/p&gt;
+&lt;div class="math"&gt;$$d=\frac{\omega^T\cdot x+b}{\lVert\omega\rVert}$$&lt;/div&gt;
+&lt;p&gt;The margin is defined as a the minimum distance &lt;span class="math"&gt;\(C\)&lt;/span&gt; from the separating line, that is, &lt;span class="math"&gt;\(C=\text{Min }\{y_i d_i\}\)&lt;/span&gt;. The optimal separating line maximizes this margin, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$y_i\frac{\omega^T\cdot x_i+b}{\lVert\omega\rVert}\geq \text{Max }C=\rho,\;\forall (x_i,y_i)$$&lt;/div&gt;
+&lt;p&gt;
+We have multiplied by the target &lt;span class="math"&gt;\(y_i\in\{-1,1\}\)&lt;/span&gt; to guarantee that each term is always positive on both sides of the separating line. Since the line equation is invariant under rescaling &lt;span class="math"&gt;\((\omega,b)\rightarrow (\lambda \omega,\lambda b)\)&lt;/span&gt; we can choose &lt;span class="math"&gt;\(\lVert\omega\rVert=1/\rho\)&lt;/span&gt;. This means that maximizing &lt;span class="math"&gt;\(\rho\)&lt;/span&gt; as above is equivalent to
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{Min }\lVert\omega\rVert,\;\;y_i(\omega^T\cdot x_i+b)\geq 1,\;\forall (x_i,y_i)$$&lt;/div&gt;
+&lt;p&gt;We can translate this minization problem to finding the minima of the loss function
+&lt;/p&gt;
+&lt;div class="math"&gt;$$L=\frac{1}{2}\sum_{k=1}^d \omega_k^2 -\sum_{i=1}^N\alpha_i[ y_i(\omega^T\cdot x_i+b)-1],\;\alpha_i\geq 0$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\alpha_i\)&lt;/span&gt; are Lagrange multipliers, &lt;span class="math"&gt;\(d\)&lt;/span&gt; is the number of dimensions and &lt;span class="math"&gt;\(N\)&lt;/span&gt; is the number of datapoints. The local minima solves the equations
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\frac{\partial L}{\partial \omega_k}=\omega_k -\sum_{i=1}^N\alpha_i y_ix^k_i=0\\
+&amp;amp;\frac{\partial L}{\partial b}=\sum_i\alpha_iy_i=0\\
+&amp;amp;\frac{\partial L}{\partial \alpha_i}= y_i(\omega^T\cdot x_i+b)-1=0
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+Provided &lt;span class="math"&gt;\(\alpha_i&amp;gt;0\)&lt;/span&gt; for which the loss function is differentiable in &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;. If &lt;span class="math"&gt;\(\alpha_i=0\)&lt;/span&gt; then the we only have the first two equations. This means that &lt;span class="math"&gt;\(\alpha_i&amp;gt;0\)&lt;/span&gt; corresponds to points that sit exactly on the margin, and the remaining equations depend only on these points. These are known as support vectors.&lt;/p&gt;
+&lt;p&gt;If we replace &lt;span class="math"&gt;\(\omega\)&lt;/span&gt; by its equation in the loss function &lt;span class="math"&gt;\(L\)&lt;/span&gt; we obtain the dual problem&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{L}=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j x_i^T\cdot x_j,\;\alpha_i\geq 0 $$&lt;/div&gt;
+&lt;p&gt;where we have used that &lt;span class="math"&gt;\(\sum_i\alpha_iy_i=0\)&lt;/span&gt;. The problem with &lt;span class="math"&gt;\(-\hat{L}\)&lt;/span&gt; is actually a convex minimization problem and can be solved using traditional methods. The solution of the dual problem must suplemented with the additional conditions:
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}&amp;amp;y_i(\omega^T\cdot x_i+b)=1,\;\alpha_i&amp;gt;0\\
+&amp;amp;y_i(\omega^T\cdot x_i+b)&amp;gt;1,\;\alpha_i=0\\
+&amp;amp;\sum_i\alpha_i y_i=0\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;Support vectors live on the margin and thus &lt;span class="math"&gt;\(y_i(\omega^T\cdot x_i+b)=1\)&lt;/span&gt;. Given a support vector &lt;span class="math"&gt;\(x_s,y_s\)&lt;/span&gt;, we can use this equation to determine &lt;span class="math"&gt;\(b\)&lt;/span&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$b=y_s-\sum_{i=1}^m\alpha_p y_px_p^T\cdot x_s$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(p=1\ldots m\)&lt;/span&gt; runs over the support vectors. &lt;span class="math"&gt;\(\hat{L}\)&lt;/span&gt; is maximized by the solution and as such
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial\hat{L}}{\partial \alpha_s}=1-y_s\sum_{p=1}^m\alpha_py_px_p^T\cdot x_s=0$$&lt;/div&gt;
+&lt;p&gt; 
+Multiplying this equation by &lt;span class="math"&gt;\(\alpha_s\)&lt;/span&gt; and summing over &lt;span class="math"&gt;\(s\)&lt;/span&gt; we obtain
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{s=1}^m\alpha_s-\sum_{s=1}^m\sum_{p=1}^m\alpha_s\alpha_py_sy_px_p^T\cdot x_s=0\iff \lVert\omega\rVert^2=\sum_{s=1}^m\alpha_s=\lVert\alpha\rVert_1$$&lt;/div&gt;
+&lt;p&gt;
+So the margin is inversely proportional to the linear norm of &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Non-linearly separable case:&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="" height="250" src="/images/svm3.png" style="display: block; margin: 0 auto" width="250"&gt; &lt;/p&gt;
+&lt;p&gt;In the non-linearly separable case one cannot find a hyperplane that separates the classes. That is, for any hyperplane there exists &lt;span class="math"&gt;\(x_i,y_i\)&lt;/span&gt; such that&lt;/p&gt;
+&lt;div class="math"&gt;$$y_i(\omega^T\cdot x_i +b)\ngtr 1$$&lt;/div&gt;
+&lt;p&gt;
+See picture above.&lt;/p&gt;
+&lt;p&gt;However, one can formulate a relaxed version of the constraints using &lt;em&gt;slack variables&lt;/em&gt; &lt;span class="math"&gt;\(\xi_i\geq 0\)&lt;/span&gt;
+&lt;/p&gt;
+&lt;div class="math"&gt;$$y_i(\omega^T\cdot x_i +b)\geq 1-\xi_i$$&lt;/div&gt;
+&lt;p&gt;
+If we remove the points for which &lt;span class="math"&gt;\(0 &amp;lt; y_i(\omega^T\cdot x_i +b)&amp;lt;1\)&lt;/span&gt; then the data is linearly separable. With the remaining data we can define a margin, which is called a soft-margin instead of a hard-margin as in the separable case. The points for which &lt;span class="math"&gt;\(\xi_i\)&lt;/span&gt; is non-zero can be considered as outliers. &lt;/p&gt;
+&lt;p&gt;As before, we want to minimize &lt;span class="math"&gt;\(\lVert\omega\rVert\)&lt;/span&gt;, but at the same time we want to use the smallest possible number of &lt;span class="math"&gt;\(\xi\)&lt;/span&gt; with the smallest values possible. This can be written as
+ &lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{2}\lVert\omega\rVert^2+\lambda \sum_i \xi_i^p-\sum_i\alpha_i[y_i(\omega^T\cdot x_i +b)- 1+\xi_i],\;\alpha_i\geq 0,\xi_i\geq 0$$&lt;/div&gt;
+&lt;p&gt;
+The term &lt;span class="math"&gt;\(\lambda \sum_i \xi_i^p\)&lt;/span&gt; with &lt;span class="math"&gt;\(\lambda&amp;gt;0\)&lt;/span&gt; works as a regulator, which prevents &lt;span class="math"&gt;\(\xi_i\)&lt;/span&gt; from taking large values as well as having a large number of non-zero &lt;span class="math"&gt;\(\xi_i\)&lt;/span&gt;. The exponent &lt;span class="math"&gt;\(p\)&lt;/span&gt; defines different types of regularization. For &lt;span class="math"&gt;\(p=1\)&lt;/span&gt; the loss function becomes the &lt;em&gt;Hinge loss function&lt;/em&gt;&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{1}{2}\lVert\omega\rVert^2+\lambda\sum_i \text{max}(0,1-y_i(\omega^T\cdot x_i +b))$$&lt;/div&gt;
+&lt;p&gt;The next steps are very similar to the separable case. One can build a dual problem and determine the support vectors and outliers.&lt;/p&gt;
+&lt;p&gt;&lt;a name="gen"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Generalization properties&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;Given the separating hyperplane we can build the predictor
+&lt;/p&gt;
+&lt;div class="math"&gt;$$h(x)=\text{sign}(\omega\cdot x+b)$$&lt;/div&gt;
+&lt;p&gt;
+We want to bound the generalization error &lt;span class="math"&gt;\(R(h_S)=\sum_{x,y} 1_{h(x)\neq y}D(x)\)&lt;/span&gt;. To do this we can explore the leave-one-out error &lt;span class="math"&gt;\(R_{LOO}\)&lt;/span&gt;. The &lt;span class="math"&gt;\(R_{LOO}(x)\)&lt;/span&gt; is the error on a point &lt;span class="math"&gt;\(x\)&lt;/span&gt; provided we train the algorithm on the remaining &lt;span class="math"&gt;\(S\setminus{x}\)&lt;/span&gt; dataset, that is, with the point &lt;span class="math"&gt;\(x\)&lt;/span&gt; excluded. The empirical &lt;span class="math"&gt;\(\hat{R}_{LLO}\)&lt;/span&gt; is obtained by averaging over all points of the dataset &lt;span class="math"&gt;\(S\)&lt;/span&gt;, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{R}_{LLO}=\frac{1}{m}\sum_{x} R_{LLO}(x)$$&lt;/div&gt;
+&lt;p&gt;
+One can show that the average of &lt;span class="math"&gt;\(\hat{R}_{LLO}\)&lt;/span&gt; is an unbiased estimate of the generalization error. That is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{E}_{S\sim D^m} \hat{R}_{LLO}=\mathbb{E}_{S'\sim D^{m-1}}(R(h_{S'}))$$&lt;/div&gt;
+&lt;p&gt;
+In more detail,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}\mathbb{E}_{S\sim D^m} \hat{R}_{LLO}&amp;amp;=\mathbb{E}_{S\sim D^m}\frac{1}{m}\sum_{x} R_{LLO}(x)\\
+&amp;amp;=\mathbb{E}_{S\sim D^m}1_{h_{S'}(x)\neq y}\\
+&amp;amp;=\mathbb{E}_{S'\sim D^{m-1},x\sim D}1_{h_{S'}(x)\neq y}\\
+&amp;amp;=\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;Lets estimate &lt;span class="math"&gt;\(R_{LLO}(x)\)&lt;/span&gt; for the SVM in the separable case. If &lt;span class="math"&gt;\(x\)&lt;/span&gt; is above the margin then the error is zero, because if we remove this point the predictor will not change as it depends only on the support vectors. However if &lt;span class="math"&gt;\(x\)&lt;/span&gt; is exactly on the margin, then the support vectors of the new predictor will change. This point &lt;span class="math"&gt;\(x\)&lt;/span&gt; may or may not be correctly classified, and so the maximum number of points that can be misclassified by this procedure is the same as the number of support vectors. This means that,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\hat{R}_{LLO}\leq \frac{NV(S)}{m}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(NV\)&lt;/span&gt; is the number of support vectors for the dataset &lt;span class="math"&gt;\(S\)&lt;/span&gt;. We may therefore conclude that the average generalization error is bounded by the average number of support vectors, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})\leq \frac{\mathbb{E}_{S\sim D^m}NV(S)}{m}$$&lt;/div&gt;
+&lt;p&gt;Assuming that &lt;span class="math"&gt;\(NV\)&lt;/span&gt; remains small for different datasets, the above result implies that the average error also remains small.&lt;/p&gt;
+&lt;p&gt;&lt;a name="non-linear"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;3. Non-linear decision boundary&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;It is possible that the dataset is separable but the decision boundary is not a hyperplane.
+In this case, there should exist a map &lt;span class="math"&gt;\(\phi: x\rightarrow x'\)&lt;/span&gt; that makes the problem linearly separable.
+All the previous steps follow except that we use &lt;span class="math"&gt;\(x'\)&lt;/span&gt; instead of &lt;span class="math"&gt;\(x\)&lt;/span&gt;. The problem is in determining the map &lt;span class="math"&gt;\(\phi\)&lt;/span&gt;, which is usual a difficult problem. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="300" src="/images/svm2.png" style="display: block; margin: 0 auto" width="300"&gt; &lt;/p&gt;
+&lt;p&gt;Kernel methods are used to address solutions of this type. Suppose we find such a map. Then we have a new set of features &lt;span class="math"&gt;\(\phi(x_1),\phi(x_2),\ldots \phi(x_n)\)&lt;/span&gt;. The dual problem becomes&lt;/p&gt;
+&lt;div class="math"&gt;$$L_D=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j \phi(x_i)^T\cdot \phi(x_j),\;\alpha_i\geq 0 $$&lt;/div&gt;
+&lt;p&gt;and the predictor&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}G(x)&amp;amp;=\text{sign} \big(\omega^T\phi(x)+b\big)\\
+&amp;amp;=\text{sign} \big(\sum_{i=1}^N\alpha_i y_i\phi(x)^T\cdot\phi(x_i)+b\big)
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+The constant &lt;span class="math"&gt;\(b\)&lt;/span&gt; can be determined from the location of a support vector. So we see that the solution only depends on the scalar &lt;span class="math"&gt;\(K(x,x')=\phi(x)^T\cdot \phi(x')\)&lt;/span&gt;. The function &lt;span class="math"&gt;\(K(x,x')\)&lt;/span&gt; is a Kernel function and obeys the following conditions&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It is symmetric: &lt;span class="math"&gt;\(K(x,x')=K(x',x)\)&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;It is positive semi-definite: &lt;span class="math"&gt;\(\sum_{i,j}K(x_i,x_j)\lambda_i\lambda_j\geq 0,\; \forall \lambda_i\)&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Instead of looking for the map &lt;span class="math"&gt;\(\phi\)&lt;/span&gt; we can search for the Kernel which is a scalar function. 
+For example, lets consider the gaussian Kernel
+&lt;/p&gt;
+&lt;div class="math"&gt;$$K(x,y)=e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}$$&lt;/div&gt;
+&lt;p&gt;
+Since this is a positive and symmetric function, it is easy to see that above conditions are satisfied. But can we find the map &lt;span class="math"&gt;\(\phi\)&lt;/span&gt; such that &lt;span class="math"&gt;\(K(x,x')=\phi(x)^T\phi(x')\)&lt;/span&gt;? Note that&lt;/p&gt;
+&lt;div class="math"&gt;$$e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}=e^{-\frac{x^2+y^2}{2\sigma^2}}\sum_{n=1}^{\infty}\frac{(xy)^n}{(2\sigma^2)^n n!}$$&lt;/div&gt;
+&lt;p&gt;For each polynomial term in the expansion&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}(x y)^n=(\sum_{i=1}^d x_iy_i)^n&amp;amp;=\sum_{\sum_i k_i=n}\frac{n!}{k_1!k_2!\ldots k_d!}(x_1y_1)^{k_1}(x_2y_2)^{k_2}\ldots (x_dy_d)^{k_d}\\
+&amp;amp;=\sum_{\sum_i k_i=n}\frac{n!}{k_1!k_2!\ldots k_d!} x_1^{k_1}x_2^{k_2}\ldots x_d^{k_d} y_1^{k_1}y_2^{k_2}\ldots y_d^{k_d}\\
+&amp;amp;=h_n(x)^T\cdot h_n(y)
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$h_n(x)=(x_1^n,\sqrt{n} x_1^{n-1}x_2,\sqrt{n} x_1^{n-1}x_3,\ldots,\sqrt{\frac{n!}{k_1!k_2!\ldots k_d!}} x_1^{k_1}x_2^{k_2}\ldots x_d^{k_d},\ldots x_d^n)$$&lt;/div&gt;
+&lt;p&gt;This means that for the gaussian Kernel the map &lt;span class="math"&gt;\(\phi\)&lt;/span&gt; is infinite dimensional. This shows how powerful Kernel methods can be.&lt;/p&gt;
+&lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;4. Python implementation&lt;/strong&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;The CVXOPT library can be used to solve quadratic optimization problems with constraints.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;cvxopt&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;LinearSVM&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__init__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;coef_&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;intercept_&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weight_&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;support_vectors_&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;None&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;num_iter&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;fit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;astype&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;float64&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+        &lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;solvers&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;options&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;show_progress&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;False&lt;/span&gt;
+
+        &lt;span class="n"&gt;pairs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[[(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;j&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;classes&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
+
+        &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;pairs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;idx&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;idx&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;idx&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,)&lt;/span&gt;
+            &lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;idx&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+            &lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y_aux&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;idx&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+            &lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt;
+            &lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;1.0&lt;/span&gt;
+
+            &lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;
+            &lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.5&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tensordot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;z&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;axes&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;),(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)])&lt;/span&gt;
+            &lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ones&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+            &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;G&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;identity&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+            &lt;span class="n"&gt;G&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;G&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;zeros&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+            &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;matrix&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+            &lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;cvxopt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;solvers&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;qp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Q&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;G&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;array&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;x&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+
+            &lt;span class="c1"&gt;#support vectors&lt;/span&gt;
+            &lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,)&lt;/span&gt;
+            &lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+            &lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+            &lt;span class="n"&gt;sup_vec&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;support_vectors_&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;pair&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;sup_vec&lt;/span&gt;
+
+            &lt;span class="c1"&gt;#margin&lt;/span&gt;
+            &lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;sol&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x_temp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="n"&gt;y_s&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y_temp&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;sup_vec_loc&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+            &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sup_vec&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reshape&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+            &lt;span class="n"&gt;coef&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;y_s&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y_s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+            &lt;span class="n"&gt;coef&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;coef&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="n"&gt;intercept&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y_s&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;coef&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;mean&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+            &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;intercept_&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;pair&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;intercept&lt;/span&gt;
+            &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;weight_&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;pair&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;coef&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;w&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;SMO algorithm&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the SMO algorithm, or sequential minimal optimization, we solve the dual minimization problem iteratively. First we randomly initialize all &lt;span class="math"&gt;\(\alpha_i\)&lt;/span&gt;. Then we choose a random pair of &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;'s, say &lt;span class="math"&gt;\(\alpha_0,\alpha_1\)&lt;/span&gt; and solve for the minimum of &lt;span class="math"&gt;\(L(\alpha_0,\alpha_1)\)&lt;/span&gt; with the other &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt; fixed. This is easy to do because the function &lt;span class="math"&gt;\(L(\alpha_0,\alpha_1)\)&lt;/span&gt; is actually one dimensional after using the constraint &lt;span class="math"&gt;\(\sum_i \alpha_i y_i=0\)&lt;/span&gt;. Then we proceed with a different pair of &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;'s  and repeat until the solution converges.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;Ensure that the target y has values -1,1&lt;/span&gt;
+&lt;span class="sd"&gt;    Step 1): generate all (i,j) to get access to alpha pairs&lt;/span&gt;
+&lt;span class="sd"&gt;    Step 2):&lt;/span&gt;
+&lt;span class="sd"&gt;&amp;quot;&amp;quot;&amp;quot;&lt;/span&gt;
+&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;random&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;normal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;,(&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;l&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shape&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])]&lt;/span&gt;
+&lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[(&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;j&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;l&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;random&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;shuffle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;threshold&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;alpha_prev&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;Z&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;not_converged&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;
+&lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="n"&gt;not_converged&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;threshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+
+        &lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+        &lt;span class="c1"&gt;#If constraint is possible to be solved continue&lt;/span&gt;
+        &lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;continue&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# Solve 2-dimensional optimization problem with constraint&lt;/span&gt;
+        &lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;Z&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+        &lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;max&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+            &lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;
+
+        &lt;span class="c1"&gt;#update alpha&lt;/span&gt;
+        &lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;
+        &lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha1&lt;/span&gt;
+
+        &lt;span class="n"&gt;T&lt;/span&gt;&lt;span class="o"&gt;=-&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;
+        &lt;span class="n"&gt;Z&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;A&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y0&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;alpha1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;y1&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;j&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+        &lt;span class="c1"&gt;# verify if alpha converges&lt;/span&gt;
+        &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alpha_prev&lt;/span&gt;    
+        &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;np&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;abs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;threshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;not_converged&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;False&lt;/span&gt;
+            &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;converged&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;
+        &lt;span class="n"&gt;alpha_prev&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;alpha&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;copy&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;num_iter&lt;/span&gt;&lt;span class="o"&gt;+=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;[1] &lt;em&gt;Understanding Machine Learning: from Theory to Algorithms&lt;/em&gt;, Shai Ben-David and Shai Shalev-Shwartz&lt;/p&gt;
+&lt;p&gt;[2] &lt;em&gt;The elements of statistical learning&lt;/em&gt;, T. Hastie, R. Tibshirani, J. Friedman&lt;/p&gt;
+&lt;p&gt;[3] &lt;em&gt;Foundations of machine learning&lt;/em&gt;, M. Mohri, A. Rostamizadeh, A. Talwalkar&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Gradient Boosting"</title><link href="/gradient-boosting.html" rel="alternate"></link><published>2020-10-13T00:00:00+02:00</published><updated>2020-10-13T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-10-13:/gradient-boosting.html</id><summary type="html">&lt;p&gt;Gradient boosting is another type of boosting algorithm. It uses gradient descent to minimize the loss function and hence the name. However, unlike other algorithms, the learning rate is adjusted at every step, by solving a one-dimensional optmization problem.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
 &lt;li&gt;&lt;a href="#def1"&gt;Gradient boosting&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#decision"&gt;Decision boundary&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#python"&gt;Python implementation&lt;/a&gt;&lt;/li&gt;
@@ -2023,52 +2650,50 @@ where &lt;span class="math"&gt;\(w,h\)&lt;/span&gt; are 10 dimensional parameter
 &lt;/ol&gt;
 &lt;p&gt;&lt;a name="def1"&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;&lt;strong&gt;1. Basic concept&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;All the machine learning models suffer from the same basic problem. If we have too many features as compared to the amount of data, then it is easier to overfit and the model will generalize poorly- this means that the model can more easily memorize the data because there are more features that can be used to differentiate the datapoints. Instead if we have too few features for the same amount of data, then it is  harder for the model to capture the relevant features and it will mostly certainly underfit. &lt;/p&gt;
-&lt;p&gt;So what is the right amount of data versus number of features? A simple criterion is the following. Suppose we have a feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; that can take &lt;span class="math"&gt;\(N\)&lt;/span&gt; distinct values. In a binary classification problem for example, if &lt;span class="math"&gt;\(m\)&lt;/span&gt;, the number of data-points, is very large, then we have enough points to calculate the empirical probabilities &lt;span class="math"&gt;\(P(c|x)\)&lt;/span&gt; with relative confidence, where &lt;span class="math"&gt;\(c=0,1\)&lt;/span&gt; is the class. As a classifier model we can use the set of empirical probabilites- the predictor is the class which gives higher probability. On the other hand, if &lt;span class="math"&gt;\(m\)&lt;/span&gt; is smaller than &lt;span class="math"&gt;\(N\)&lt;/span&gt; then the data is too sparse and we cannot rely on the empirical probabilities. Similarly, if we have an additional feature which can also take &lt;span class="math"&gt;\(N\)&lt;/span&gt; values, then we need &lt;span class="math"&gt;\(m\)&lt;/span&gt; to be larger than &lt;span class="math"&gt;\(N^2\)&lt;/span&gt;. In general, for &lt;span class="math"&gt;\(d\)&lt;/span&gt; dimensions we need &lt;span class="math"&gt;\(m\gg N^d\)&lt;/span&gt;. The same applies for continuous features. One can assume that &lt;span class="math"&gt;\(N=2^{64}\)&lt;/span&gt; for a 64-bit computer, and still the necessary data grows exponentially with the number of dimensions.&lt;/p&gt;
-&lt;p&gt;A more detailed analysis, as explained in the following section, shows that there exists an optimal &lt;span class="math"&gt;\(N_{opt}\)&lt;/span&gt; for which the accuracy is the best possible. For &lt;span class="math"&gt;\(N&amp;gt;N_{opt}\)&lt;/span&gt; the model prediction deteriorates until it starts performing as well as an empirical model given by the relative frequencies of the classes, disregarding their features. That is, when the number of features is large, the data becomes so sparse that the best we can do is to draw the classes according to their probabilities &lt;span class="math"&gt;\(P(c=0,1)\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;All the machine learning models suffer from the same basic problem. If a dataset has a very large number of features as compared to the number of datapoints, then a sufficiently complex algorithm will more easily overfit and the model will generalize poorly- this is because the model can easily memorize the data since there are more features that can be used to differentiate the datapoints. Instead if we have a small number of features for the same amount of data, then it is  harder for the model to learn the relevant features and it will mostly certainly underfit. &lt;/p&gt;
+&lt;p&gt;So what is the right amount of data versus number of features? A simple criterion can be the following. Suppose we have a binary classification problem with a single feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; that can take &lt;span class="math"&gt;\(n\)&lt;/span&gt; distinct values. If &lt;span class="math"&gt;\(m\)&lt;/span&gt;, the number of data-points, is very large, then we have enough datapoints to calculate the empirical probabilities &lt;span class="math"&gt;\(P(c|x)\)&lt;/span&gt; with relative confidence, where &lt;span class="math"&gt;\(c=0,1\)&lt;/span&gt; is the class (we can use histograms for that purpose). We can use the set of empirical probabilites as a classifier- the predictor is the class which has higher probability. On the other hand, if &lt;span class="math"&gt;\(m\)&lt;/span&gt; is smaller than &lt;span class="math"&gt;\(n\)&lt;/span&gt; then the data is too sparse and we cannot rely on the empirical probabilities. Similarly, if we have an additional feature which can also take &lt;span class="math"&gt;\(n\)&lt;/span&gt; distinct values, then we need &lt;span class="math"&gt;\(m\)&lt;/span&gt; to be larger than &lt;span class="math"&gt;\(n^2\)&lt;/span&gt;. In general, if the feature space is &lt;span class="math"&gt;\(d\)&lt;/span&gt;-dimensional, we need &lt;span class="math"&gt;\(m\gg n^d\)&lt;/span&gt;. The same applies for continuous features. One can assume that &lt;span class="math"&gt;\(n=2^{64}\)&lt;/span&gt; for a 64-bit computer, and still the necessary data grows exponentially with the number of dimensions.&lt;/p&gt;
+&lt;p&gt;A more detailed analysis, as explained in the following section, shows that there exists an optimal &lt;span class="math"&gt;\(n_{opt}\)&lt;/span&gt; for which the accuracy is the best possible. For &lt;span class="math"&gt;\(n&amp;gt;n_{opt}\)&lt;/span&gt; the model prediction deteriorates until it starts performing as well as an empirical model given by the relative frequencies of the classes. That is, when the number of features is large, the data becomes so sparse that the best we can do is to draw the classes according to their probabilities &lt;span class="math"&gt;\(P(c=0,1)\)&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;a name="def"&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;&lt;strong&gt;2. Hughes phenomenon&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;Suppose we have a binary classification problem with classes &lt;span class="math"&gt;\(c_1,c_2\)&lt;/span&gt; and a training set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; samples with &lt;span class="math"&gt;\(n\)&lt;/span&gt; features &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;. Intuitively having a very large dataset with only very few features, that is, &lt;span class="math"&gt;\(n\ll m\)&lt;/span&gt; may lead to difficulties to learning because there may not be enough information to correctly classify the samples. On the other hand, a small dataset as compared to a very large number of features, &lt;span class="math"&gt;\(n\gg m\)&lt;/span&gt;, means that we need a very complex hypothesis function which may lead to overfitting. What is the optimal number of features &lt;span class="math"&gt;\(n_{opt}\)&lt;/span&gt;?&lt;/p&gt;
+&lt;p&gt;Suppose we have a binary classification problem with classes &lt;span class="math"&gt;\(c_1,c_2\)&lt;/span&gt; and a training set of &lt;span class="math"&gt;\(m\)&lt;/span&gt; samples with a feature &lt;span class="math"&gt;\(x\)&lt;/span&gt; that can take &lt;span class="math"&gt;\(n\)&lt;/span&gt; values &lt;span class="math"&gt;\(x_i\)&lt;/span&gt;. Intuitively having a very large dataset with only very few features, that is, &lt;span class="math"&gt;\(n\ll m\)&lt;/span&gt; may lead to difficulties in learning because there may not be enough information to correctly classify the samples. On the other hand, a small dataset as compared to a very large number of features, &lt;span class="math"&gt;\(n\gg m\)&lt;/span&gt;, means that we need a very complex hypothesis function which may lead to overfitting. So what is the optimal number &lt;span class="math"&gt;\(n_{opt}\)&lt;/span&gt;?&lt;/p&gt;
 &lt;p&gt;We use the Bayes optimal classifier. In this case we choose the class that has higher probability according to the rule&lt;/p&gt;
 &lt;div class="math"&gt;$$\tilde{c}_i=\text{argmax}_{j=1,2}P(c_j|x)$$&lt;/div&gt;
 &lt;p&gt;
-where &lt;span class="math"&gt;\(\tilde{c}_i\)&lt;/span&gt; is the predicted class and &lt;span class="math"&gt;\(P(c,x)\)&lt;/span&gt; is the true distribution. The accuracy of the Bayes optimal classifier is then
-&lt;/p&gt;
+where &lt;span class="math"&gt;\(\tilde{c}_i\)&lt;/span&gt; is the predicted class and &lt;span class="math"&gt;\(P(c,x)\)&lt;/span&gt; is the true distribution. The accuracy of the Bayes optimal classifier is then&lt;/p&gt;
 &lt;div class="math"&gt;$$\sum_{x,c}\mathbb{1}_{c,\tilde{c}}P(c,x)=\sum_{x,\tilde{c}=\text{argmax P(c|x)}} P(\tilde{c},x)=\sum_x[\text{max}_c P(c|x)] P(x) =\sum_x [\text{max}_c P(x|c)P(c)]$$&lt;/div&gt;
-&lt;p&gt;
-Lets define &lt;span class="math"&gt;\(P(c_1)=p_{c_1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(P(c_2)=p_{c_2}\)&lt;/span&gt;, then the Bayes accuracy has the form:
-&lt;/p&gt;
+&lt;p&gt;Lets define &lt;span class="math"&gt;\(p_{c_1}\equiv P(c_1)\)&lt;/span&gt; and &lt;span class="math"&gt;\(p_{c_2}\equiv P(c_2)\)&lt;/span&gt;. The Bayes accuracy can be written as&lt;/p&gt;
 &lt;div class="math"&gt;$$\sum_{x=x_1}^{x_n} \text{max}\left(P(x|c_1)p_{c_1},P(x|c_2)p_{c_2}\right)$$&lt;/div&gt;
-&lt;p&gt;We ought to study the Bayes accuracy over all possible environment probabilities &lt;span class="math"&gt;\(P(x|c_1)\)&lt;/span&gt; and &lt;span class="math"&gt;\(P(x|c_2)\)&lt;/span&gt;. To do this we define&lt;br&gt;
+&lt;p&gt;We ought to study the Bayes accuracy over all possible environment probabilities &lt;span class="math"&gt;\(P(x|c_1)\)&lt;/span&gt; and &lt;span class="math"&gt;\(P(x|c_2)\)&lt;/span&gt;. &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Statistical approach&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;To do this we define&lt;br&gt;
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}u_i&amp;amp;\equiv&amp;amp; P(x_i|c_1), i=1\ldots n\\ v_i&amp;amp;\equiv&amp;amp; P(x_i|c_2), i=1\ldots n\end{aligned}$$&lt;/div&gt;
 &lt;p&gt;
-and assume that &lt;span class="math"&gt;\(u,v\)&lt;/span&gt; are themselves random  variables. 
-The measure can be calculated from
+and assume that &lt;span class="math"&gt;\(u,v\)&lt;/span&gt; are themselves random  variables. &lt;/p&gt;
+&lt;p&gt;The measure for &lt;span class="math"&gt;\(u_i,v_i\)&lt;/span&gt; can be calculated from the expression
 &lt;/p&gt;
 &lt;div class="math"&gt;$$dP(u_1,u_2,\ldots,u_n,v_1,v_2,\ldots,v_n)=Ndu_1du_2\ldots du_{n-1}dv_1dv_2\ldots dv_{n-1}$$&lt;/div&gt;
 &lt;p&gt;
-where &lt;span class="math"&gt;\(N\)&lt;/span&gt; is a normalization constant. Note that because of the constraints &lt;span class="math"&gt;\(\sum_i u_i=1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_i v_i=1\)&lt;/span&gt;, the measure does not depend on &lt;span class="math"&gt;\(du_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(dv_n\)&lt;/span&gt;. To find the normalization &lt;span class="math"&gt;\(N\)&lt;/span&gt; note that the variables &lt;span class="math"&gt;\(u_i,v_i\)&lt;/span&gt; live in the hypercube &lt;span class="math"&gt;\(0\leq u_i\leq 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(0\leq v_i\leq 1\)&lt;/span&gt; and must obey the conditions &lt;span class="math"&gt;\(\sum_{i=1}^n u_i= 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_{i=1}^nv_i= 1\)&lt;/span&gt;, respectively. Given this we calculate
+where &lt;span class="math"&gt;\(N\)&lt;/span&gt; is a normalization constant. Note that because of the constraints &lt;span class="math"&gt;\(\sum_i u_i=1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_i v_i=1\)&lt;/span&gt;, the measure does not depend on &lt;span class="math"&gt;\(du_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(dv_n\)&lt;/span&gt;. To find the normalization &lt;span class="math"&gt;\(N\)&lt;/span&gt; we use the fact that the variables &lt;span class="math"&gt;\(u_i,v_i\)&lt;/span&gt; live in the hypercube &lt;span class="math"&gt;\(0\leq u_i\leq 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(0\leq v_i\leq 1\)&lt;/span&gt; and must obey the conditions &lt;span class="math"&gt;\(\sum_{i=1}^n u_i= 1\)&lt;/span&gt; and &lt;span class="math"&gt;\(\sum_{i=1}^nv_i= 1\)&lt;/span&gt;, respectively. Given this we calculate
 &lt;/p&gt;
 &lt;div class="math"&gt;$$1=N\int_0^1 du_1\int_{0}^{1-u_1}du_2\int_0^{1-u_1-u_2}du_3\ldots \int_0^1dv_1\int_0^{1-v_1}dv_2\int_0^{1-v_1-v_2}dv_3\ldots $$&lt;/div&gt;
-&lt;p&gt;The integrals can be calculated easily to give &lt;span class="math"&gt;\(N=[(n-1)!]^2\)&lt;/span&gt;. One trick is to use the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^n \int_0^{\infty} dx_i e^{-\alpha x_i}\)&lt;/span&gt; and then use the change of variables &lt;span class="math"&gt;\(x_i=r u_i\)&lt;/span&gt; with &lt;span class="math"&gt;\(\sum_{i=1}^nu_i=1\)&lt;/span&gt; and integrate over &lt;span class="math"&gt;\(r\)&lt;/span&gt;.&lt;/p&gt;
-&lt;p&gt;The mean Bayes accuracy is therefore
+&lt;p&gt;Calculating the integrals we obtain &lt;span class="math"&gt;\(N=[(n-1)!]^2\)&lt;/span&gt;. One trick is to use the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^n \int_0^{\infty} dx_i e^{-\alpha x_i}\)&lt;/span&gt; and then use the change of variables &lt;span class="math"&gt;\(x_i=r u_i\)&lt;/span&gt; with &lt;span class="math"&gt;\(\sum_{i=1}^nu_i=1\)&lt;/span&gt; and integrate over &lt;span class="math"&gt;\(r\)&lt;/span&gt;.&lt;/p&gt;
+&lt;p&gt;To calculate the mean Bayes accuracy, we average the Bayes accuracy over the measure we have just determined. That is,
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\int\Big(\sum_i \text{max}(u_ip_{c_1},v_ip_{c_2}) \Big)dP(u,v)= \\
- &amp;amp;=n(n-1)^2\int_0^1\int_0^1du_1dv_1(1-u_1)^{n-2}(1-v_1)^{n-2}\text{max}(u_1p_{c_1},v_1p_{c_2})\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;
-By symmetry, the sum in the first equation splits into &lt;span class="math"&gt;\(n\)&lt;/span&gt; equal terms. The integrals over the remaining &lt;span class="math"&gt;\(u_2,\ldots u_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_2,\ldots v_n\)&lt;/span&gt; give the term &lt;span class="math"&gt;\((1-u_1)^{n-2}(1-v_1)^{n-2}\)&lt;/span&gt; (one can use again the trick of the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^{n-1}\int_0^{\infty}dx_ie^{-\alpha x_i}\)&lt;/span&gt;, change variables to &lt;span class="math"&gt;\(x_i=ru_i\)&lt;/span&gt; and then use the constrain &lt;span class="math"&gt;\(\sum_{i=2}^{n}u_i=1-u_1\)&lt;/span&gt;).&lt;/p&gt;
-&lt;p&gt;The integral above is relatively easy to calculate. However, we are mostly interested in the limit when &lt;span class="math"&gt;\(n\rightarrow \infty\)&lt;/span&gt;. To do this we change variables &lt;span class="math"&gt;\(u_1\rightarrow u_1/n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_1\rightarrow v_1/n\)&lt;/span&gt; and take &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. This gives
+ &amp;amp;=n(n-1)^2\int_0^1\int_0^1du_1dv_1(1-u_1)^{n-2}(1-v_1)^{n-2}\text{max}(u_1p_{c_1},v_1p_{c_2})\end{aligned}\label{eq1}\tag{1}$$&lt;/div&gt;
+&lt;p&gt;By symmetry, the sum in the first equation splits into &lt;span class="math"&gt;\(n\)&lt;/span&gt; equal terms. The integrals over the remaining &lt;span class="math"&gt;\(u_2,\ldots u_n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_2,\ldots v_n\)&lt;/span&gt; can be done easily and give the contribution &lt;span class="math"&gt;\((1-u_1)^{n-2}(1-v_1)^{n-2}\)&lt;/span&gt; (one can use again the trick of the unconstrained integral &lt;span class="math"&gt;\(\prod_{i=1}^{n-1}\int_0^{\infty}dx_ie^{-\alpha x_i}\)&lt;/span&gt;, change variables to &lt;span class="math"&gt;\(x_i=ru_i\)&lt;/span&gt; and then use the constraint &lt;span class="math"&gt;\(\sum_{i=2}^{n}u_i=1-u_1\)&lt;/span&gt;).&lt;/p&gt;
+&lt;p&gt;The integral above \eqref{eq1} is relatively easy to calculate. However, we are mostly interested when &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. To do this we change variables &lt;span class="math"&gt;\(u_1\rightarrow u_1/n\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_1\rightarrow v_1/n\)&lt;/span&gt; and take &lt;span class="math"&gt;\(n\gg 1\)&lt;/span&gt;. This gives
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}&amp;amp;\sim \int_0^n\int_0^ndu_1dv_1(1-u_1/n)^{n}(1-v_1/n)^{n}\text{max}(u_1p_{c_1},v_1p_{c_2})\\
 &amp;amp;\sim \int_0^{\infty}\int_0^{\infty}du_1dv_1e^{-u_1-v_1}\text{max}(u_1p_{c_1},v_1p_{c_2})\\&amp;amp;=1-p_{c_1}p_{c_2}\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;which means that the Bayes accuracy has a limiting value as the number of features is very large. &lt;/p&gt;
-&lt;p&gt;In the case of a finite dataset, we can use the empirical distribution of &lt;span class="math"&gt;\(u_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_i\)&lt;/span&gt;. Suppose we have &lt;span class="math"&gt;\(m_1\)&lt;/span&gt; datapoints with class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2\)&lt;/span&gt; points with class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;. Then we can estimate &lt;span class="math"&gt;\(P(x_i|c_1)\)&lt;/span&gt; by the fraction of points in class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; that have feature &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; and similarly for class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;, that is, 
+&lt;p&gt;This means that the Bayes accuracy has a limiting value as the feature space becomes very large.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Finite dataset&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In the case of a finite dataset, we can use the empirical distribution of &lt;span class="math"&gt;\(u_i\)&lt;/span&gt; and &lt;span class="math"&gt;\(v_i\)&lt;/span&gt;. Suppose we have &lt;span class="math"&gt;\(m_1\)&lt;/span&gt; datapoints with class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2\)&lt;/span&gt; points with class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;. We can estimate &lt;span class="math"&gt;\(P(x_i|c_1)\)&lt;/span&gt; by the fraction of points in class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; that have feature &lt;span class="math"&gt;\(x_i\)&lt;/span&gt; and similarly for class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt;, that is, 
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}&amp;amp;P(x_i|c_1)\simeq \frac{s_i}{m_1}\\
 &amp;amp;P(x_i|c_2)\simeq \frac{r_i}{m_2}\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;
-In turn the probabilities &lt;span class="math"&gt;\(p_{c_1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(p_{c_2}\)&lt;/span&gt; are given by &lt;span class="math"&gt;\(m_1/m\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2/m\)&lt;/span&gt; respectively where &lt;span class="math"&gt;\(m\)&lt;/span&gt; is the total number of datapoints. The Bayes classification rule then consists in choosing class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; for feature &lt;span class="math"&gt;\(x_1\)&lt;/span&gt; provided &lt;span class="math"&gt;\(s_1p_{c_1}/m_1=s_1/m\)&lt;/span&gt; is larger than &lt;span class="math"&gt;\(r_1p_{c_2}/m_2=r_1/m\)&lt;/span&gt;, and class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt; if it is smaller. When &lt;span class="math"&gt;\(s_1=r_1\)&lt;/span&gt; we choose class which has higher prior probability. &lt;/p&gt;
+&lt;p&gt;In turn the probabilities &lt;span class="math"&gt;\(p_{c_1}\)&lt;/span&gt; and &lt;span class="math"&gt;\(p_{c_2}\)&lt;/span&gt; are given by &lt;span class="math"&gt;\(m_1/m\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_2/m\)&lt;/span&gt; respectively where &lt;span class="math"&gt;\(m\)&lt;/span&gt; is the number of datapoints. The Bayes classification rule then consists in choosing class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; for feature &lt;span class="math"&gt;\(x_1\)&lt;/span&gt; provided &lt;span class="math"&gt;\(s_1p_{c_1}/m_1=s_1/m\)&lt;/span&gt; is larger than &lt;span class="math"&gt;\(r_1p_{c_2}/m_2=r_1/m\)&lt;/span&gt;, and class &lt;span class="math"&gt;\(c_2\)&lt;/span&gt; if it is smaller. When &lt;span class="math"&gt;\(s_1=r_1\)&lt;/span&gt; we choose class which has higher prior probability. &lt;/p&gt;
 &lt;p&gt;The probability of drawing &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; points in class &lt;span class="math"&gt;\(c_1\)&lt;/span&gt; with feature &lt;span class="math"&gt;\(x_1\)&lt;/span&gt;, &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; points with feature &lt;span class="math"&gt;\(x_2\)&lt;/span&gt;, and so on, follows a multinomial distribution:
 &lt;/p&gt;
 &lt;div class="math"&gt;$$P(s_1,s_2,\ldots s_n|u_1,u_2,\ldots)=\frac{m_1!}{s_1!s_2!\ldots s_n!}u_1^{s_1}u_2^{s_2}\ldots u_n^{s_n}$$&lt;/div&gt;
@@ -2076,35 +2701,32 @@ In turn the probabilities &lt;span class="math"&gt;\(p_{c_1}\)&lt;/span&gt; and 
 where &lt;span class="math"&gt;\(s_1+s_2+\ldots s_n=m_1\)&lt;/span&gt;. Marginalizing over &lt;span class="math"&gt;\(s_2,\ldots s_n\)&lt;/span&gt; one obtains:
 &lt;/p&gt;
 &lt;div class="math"&gt;$$P(s_1|u_1)=\frac{m_1!}{s_1!(m_1-s_1)!}u_1^{s_1}(1-u_1)^{m_1-s_1}$$&lt;/div&gt;
-&lt;p&gt;The mean Bayes accuracy is then:
+&lt;p&gt;The mean Bayes accuracy is then
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}&amp;amp; n\int\prod_{i=1}^{n-1}du_idv_i \sum_{s_1,r_1}\text{max}(u_1p_{c_1},v_1 p_{c_2})P(s_1|u_1)P(r_1|v_1)dP(u_1,v_1,\ldots)\\
 &amp;amp;=n(n-1)^2\sum_{s_1&amp;gt;r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_1}\int du_1dv_1 u_1^{s_1+1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1}(1-v_1)^{m_2+n-r_1-2} \\
 &amp;amp;+ n(n-1)^2\sum_{s_1\leq r_1}{m_1\choose s_1}{m_2\choose r_1}p_{c_2}\int du_1dv_1 u_1^{s_1}(1-u_1)^{m_1+n-s_1-2}v_1^{r_1+1}(1-v_1)^{m_2+n-r_1-2}\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;Using &lt;span class="math"&gt;\(\int_0^1 dx x^a (1-x)^b=a!b!/(a+b+1)!\)&lt;/span&gt; we calculate:
+&lt;p&gt;Using &lt;span class="math"&gt;\(\int_0^1 dx x^a (1-x)^b=a!b!/(a+b+1)!\)&lt;/span&gt; we calculate
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}n(n-1)^2&amp;amp;\sum_{s_1&amp;gt;r_1}p_{c_1}{m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\\
 +n(n-1)^2&amp;amp;\sum_{s_1\leq r_1}p_{c_2}{m_1\choose s_1}{m_2\choose r_1}\frac{(r_1+1)!(m_2+n-r_1-2)!}{(m_2+n)!}\frac{s_1!(m_1+n-s_1-2)!}{(m_1+n-1)!}\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;With some work we can simplify the expression above:
+&lt;p&gt;With some work we can simplify the expression above
 &lt;/p&gt;
 &lt;div class="math"&gt;$$\begin{aligned}n(n-1)^2&amp;amp;\sum_{s_1&amp;gt;r_1}p_{c_1}(s_1+1)\frac{(m_1+n-s_1-2)(m_1+n-s_1-2)\ldots (m_1-s_1+1)}{(m_1+n)(m_1+n-1)\ldots (m_1+1)}\times \frac{(m_2+n-r_1-2)(m_2+n-r_1-2)\ldots (m_2-r_1+1)}{(m_2+n-1)(m_2+n-2)\ldots (m_2+1)}\\
 +n(n-1)^2&amp;amp;\sum_{s_1\leq r_1}p_{c_2}(s_1\leftrightarrow r_1,m_1\leftrightarrow m_2)\end{aligned}$$&lt;/div&gt;
-&lt;p&gt;We can determine the limit &lt;span class="math"&gt;\(n\rightarrow \infty\)&lt;/span&gt; by using the Stirling's approximation of the factorial function:
+&lt;p&gt;For large &lt;span class="math"&gt;\(n\)&lt;/span&gt; we use the Stirling's approximation of the factorial function,
 &lt;/p&gt;
 &lt;div class="math"&gt;$$n!\simeq \sqrt{2\pi n}\Big(\frac{n}{e}\Big)^{n}$$&lt;/div&gt;
-&lt;p&gt;
-For each &lt;span class="math"&gt;\(s_1,r_1\)&lt;/span&gt; term we calculate:
-&lt;/p&gt;
+&lt;p&gt;and calculate, for each &lt;span class="math"&gt;\(s_1,r_1\)&lt;/span&gt;,&lt;/p&gt;
 &lt;div class="math"&gt;$${m_1\choose s_1}{m_2\choose r_1}\frac{(s_1+1)!(m_1+n-s_1-2)!}{(m_1+n)!}\frac{r_1!(m_2+n-r_1-2)!}{(m_2+n-1)!}\simeq (s_1+1)\frac{m_1!}{(m_1-s_1)!}\frac{m_2!}{(m_2-r_1)!}n^{-(s_1+r_1+3)}+\mathcal{O}(n^{-(s_1+r_1+4)})$$&lt;/div&gt;
 &lt;p&gt;
-and for the other term we interchange &lt;span class="math"&gt;\(s_1\leftrightarrow r_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_1\leftrightarrow m_2\)&lt;/span&gt;. Only the term with &lt;span class="math"&gt;\(s_1=r_1=0\)&lt;/span&gt; gives an order &lt;span class="math"&gt;\(\mathcal{O}(1)\)&lt;/span&gt; term and so we obtain:
-&lt;/p&gt;
-&lt;div class="math"&gt;$$\text{lim}_{n\rightarrow \infty}=p_{c_2}$$&lt;/div&gt;
-&lt;p&gt;Below a plot of the curve for some values of &lt;span class="math"&gt;\(m=m_1+m_2\)&lt;/span&gt;:
+and for the other sum we interchange &lt;span class="math"&gt;\(s_1\leftrightarrow r_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(m_1\leftrightarrow m_2\)&lt;/span&gt;. Only the term with &lt;span class="math"&gt;\(s_1=r_1=0\)&lt;/span&gt; gives an order &lt;span class="math"&gt;\(\mathcal{O}(1)\)&lt;/span&gt; contribution and so we obtain that&lt;/p&gt;
+&lt;div class="math"&gt;$$\text{lim}_{n\rightarrow \infty}\text{Mean Bayes}=p_{c_2}$$&lt;/div&gt;
+&lt;p&gt;Below a plot of the curve of the Mean Bayes accuracy for some values of &lt;span class="math"&gt;\(m=m_1+m_2\)&lt;/span&gt;:
 &lt;img alt="" height="400" src="/images/p105p205.png" style="display: block; margin: 0 auto" width="400"&gt;&lt;/p&gt;
 &lt;p&gt;ando also for different prior probabilities:
 &lt;img alt="" height="400" src="/images/p102p208.png" style="display: block; margin: 0 auto" width="400"&gt;
-We see in this case that the mean accuracy first increases then it deteriorates until it reaches a limiting value for large &lt;span class="math"&gt;\(n\)&lt;/span&gt;.&lt;/p&gt;
+We see that the mean accuracy first increases up to an optimal values and then it deteriorates until it reaches a limiting value for large &lt;span class="math"&gt;\(n\)&lt;/span&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;a name="python"&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;h3&gt;&lt;strong&gt;2. Python implementation&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;&lt;br/&gt;&lt;/p&gt;

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Neural Network" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Neural Network"; Date: 2020-11-12; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Neural Network"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-11-12T00:00:00+01:00" itemprop="datePublished">Thu 12 November 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Neural Network</a></li>
+<li><a href="#training">Backpropagation</a></li>
+<li><a href="#gen">VC-dimension</a></li>
+<li><a href="#decision">Decision boundary</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Neural Network</strong></h3>
+<p><img alt="" height="350" src="/images/nn.png" style="display: block; margin: 0 auto" width="350"> </p>
+<p>A neural network is a graph composed of nodes and edges. The edges implement linear operations while the nodes aggregate the contribution from each edge before composing by an activation function <span class="math">\(g\)</span>. This process is replicated to the next layer. Note that within each layer the nodes do not interact with each other, that is, there is no edge between nodes. Mathematically we have the following series of operations</p>
+<div class="math">$$\begin{aligned}&amp;z^{(l)}_i=g(\omega^{(l)}_{ij}z^{(l-1)}_j+b^{(l)}_j)\\
+&amp;z^{(l-1)}_j=g(\omega^{(l-1)}_{jk}z^{(l-2)}_k+b^{(l-1)}_j)\\
+&amp;\ldots\\
+&amp;z^{(1)}_p = g(\omega^{(1)}_{pr}x_r+b^{(0)}_l)
+\end{aligned}$$</div>
+<p>
+The activation function <span class="math">\(g\)</span> is a non-linear function with support on the real line. A common choice is the sigmoid function but the sign function also works. This sequence of compositions is known as forward pass. </p>
+<p>A neural network is a type of universal approximator. Cybenko (1989) has shown that any continuous function <span class="math">\(f\)</span> in <span class="math">\(I_n\)</span>, the n-dimensional unit cube, can be approximated with arbitrary accuracy by a sum of the form
+</p>
+<div class="math">$$C=\sum_{i=1}^N \alpha_i\sigma(\beta_i^T\cdot x+b_i) $$</div>
+<p>
+That is,
+</p>
+<div class="math">$$|C(x)-f(x)|&lt;\epsilon,\;\forall x\in I_n$$</div>
+<p>
+for any <span class="math">\(\epsilon&gt;0\)</span>.</p>
+<p>The network architecture has two major parameters that we need to tune: the width of the layers, that is, the number of neurons per layer and the depth or number of layers. Clearly increasing the number of neurons in a layer adds complexity to the neural network, because we are adding more parameters to fit. And the depth does it too. However, adding depth to the neural network increases the number of parameters more rapidily than adding neurons in the same layer. Suppose we have one hidden layer with <span class="math">\(n\)</span> neurons. The number of edges flowing ot this layer is <span class="math">\(n(d+1)\)</span> where <span class="math">\(d\)</span> is the dimension of the input. Instead, if we consider two hidden layers with <span class="math">\(n/2\)</span> neurons each, we have in total <span class="math">\(n(n/2+1)/2+n(d+1)/2\)</span> edges flowing to the hidden layers. This number scales quadratically with <span class="math">\(n\)</span>, while for a single hidden layer it scales linearly.  </p>
+<p>But adding depth has an additional effect. We can see the output at a layer as a different feature representation of the data. So adding layers also allows the neural network to learn different representations of the data which may help performance. The neural network can be trained beforehand on very large datasets and learn very complex features. We can take the last hidden layer feature representation as a new input feature and train only the last layer weights. Training the last layer allows us to use the neural network on datasets that may differ, in population, from training dataset. Instead, if we were to train a neural network with only one hidden layer, we would need to add increasing number of neurons to capture more complex functions. However, the effect of having a large amount of neurons may be prejudicial as we are increasing the dimension of the hidden feature space, which may suffer from dimensionality issues. In contrast, adding depth increases complexity while keeping the dimensionality of the hidden space under control.</p>
+<p>Although depth helps learning, it brings other shortcomings in terms of training. With more depth the derivatives of the loss function with respect to the parameters can be difficult to calculate. As we see next section, using the backpropagation algorithm the derivatives contain multiple products coming from each layer. While the parameters of the last layers are more easily to learn, the parameters coming from the first layers can be hard to learn. Having a very large number of products will eventually make the derivative approach zero or become quite large, which hinders training.</p>
+<p><a name="training"></a></p>
+<h3><strong>2. Backpropagation</strong></h3>
+<p>Lets consider a binary classification problem with classes <span class="math">\(y=\{0,1\}\)</span>. In this case we want to model the probability <span class="math">\(p(x)\equiv p(y=1|x)\)</span>. The loss function is the log-loss function given by
+</p>
+<div class="math">$$L=-\sum_iy_i\ln p(x_i)+(1-y_i)\ln(1-p(x_i))$$</div>
+<p>
+and we model <span class="math">\(p(x)\)</span> with a neural network with one hidden layer, that is,</p>
+<p><img alt="" height="250" src="/images/nn2.png" style="display: block; margin: 0 auto" width="250"> 
+So we have
+</p>
+<div class="math">$$\begin{aligned}&amp; p(x)=\sigma(\omega^{(2)}_{i}z^{(1)}_i+b^{(2)})\\
+&amp;z^{(1)}_j = \sigma( \omega^{(1)}_{jk}x_k+b^{(1)}_j)
+\end{aligned}
+$$</div>
+<p>
+where implicit contractions are in place.</p>
+<p>The loss function depends on the weights <span class="math">\( \omega^{(2)}_i\)</span> and <span class="math">\(\omega^{(1)}_{ij}\)</span> in a very complicated way. To calculate the minimum of the loss function we use the gradient descent algorithm. So we calculate the derivatives of the loss function with respect to the weights,
+</p>
+<div class="math">$$\begin{aligned}&amp;\frac{\partial L}{\partial \omega^{(2)}_i}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})z^{(1)}_i\\
+&amp;\frac{\partial L}{\partial b^{(2)}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\\
+&amp;\frac{\partial L}{\partial \omega^{(1)}_{ij}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\omega^{(2)}_i \dot{\sigma}(\omega^{(1)}_{ik} x_k+b^{(1)}_i)x_j\\
+&amp;\frac{\partial L}{\partial b^{(1)}_{i}}=\sum_x \frac{\partial L}{\partial p(x)}\dot{\sigma}(\omega^{(2)}_{k}z^{(1)}_k+b^{(2)})\omega^{(2)}_i \dot{\sigma}(\omega^{(1)}_{ik} x_k+b^{(1)}_i)
+\end{aligned}$$</div>
+<p>
+We see that as we go down in the layer level, we need to propagate back the composition of the forward pass in order to calculate the derivatives. That is, first we calculate the derivatives of the weights in the higher levels, and progress downwards towards lower levels. This process can be done in an iterative way, and is known as backpropagation algorithm. More generally we have</p>
+<div class="math">$$\begin{aligned}&amp;\frac{\partial p_k(x)}{\partial \omega^{(n)}_{ij}}=\dot{g}^{(l)}_k\omega^{(l)}_{kk_1} \dot{g}^{(l-1)}_{k_1}\omega^{(l-1)}_{k_1k_2}\ldots \dot{g}^{(n)}_i z^{(n-1)}_j\\
+&amp;\frac{\partial p_k(x)}{\partial b^{(n)}_{i}}=\dot{g}^{(l)}_k\omega^{(l)}_{kk_1} \dot{g}^{(l-1)}_{k_1}\omega^{(l-1)}_{k_1k_2}\ldots \dot{g}^{(n)}_i
+\end{aligned}$$</div>
+<p>
+where again sums over indices are implicit.</p>
+<p><a name="gen"></a></p>
+<h3><strong>3. VC-dimension</strong></h3>
+<p>We can estimate the VC-dimension of a neural network with activation the sign function. Recall the growth function definition: <span class="math">\(\text{max}_{C\in \chi: |C|=m}|\mathcal{H}_C|\)</span> where <span class="math">\(\mathcal{H}_C\)</span> is the restriction of the neural network hypotheses from the set <span class="math">\(C\)</span> to <span class="math">\(\{0,1\}\)</span>. Between adjacent layers <span class="math">\(L^{t-1}\)</span> and <span class="math">\(L^{t}\)</span> one can define a mapping between <span class="math">\(\mathcal{H}^t:\,\mathbb{R}^{|L^{t-1}|}\rightarrow \mathbb{R}^{|L^{t}|}\)</span>, where <span class="math">\(|L^{t-1}|\)</span> and <span class="math">\(|L^t|\)</span> are the number of neurons in the layers, respectively. Then the hypothesis class can be written as the composition of each of these maps, that is, <span class="math">\(\mathcal{H}=\mathcal{H}^T\circ \ldots \circ \mathcal{H}^1\)</span>. The growth function can thus be bounded by
+</p>
+<div class="math">$$\Pi_{\mathcal{H}}(m)\leq \prod_{t=1}^T\Pi_{\mathcal{H^t}}(m)$$</div>
+<p>In turn, for each layer the class <span class="math">\(\mathcal{H}^t\)</span> can be written as the product of each neuron class, that is, <span class="math">\(\mathcal{H}^t=\mathcal{H}^{t,1}\times \ldots \times \mathcal{H}^{t,i}\)</span> where <span class="math">\(i\)</span> is the number of neurons in that layer. Similarly we can bound the growth function of each layer class
+</p>
+<div class="math">$$\Pi_{\mathcal{H}^t}(m)\leq \prod_{i=1}^{|L^t|}\Pi_{\mathcal{H^{t,i}}}(m)$$</div>
+<p>Each neuron is a homogeneous halfspace class, and we have seen that the VC-dimension of this class is the dimension of their input plus one (VC-dimension of a separating hyperplane). If we count the bias constant as a single edge, then this dimension is just the number of edges flowing in to the node <span class="math">\(i\)</span>, which we denote as <span class="math">\(d_{t,i}\)</span>. Using Sauer's Lemma we have
+</p>
+<div class="math">$$\Pi_{\mathcal{H}^{t,i}}\leq \Big(\frac{em}{d_{t,i}}\Big)^{d_{t,i}}&lt;(em)^{d_{t,i}}$$</div>
+<p>Putting all these factors together we obtain the bound
+</p>
+<div class="math">$$\Pi_{\mathcal{H}}(m)\leq \prod_{t,i} (em)^{d_{t,i}}=(em)^{|E|}$$</div>
+<p>
+where <span class="math">\(|E|\)</span> is the total number of edges, which is also the total number of parameters in the network. For <span class="math">\(m^*=\text{VC-dim}\)</span> we have <span class="math">\(\Pi_{\mathcal{H}}=2^{m^*}\)</span>, therefore</p>
+<div class="math">$$2^{m^*}\leq (em^*)^{|E|}$$</div>
+<p>
+It follows that <span class="math">\(m^*\)</span> must be of the order <span class="math">\(\mathcal{O}(|E|\log_2|E|)\)</span>.</p>
+<p>If the activation function is the sigmoid, the proof is out of scope. One can though give a rough estimate. The VC-dimension should be of the order of the number of tunable parameters. This is the number of edges <span class="math">\(|E|\)</span>, counting the bias parameters. </p>
+<p><a name="decision"></a></p>
+<h3><strong>4. Decision Boundary </strong></h3>
+<p>Below we plot the decision boundary for a neural network with one hidden layer after several iterations, that is, the number of gradient descent steps:
+<img alt="" height="300" src="/images/nn_decision.png" style="display: block; margin: 0 auto" width="300"> </p>
+<p>The neural network has enough capacity to draw complicated decision boundaries. Below we show the decision boundary at different stages of learning. </p>
+<p float="left">
+  <img src="/images/nn_decision_200.png" width="230" />
+  <img src="/images/nn_decision_1000.png" width="230" />
+  <img src="/images/nn_decision_2000.png" width="230" />
+</p>
+
+<p float="center">
+  <img src="/images/nn_decision_3000.png" width="230" />
+  <img src="/images/nn_decision_4000.png" width="230" />
+  <img src="/images/nn_decision_30k.png" width="230" />
+</p>
+
+<p>Waiting long enough, allows the neural network to overfit the data as we see in the last picture. </p>
+<p><a name="python"></a></p>
+<h3><strong>5. Python implementation</strong></h3>
+<p>Define classes for linear layer and sigmoid activation function:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinearLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dim_in</span><span class="p">,</span><span class="n">dim_out</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_in</span><span class="o">=</span><span class="n">dim_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_out</span><span class="o">=</span><span class="n">dim_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.01</span><span class="p">,(</span><span class="n">dim_in</span><span class="p">,</span><span class="n">dim_out</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.01</span><span class="p">,</span><span class="n">dim_out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">+=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">dL</span><span class="o">=</span><span class="n">x</span>
+
+        <span class="k">return</span> <span class="n">dL</span>
+
+<span class="k">class</span> <span class="nc">Sigmoid</span><span class="p">:</span>
+    <span class="s2">&quot;sigmoid function&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
+
+<p>Class NN: implements neural network</p>
+<p>Class logloss: returns loss function object which contains backward derivates for gradient descent</p>
+<p>Class optimizer: implements gradiend descent step with specified learning rate</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NN</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Neural Network with one hidden layer&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dim_in</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">dim_out</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">dim_in</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer2</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">dim_out</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="o">=</span><span class="n">Sigmoid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="o">=</span><span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_l1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_s1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_l1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_l2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layer2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_s1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_s2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_l2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_s2</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="n">pred</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred</span>
+
+<span class="k">class</span> <span class="nc">logloss</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">L</span><span class="o">=</span><span class="n">y</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">L</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">dL</span><span class="o">=-</span><span class="n">y</span><span class="o">/</span><span class="n">p</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">dL</span><span class="o">=</span><span class="n">dL</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dL</span><span class="o">=</span><span class="n">dL</span><span class="o">*</span><span class="n">model</span><span class="o">.</span><span class="n">sig</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">out_l2</span><span class="p">)</span>
+        <span class="n">dw2</span><span class="p">,</span><span class="n">db2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">out_s1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">dL</span><span class="p">),</span><span class="n">dL</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="n">dw1</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">layer2</span><span class="o">.</span><span class="n">weights</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">model</span><span class="o">.</span><span class="n">sig</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">out_l1</span><span class="p">)</span>
+        <span class="n">db1</span><span class="o">=</span><span class="p">(</span><span class="n">dL</span><span class="o">*</span><span class="n">dw1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dw1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">dL</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">dw1</span><span class="p">)</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">delta</span><span class="o">=</span><span class="n">db1</span><span class="p">,</span><span class="n">dw1</span><span class="p">,</span><span class="n">db2</span><span class="p">,</span><span class="n">dw2</span>
+
+<span class="k">class</span> <span class="nc">optimizer</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="o">=</span><span class="n">lr</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">db1</span><span class="p">,</span><span class="n">dw1</span><span class="p">,</span><span class="n">db2</span><span class="p">,</span><span class="n">dw2</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">layer1</span><span class="o">.</span><span class="n">bias</span><span class="o">-=</span><span class="n">db1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">layer1</span><span class="o">.</span><span class="n">weights</span><span class="o">-=</span><span class="n">dw1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">layer2</span><span class="o">.</span><span class="n">bias</span><span class="o">-=</span><span class="n">db2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">layer2</span><span class="o">.</span><span class="n">weights</span><span class="o">-=</span><span class="n">dw2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span>
+</pre></div>
+
+
+<p>Training for loop:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span><span class="n">loss</span><span class="p">,</span><span class="n">xtrain</span><span class="p">,</span><span class="n">ytrain</span><span class="p">,</span><span class="n">num_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iter</span><span class="p">):</span>
+
+        <span class="n">L</span><span class="o">=</span><span class="n">loss</span><span class="p">(</span><span class="n">xtrain</span><span class="p">,</span><span class="n">ytrain</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">xtrain</span><span class="p">,</span><span class="n">ytrain</span><span class="p">)</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">i</span><span class="o">%</span><span class="mi">10</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Iteration &#39;</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="s1">&#39;, loss: &#39;</span><span class="p">,</span><span class="n">L</span><span class="p">)</span>
+</pre></div>
+
+
+<h3><strong>References</strong></h3>
+<p><br/></p>
+<p>[1] <em>Understanding Machine Learning: from Theory to Algorithms</em>, Shai Ben-David and Shai Shalev-Shwartz</p>
+<p>[2] <em>The elements of statistical learning</em>, T. Hastie, R. Tibshirani, J. Friedman</p>
+<p>[3] <em>Approximation by superpositions of a sigmoidal function</em>, Cybenko, G. (1989) </p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (17)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
