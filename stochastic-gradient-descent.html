@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Stochastic Gradient Descent" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Stochastic Gradient Descent"; Date: 2020-12-01; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Stochastic Gradient Descent"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2020-12-01T00:00:00+01:00" itemprop="datePublished">Tue 01 December 2020</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#sgd">SGD</a></li>
+<li><a href="#var">Variants</a></li>
+</ol>
+<p><a name="sgd"></a></p>
+<h3><strong>1. SGD</strong></h3>
+<p>The gradient descent is an algorithm for solving optimization problems. It uses the gradients of the function we want to optimize to search for a solution. The concept is very simple. Suppose we want to minimize a loss function. We start by choosing a random point in the loss function surface. Then we make a step proportional to the gradient of the function at that point but in the opposite direction. This guarantees, if the step is sufficiently small, that the new point has smaller loss value. We continue this process until the gradient is zero, or smaller than a predefined threshold.  See the picture below for an example</p>
+<p><img alt="" height="200" src="/images/grad1D.png" style="display: block; margin: 0 auto" width="200"> </p>
+<p>The loss is usually a multivariate function in a high dimensional space, that is, <span class="math">\(L=L(x)\)</span> with <span class="math">\(x\in\mathbb{R}^d\)</span>. The gradient step ensures that we always make steps in a direction orthogonal to the surfaces of constant loss value. That is, consider the surface that has loss value <span class="math">\(L=L_1\)</span>. A small step <span class="math">\(dx\)</span> on this surface does not change the loss value. Therefore we must have </p>
+<div class="math">$$\frac{\partial L}{\partial x_1}dx_1+\frac{\partial L}{\partial x_2}dx_2+\ldots+\frac{\partial L}{\partial x_d}dx_d=\frac{\partial L}{\partial x}\cdot dx=0$$</div>
+<p>
+and so the gradient vector <span class="math">\(\partial L /\partial x\)</span> is an orthogonal vector to the surface <span class="math">\(L=L_1\)</span>.
+In other words, a gradient step moves the parameter away from surfaces of constant loss. </p>
+<p><img alt="" height="300" src="/images/grad_descent.png" style="display: block; margin: 0 auto" width="300"> </p>
+<p>In practice we perform the update
+</p>
+<div class="math">$$w_t=w_{t-1}-\eta \frac{\partial L}{\partial w_{t-1}}$$</div>
+<p>
+where <span class="math">\(w\)</span> is the parameter to be learnt and <span class="math">\(\eta\)</span> is the learning rate. Usually, we need to adapt the learning rate during the descent. A large learning rate may lead to non-convergent results. On the other hand, a small learning rate will make the convergence very slow. </p>
+<p>One of the most important shortcomings of the gradient descent is that it may get stuck in a local minimum. To add to this, calculating the gradient at every step may be computationally very expensive. For example, in neural networks the computational cost is at least of order <span class="math">\(\mathcal{O}(Nm)\)</span>, where <span class="math">\(N\)</span> is the number of datapoints and <span class="math">\(m\)</span> the number of parameters. For very large neural networks with millions of parameters, calculating the gradient at each step is infeasable. To solve these issues, instead of calculating the loss overall all the datapoints we can consider small batches at each step. We calculate the contribution to the gradient from the smaller batch
+</p>
+<div class="math">$$\frac{\partial L^{B}}{\partial w}=\sum_{i\in\text{Batch}}\frac{\partial L_i}{\partial w}$$</div>
+<p> <br>
+where <span class="math">\(L_i\)</span> is the loss contribution from a single datapoint, and use this to update the parameters in an iterative way.</p>
+<p>In stochastic gradient descent we update the parameters using a small-batch gradient descent. We run over all small-batches to guarantee that we learn over all the data. Suppose we have a sequence of non-overlapping and randomly chosen small batches <span class="math">\(\{B_0,B_1,\ldots,B_n\}\)</span> each of size <span class="math">\(b\)</span>. Then at each step in the gradient descent we update the parameters using the corresponding batch, that is,</p>
+<div class="math">$$w_t=w_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}$$</div>
+<p>Once we run over all batches, if the parameters <span class="math">\(w_t\)</span> do not change considerably, the total distance traveled in parameter space is proportional to the gradient calculated on the full dataset. That is,</p>
+<div class="math">$$\sum_{t=0}^T \Delta w_t=-\eta \sum_{t=0}^T  \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}\simeq -\eta\frac{\partial L}{\partial w_{T}}$$</div>
+<p>If the batches have size one, then this is a Monte-Carlo estimation of the unbiased gradient descent <span class="math">\(\sum_i \frac{\partial L_i}{\partial w}D(x_i)\)</span>, where <span class="math">\(D(x_i)\)</span> is the true distribution, and hence the name stochastic descent. Even if the descent takes us to a local minimum, the batch-gradient may not be zero and we will avoid being stuck there. </p>
+<p><a name="var"></a></p>
+<h3><strong>2. Variants</strong></h3>
+<ul>
+<li><strong>Momentum</strong></li>
+</ul>
+<p>The stochastic gradient descent can drift the learning over directions in feature space that are not relevant. This happens because at each step the new gradient step does not remember past movements. To compensate for this one may add a "velocity" component <span class="math">\(v_t\)</span>, that is,
+</p>
+<div class="math">$$\begin{aligned}
+&amp;v_{t}=\gamma v_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}\\
+&amp;w_t=w_{t-1}+v_{t}
+\end{aligned}$$</div>
+<p>
+where <span class="math">\(\gamma\)</span> is the velocity parameter and <span class="math">\(v_{0}=0\)</span>. Since <span class="math">\(\gamma&lt;1\)</span>, movements in the far past become less and less important. However, recent movements can contribute significantly. In essence, we are calculating an exponentially decaying average of the past gradients. This average eliminates frequent oscillations and reinforces relevant directions of the descent.</p>
+<ul>
+<li><strong>Nesterov accelerated gradient (NAG)</strong></li>
+</ul>
+<p>The NAG learning is very similar to the momentum update, except that it introduces corrections to the gradient. So instead of calculating the gradient at <span class="math">\(w_{t-1}\)</span>, it is calculated at <span class="math">\(w_{t-1}+\gamma v_{t-1}\)</span>. That is,
+</p>
+<div class="math">$$\begin{aligned}
+&amp;v_{t}=\gamma v_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}(w_{t-1}+\gamma v_{t-1})\\
+&amp;w_t=w_{t-1}+v_{t}
+\end{aligned}$$</div>
+<p>
+The shift by <span class="math">\(\gamma v_{t-1}\)</span> brings corrections to gradient.</p>
+<ul>
+<li><strong>AdaGrad</strong></li>
+</ul>
+<p>Adagrad or adaptive gradient introduces a learning rate that varies through the descent. The algorithm consists in the sequence
+</p>
+<div class="math">$$\begin{aligned}
+w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{G_{t-1,ii}}}g_{t-1,i}
+\end{aligned}$$</div>
+<p>
+where <span class="math">\(g_{t,i}\)</span> are the gradients for the parameter component <span class="math">\(w_{t-1,i}\)</span>, and <span class="math">\(G_{t-1,ii}=\sum_{\tau=0}^tg^2_{\tau,i}\)</span> is the sum of all the squared gradients up to time <span class="math">\(t\)</span>. The solution is actually more complicated but also computationally more expensive. The matrix <span class="math">\(G_{t,ii}\)</span> is replaced by the full matrix <span class="math">\(G_t=\sum_{\tau=0}^tg_{\tau}g_{\tau}^T\)</span>, where <span class="math">\(g_t\)</span> is now the gradient vector. This choice guarantees optimal bounds on the regret function. During the stochastic descent new data is introduced at each step in order to estimate the update of the parameters. The regret function calculates the difference between the acumulated loss at time <span class="math">\(t\)</span> and the actual minimum of the loss known at time <span class="math">\(t\)</span>. Bounding the regret guarantees that the update algorithm takes us close to the desired solution.</p>
+<ul>
+<li><strong>AdaDelta</strong></li>
+</ul>
+<p>The Adagrad algorithm makes the learning rate very small after some time. This happens because the matrix <span class="math">\(G_{t,ii}\)</span> accumulates all the past gradients, and thus becomes increasingly larger. Instead, we can calculate a weighted sum over the squared gradients which prevents contributions in the far past to be relevant. That is,
+ </p>
+<div class="math">$$\begin{aligned}
+ &amp;E(g)_t=\gamma E(g)_{t-1}+(1-\gamma)g_t^2\\
+&amp;w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{ E(g)_{t-1,ii} }}g_{t-1,i}
+\end{aligned}$$</div>
+<p>
+A similar algorithm which goes by the name <strong>RMSprop</strong> has been developed independently around the same time as the Adadelta.</p>
+<ul>
+<li><strong>Adam</strong></li>
+</ul>
+<p>The Adam or adaptive momentum estimation, adds further improvements in the Adadelta algorithm. The update algorithm introduces a momentum component in addition to the squared gradients,
+</p>
+<div class="math">$$
+\begin{aligned}
+&amp;v_t=\gamma_1 v_{t-1}+(1-\gamma_1) g_t\\
+ &amp;E(g)_t=\gamma_2 E(g)_{t-1}+(1-\gamma_2)g_t^2
+\end{aligned}
+$$</div>
+<p>
+But it also introduces bias corrections. That is, after time <span class="math">\(t\)</span> the components above have the expression
+</p>
+<div class="math">$$
+\begin{aligned}
+&amp;v_t=(1-\gamma_1)\sum_{\tau=0}^{t}\gamma_1^{t-\tau}g_{\tau}\\
+ &amp;E(g)_t=(1-\gamma_2)\sum_{\tau=0}^{t}\gamma_2^{t-\tau}g^2_{\tau}
+\end{aligned}
+$$</div>
+<p>
+Assuming that <span class="math">\(g_{\tau}\)</span> is drawn i.i.d according to some distribution, we take the expectation values 
+</p>
+<div class="math">$$
+\begin{aligned}
+&amp;\mathbb{E}(v_t)=\mathbb{E}(g_{t})(1-\gamma_1)\sum_{\tau=1}^{t}\gamma_1^{t-\tau}=\mathbb{E}(g_{t})(1-\gamma_1^t)\\
+ &amp;\mathbb{E}(E(g)_t) = \mathbb{E}(g^2_{t}) (1-\gamma_2)\sum_{\tau=1}^{t}\gamma_2^{t-\tau}=\mathbb{E}(g^2_{t}) (1-\gamma_2^t)
+\end{aligned}
+$$</div>
+<p>
+So to guarantee that we have <span class="math">\(\mathbb{E}(v_t)=\mathbb{E}(g_{t})\)</span> and <span class="math">\(\mathbb{E}(E(g)_t) = \mathbb{E}(g^2_{t})\)</span> we rescale <span class="math">\(v_t\)</span> and <span class="math">\(E(g)_t\)</span> by <span class="math">\((1-\gamma_1^t)\)</span> and <span class="math">\((1-\gamma_2^t)\)</span> respectively. The update becomes
+</p>
+<div class="math">$$
+\begin{aligned}
+&amp;\hat{v}_t=\frac{v_t}{1-\gamma_1^t}\\
+ &amp;\hat{E}(g)_t=\frac{E(g)_t}{(1-\gamma_2^t)}\\
+ &amp;w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{ \hat{E}(g)_{t-1,ii} }}\hat{v}_{t-1,i}
+\end{aligned}
+$$</div>
+<p>Note that Adam reduces to Adadelta when <span class="math">\(\gamma_1=0\)</span>.</p>
+<h3><strong>References</strong></h3>
+<p><br/></p>
+<p>[1] <em>Adaptive Subgradient Methods for Online Learning and Stochastic Optimization</em>, J. Duchi, E. Hazan, Y. Singer, (2011)</p>
+<p>[2] <em>Adam: a method for stochastic optimization</em>, D. Kingma, J. L. Ba, (2015)</p>
+<p>[3] <em>Lecture 6a: Overview of mini-batch gradient descent</em>, G. Hinton, (CS lectures)</p>
+<p>[4] <em>Introduction to Online Convex Optimization</em>, E. Hazan</p>
+<p>[5] <em>An overview of gradient descent optimization algorithms</em>, S. Ruder, arXiv:1609.04747</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (18)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>

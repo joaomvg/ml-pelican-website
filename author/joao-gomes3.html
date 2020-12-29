@@ -25,100 +25,18 @@
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/statistical-testing.html">
-		<h2 itemprop="name headline">"Statistical Testing"</h2>
+	<a href="/probably-approximately-correct-pac.html">
+		<h2 itemprop="name headline">"Probably Approximately Correct (PAC)"</h2>
 	</a>
-	<time datetime="2020-06-30T00:00:00+02:00" itemprop="datePublished">Tue 30 June 2020</time>
+	<time datetime="2020-04-14T00:00:00+02:00" itemprop="datePublished">Tue 14 April 2020</time>
 	&nbsp;—&nbsp;
 	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
 		<span itemprop="name">Joao Gomes</span>
 	</span>
-	<div class="summary"><p>We explain in detail the Student's t-statistic and the <span class="math">\(\chi^2\)</span> statistic.</p>
-<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
-
-    var configscript = document.createElement('script');
-    configscript.type = 'text/x-mathjax-config';
-    configscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        availableFonts: ['STIX', 'TeX']," +
-        "        preferredFont: 'STIX'," +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script></div>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/statistics.html" rel="category">Statistics</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/linear-regression-classifier.html">
-		<h2 itemprop="name headline">"Linear regression classifier"</h2>
-	</a>
-	<time datetime="2020-06-20T00:00:00+02:00" itemprop="datePublished">Sat 20 June 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>Linear regression/classifier basics</p></div>
+	<div class="summary"><p>In this post I explain some of the fundamentals of machine learning: PAC learnability, overfitting and generalisation bounds for classification problems. I show how these concepts work in detail for the problem of learning circumferences.</p></div>
 	Cover:
 	<span>
-	    <img src="images/lr_3classes.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
+	    <img src="images/circle_learning_epsilon.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
 	</span>
 	Category:
 	<span itemprop="articleSection">
@@ -127,74 +45,6 @@
 	Tags:
 	<span itemprop="keywords">
 		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/bias-variancecomplexity-trade-off.html">
-		<h2 itemprop="name headline">"Bias-Variance/Complexity trade-off"</h2>
-	</a>
-	<time datetime="2020-06-05T00:00:00+02:00" itemprop="datePublished">Fri 05 June 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We explain the trade-off between bias and variance or complexity.</p></div>
-	Cover:
-	<span>
-	    <img src="images/bias_vs_complexity.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/curse-of-dimensionality.html">
-		<h2 itemprop="name headline">"Curse of dimensionality"</h2>
-	</a>
-	<time datetime="2020-05-26T00:00:00+02:00" itemprop="datePublished">Tue 26 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We address the importance of dimensionality in machine learning.</p></div>
-	Cover:
-	<span>
-	    <img src="images/p105p205.png" alt="" width="400" height="400" style="display: block; margin: 0 auto" >
-	</span>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/data-science.html" rel="tag">data science</a>
-	</span>
-</div>
-<hr>
-<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
-	<a href="/hoeffdings-inequality.html">
-		<h2 itemprop="name headline">"Hoeffding's inequality"</h2>
-	</a>
-	<time datetime="2020-05-05T00:00:00+02:00" itemprop="datePublished">Tue 05 May 2020</time>
-	&nbsp;—&nbsp;
-	<span itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-		<span itemprop="name">Joao Gomes</span>
-	</span>
-	<div class="summary"><p>We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.</p></div>
-	Category:
-	<span itemprop="articleSection">
-		<a href="/category/statistics.html" rel="category">Statistics</a>
-	</span>
-	Tags:
-	<span itemprop="keywords">
-		<a href="/tag/machine-learning.html" rel="tag">machine learning</a>
 	</span>
 </div>
 <hr>
@@ -205,9 +55,8 @@
     <li class=""><a href="/author/joao-gomes.html">1</a></li>
     <li class=""><a href="/author/joao-gomes2.html">2</a></li>
     <li class="active"><a href="/author/joao-gomes3.html">3</a></li>
-    <li class=""><a href="/author/joao-gomes4.html">4</a></li>
 
-    <li class="next"><a href="/author/joao-gomes4.html">Next &rarr;</a></li>
+    <li class="next disabled"><a href="#">&rarr; Next</a></li>
 
 </ul>
 </div> 		</div>
@@ -237,7 +86,7 @@
 						<h4>Categories</h4>
 						<ul class="list-unstyled my-list-style">
 							<li><a href="/category/data-science.html">Data Science (1)</a></li>
-							<li><a href="/category/machine-learning.html">Machine Learning (17)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (18)</a></li>
 							<li><a href="/category/statistics.html">Statistics (2)</a></li>
 						</ul>
 					</div>

@@ -1,5 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-11-12T00:00:00+01:00</updated><entry><title>"Neural Network"</title><link href="/neural-network.html" rel="alternate"></link><published>2020-11-12T00:00:00+01:00</published><updated>2020-11-12T00:00:00+01:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-11-12:/neural-network.html</id><summary type="html">&lt;p&gt;A neural network is a graphical representation of a set of linear and non-linear operations. In a feed forward neural network, we stack several layers composed of nodes that transform the data non-linearly. The data crosses multiple layers, changing its feature's representation along the way. This process allows to create very complex output functions.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Data Science and Machine Learning - Machine Learning</title><link href="/" rel="alternate"></link><link href="/feeds/machine-learning.atom.xml" rel="self"></link><id>/</id><updated>2020-12-01T00:00:00+01:00</updated><entry><title>"Stochastic Gradient Descent"</title><link href="/stochastic-gradient-descent.html" rel="alternate"></link><published>2020-12-01T00:00:00+01:00</published><updated>2020-12-01T00:00:00+01:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-12-01:/stochastic-gradient-descent.html</id><summary type="html">&lt;p&gt;Stochastic gradient descent is an algorithm for online-optimization. Its purpose is to estimate the optimal parameters of the learning hypotheses. Unlike the gradient descent, the iterative process requires only a small amount of data at a time, which is very useful for large datasets.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
+&lt;li&gt;&lt;a href="#sgd"&gt;SGD&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#var"&gt;Variants&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a name="sgd"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;1. SGD&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;The gradient descent is an algorithm for solving optimization problems. It uses the gradients of the function we want to optimize to search for a solution. The concept is very simple. Suppose we want to minimize a loss function. We start by choosing a random point in the loss function surface. Then we make a step proportional to the gradient of the function at that point but in the opposite direction. This guarantees, if the step is sufficiently small, that the new point has smaller loss value. We continue this process until the gradient is zero, or smaller than a predefined threshold.  See the picture below for an example&lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="200" src="/images/grad1D.png" style="display: block; margin: 0 auto" width="200"&gt; &lt;/p&gt;
+&lt;p&gt;The loss is usually a multivariate function in a high dimensional space, that is, &lt;span class="math"&gt;\(L=L(x)\)&lt;/span&gt; with &lt;span class="math"&gt;\(x\in\mathbb{R}^d\)&lt;/span&gt;. The gradient step ensures that we always make steps in a direction orthogonal to the surfaces of constant loss value. That is, consider the surface that has loss value &lt;span class="math"&gt;\(L=L_1\)&lt;/span&gt;. A small step &lt;span class="math"&gt;\(dx\)&lt;/span&gt; on this surface does not change the loss value. Therefore we must have &lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial L}{\partial x_1}dx_1+\frac{\partial L}{\partial x_2}dx_2+\ldots+\frac{\partial L}{\partial x_d}dx_d=\frac{\partial L}{\partial x}\cdot dx=0$$&lt;/div&gt;
+&lt;p&gt;
+and so the gradient vector &lt;span class="math"&gt;\(\partial L /\partial x\)&lt;/span&gt; is an orthogonal vector to the surface &lt;span class="math"&gt;\(L=L_1\)&lt;/span&gt;.
+In other words, a gradient step moves the parameter away from surfaces of constant loss. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="" height="300" src="/images/grad_descent.png" style="display: block; margin: 0 auto" width="300"&gt; &lt;/p&gt;
+&lt;p&gt;In practice we perform the update
+&lt;/p&gt;
+&lt;div class="math"&gt;$$w_t=w_{t-1}-\eta \frac{\partial L}{\partial w_{t-1}}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(w\)&lt;/span&gt; is the parameter to be learnt and &lt;span class="math"&gt;\(\eta\)&lt;/span&gt; is the learning rate. Usually, we need to adapt the learning rate during the descent. A large learning rate may lead to non-convergent results. On the other hand, a small learning rate will make the convergence very slow. &lt;/p&gt;
+&lt;p&gt;One of the most important shortcomings of the gradient descent is that it may get stuck in a local minimum. To add to this, calculating the gradient at every step may be computationally very expensive. For example, in neural networks the computational cost is at least of order &lt;span class="math"&gt;\(\mathcal{O}(Nm)\)&lt;/span&gt;, where &lt;span class="math"&gt;\(N\)&lt;/span&gt; is the number of datapoints and &lt;span class="math"&gt;\(m\)&lt;/span&gt; the number of parameters. For very large neural networks with millions of parameters, calculating the gradient at each step is infeasable. To solve these issues, instead of calculating the loss overall all the datapoints we can consider small batches at each step. We calculate the contribution to the gradient from the smaller batch
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\frac{\partial L^{B}}{\partial w}=\sum_{i\in\text{Batch}}\frac{\partial L_i}{\partial w}$$&lt;/div&gt;
+&lt;p&gt; &lt;br&gt;
+where &lt;span class="math"&gt;\(L_i\)&lt;/span&gt; is the loss contribution from a single datapoint, and use this to update the parameters in an iterative way.&lt;/p&gt;
+&lt;p&gt;In stochastic gradient descent we update the parameters using a small-batch gradient descent. We run over all small-batches to guarantee that we learn over all the data. Suppose we have a sequence of non-overlapping and randomly chosen small batches &lt;span class="math"&gt;\(\{B_0,B_1,\ldots,B_n\}\)&lt;/span&gt; each of size &lt;span class="math"&gt;\(b\)&lt;/span&gt;. Then at each step in the gradient descent we update the parameters using the corresponding batch, that is,&lt;/p&gt;
+&lt;div class="math"&gt;$$w_t=w_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}$$&lt;/div&gt;
+&lt;p&gt;Once we run over all batches, if the parameters &lt;span class="math"&gt;\(w_t\)&lt;/span&gt; do not change considerably, the total distance traveled in parameter space is proportional to the gradient calculated on the full dataset. That is,&lt;/p&gt;
+&lt;div class="math"&gt;$$\sum_{t=0}^T \Delta w_t=-\eta \sum_{t=0}^T  \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}\simeq -\eta\frac{\partial L}{\partial w_{T}}$$&lt;/div&gt;
+&lt;p&gt;If the batches have size one, then this is a Monte-Carlo estimation of the unbiased gradient descent &lt;span class="math"&gt;\(\sum_i \frac{\partial L_i}{\partial w}D(x_i)\)&lt;/span&gt;, where &lt;span class="math"&gt;\(D(x_i)\)&lt;/span&gt; is the true distribution, and hence the name stochastic descent. Even if the descent takes us to a local minimum, the batch-gradient may not be zero and we will avoid being stuck there. &lt;/p&gt;
+&lt;p&gt;&lt;a name="var"&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;2. Variants&lt;/strong&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Momentum&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The stochastic gradient descent can drift the learning over directions in feature space that are not relevant. This happens because at each step the new gradient step does not remember past movements. To compensate for this one may add a "velocity" component &lt;span class="math"&gt;\(v_t\)&lt;/span&gt;, that is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}
+&amp;amp;v_{t}=\gamma v_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}\\
+&amp;amp;w_t=w_{t-1}+v_{t}
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(\gamma\)&lt;/span&gt; is the velocity parameter and &lt;span class="math"&gt;\(v_{0}=0\)&lt;/span&gt;. Since &lt;span class="math"&gt;\(\gamma&amp;lt;1\)&lt;/span&gt;, movements in the far past become less and less important. However, recent movements can contribute significantly. In essence, we are calculating an exponentially decaying average of the past gradients. This average eliminates frequent oscillations and reinforces relevant directions of the descent.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Nesterov accelerated gradient (NAG)&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The NAG learning is very similar to the momentum update, except that it introduces corrections to the gradient. So instead of calculating the gradient at &lt;span class="math"&gt;\(w_{t-1}\)&lt;/span&gt;, it is calculated at &lt;span class="math"&gt;\(w_{t-1}+\gamma v_{t-1}\)&lt;/span&gt;. That is,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}
+&amp;amp;v_{t}=\gamma v_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}(w_{t-1}+\gamma v_{t-1})\\
+&amp;amp;w_t=w_{t-1}+v_{t}
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+The shift by &lt;span class="math"&gt;\(\gamma v_{t-1}\)&lt;/span&gt; brings corrections to gradient.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AdaGrad&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Adagrad or adaptive gradient introduces a learning rate that varies through the descent. The algorithm consists in the sequence
+&lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}
+w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{G_{t-1,ii}}}g_{t-1,i}
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+where &lt;span class="math"&gt;\(g_{t,i}\)&lt;/span&gt; are the gradients for the parameter component &lt;span class="math"&gt;\(w_{t-1,i}\)&lt;/span&gt;, and &lt;span class="math"&gt;\(G_{t-1,ii}=\sum_{\tau=0}^tg^2_{\tau,i}\)&lt;/span&gt; is the sum of all the squared gradients up to time &lt;span class="math"&gt;\(t\)&lt;/span&gt;. The solution is actually more complicated but also computationally more expensive. The matrix &lt;span class="math"&gt;\(G_{t,ii}\)&lt;/span&gt; is replaced by the full matrix &lt;span class="math"&gt;\(G_t=\sum_{\tau=0}^tg_{\tau}g_{\tau}^T\)&lt;/span&gt;, where &lt;span class="math"&gt;\(g_t\)&lt;/span&gt; is now the gradient vector. This choice guarantees optimal bounds on the regret function. During the stochastic descent new data is introduced at each step in order to estimate the update of the parameters. The regret function calculates the difference between the acumulated loss at time &lt;span class="math"&gt;\(t\)&lt;/span&gt; and the actual minimum of the loss known at time &lt;span class="math"&gt;\(t\)&lt;/span&gt;. Bounding the regret guarantees that the update algorithm takes us close to the desired solution.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;AdaDelta&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The Adagrad algorithm makes the learning rate very small after some time. This happens because the matrix &lt;span class="math"&gt;\(G_{t,ii}\)&lt;/span&gt; accumulates all the past gradients, and thus becomes increasingly larger. Instead, we can calculate a weighted sum over the squared gradients which prevents contributions in the far past to be relevant. That is,
+ &lt;/p&gt;
+&lt;div class="math"&gt;$$\begin{aligned}
+ &amp;amp;E(g)_t=\gamma E(g)_{t-1}+(1-\gamma)g_t^2\\
+&amp;amp;w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{ E(g)_{t-1,ii} }}g_{t-1,i}
+\end{aligned}$$&lt;/div&gt;
+&lt;p&gt;
+A similar algorithm which goes by the name &lt;strong&gt;RMSprop&lt;/strong&gt; has been developed independently around the same time as the Adadelta.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Adam&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The Adam or adaptive momentum estimation, adds further improvements in the Adadelta algorithm. The update algorithm introduces a momentum component in addition to the squared gradients,
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp;v_t=\gamma_1 v_{t-1}+(1-\gamma_1) g_t\\
+ &amp;amp;E(g)_t=\gamma_2 E(g)_{t-1}+(1-\gamma_2)g_t^2
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;
+But it also introduces bias corrections. That is, after time &lt;span class="math"&gt;\(t\)&lt;/span&gt; the components above have the expression
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp;v_t=(1-\gamma_1)\sum_{\tau=0}^{t}\gamma_1^{t-\tau}g_{\tau}\\
+ &amp;amp;E(g)_t=(1-\gamma_2)\sum_{\tau=0}^{t}\gamma_2^{t-\tau}g^2_{\tau}
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;
+Assuming that &lt;span class="math"&gt;\(g_{\tau}\)&lt;/span&gt; is drawn i.i.d according to some distribution, we take the expectation values 
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp;\mathbb{E}(v_t)=\mathbb{E}(g_{t})(1-\gamma_1)\sum_{\tau=1}^{t}\gamma_1^{t-\tau}=\mathbb{E}(g_{t})(1-\gamma_1^t)\\
+ &amp;amp;\mathbb{E}(E(g)_t) = \mathbb{E}(g^2_{t}) (1-\gamma_2)\sum_{\tau=1}^{t}\gamma_2^{t-\tau}=\mathbb{E}(g^2_{t}) (1-\gamma_2^t)
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;
+So to guarantee that we have &lt;span class="math"&gt;\(\mathbb{E}(v_t)=\mathbb{E}(g_{t})\)&lt;/span&gt; and &lt;span class="math"&gt;\(\mathbb{E}(E(g)_t) = \mathbb{E}(g^2_{t})\)&lt;/span&gt; we rescale &lt;span class="math"&gt;\(v_t\)&lt;/span&gt; and &lt;span class="math"&gt;\(E(g)_t\)&lt;/span&gt; by &lt;span class="math"&gt;\((1-\gamma_1^t)\)&lt;/span&gt; and &lt;span class="math"&gt;\((1-\gamma_2^t)\)&lt;/span&gt; respectively. The update becomes
+&lt;/p&gt;
+&lt;div class="math"&gt;$$
+\begin{aligned}
+&amp;amp;\hat{v}_t=\frac{v_t}{1-\gamma_1^t}\\
+ &amp;amp;\hat{E}(g)_t=\frac{E(g)_t}{(1-\gamma_2^t)}\\
+ &amp;amp;w_{t,i}=w_{t-1,i}-\frac{\eta}{\sqrt{ \hat{E}(g)_{t-1,ii} }}\hat{v}_{t-1,i}
+\end{aligned}
+$$&lt;/div&gt;
+&lt;p&gt;Note that Adam reduces to Adadelta when &lt;span class="math"&gt;\(\gamma_1=0\)&lt;/span&gt;.&lt;/p&gt;
+&lt;h3&gt;&lt;strong&gt;References&lt;/strong&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;br/&gt;&lt;/p&gt;
+&lt;p&gt;[1] &lt;em&gt;Adaptive Subgradient Methods for Online Learning and Stochastic Optimization&lt;/em&gt;, J. Duchi, E. Hazan, Y. Singer, (2011)&lt;/p&gt;
+&lt;p&gt;[2] &lt;em&gt;Adam: a method for stochastic optimization&lt;/em&gt;, D. Kingma, J. L. Ba, (2015)&lt;/p&gt;
+&lt;p&gt;[3] &lt;em&gt;Lecture 6a: Overview of mini-batch gradient descent&lt;/em&gt;, G. Hinton, (CS lectures)&lt;/p&gt;
+&lt;p&gt;[4] &lt;em&gt;Introduction to Online Convex Optimization&lt;/em&gt;, E. Hazan&lt;/p&gt;
+&lt;p&gt;[5] &lt;em&gt;An overview of gradient descent optimization algorithms&lt;/em&gt;, S. Ruder, arXiv:1609.04747&lt;/p&gt;
+&lt;script type="text/javascript"&gt;if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width &lt; 768) ? "left" : align;
+        indent = (screen.width &lt; 768) ? "0em" : indent;
+        linebreak = (screen.width &lt; 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+&lt;/script&gt;</content><category term="Machine Learning"></category><category term="data science"></category></entry><entry><title>"Neural Network"</title><link href="/neural-network.html" rel="alternate"></link><published>2020-11-12T00:00:00+01:00</published><updated>2020-11-12T00:00:00+01:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-11-12:/neural-network.html</id><summary type="html">&lt;p&gt;A neural network is a graphical representation of a set of linear and non-linear operations. In a feed forward neural network, we stack several layers composed of nodes that transform the data non-linearly. The data crosses multiple layers, changing its feature's representation along the way. This process allows to create very complex output functions.&lt;/p&gt;</summary><content type="html">&lt;ol&gt;
 &lt;li&gt;&lt;a href="#def1"&gt;Neural Network&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#training"&gt;Backpropagation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="#gen"&gt;VC-dimension&lt;/a&gt;&lt;/li&gt;
@@ -341,10 +523,10 @@ Multiplying this equation by &lt;span class="math"&gt;\(\alpha_s\)&lt;/span&gt; 
 &lt;p&gt;
 So the margin is inversely proportional to the linear norm of &lt;span class="math"&gt;\(\alpha\)&lt;/span&gt;.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Non-linearly separable case:&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Non-separable case:&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;img alt="" height="250" src="/images/svm3.png" style="display: block; margin: 0 auto" width="250"&gt; &lt;/p&gt;
-&lt;p&gt;In the non-linearly separable case one cannot find a hyperplane that separates the classes. That is, for any hyperplane there exists &lt;span class="math"&gt;\(x_i,y_i\)&lt;/span&gt; such that&lt;/p&gt;
+&lt;p&gt;In the non-separable case one cannot find a hyperplane that separates the classes. That is, for any hyperplane there exists &lt;span class="math"&gt;\(x_i,y_i\)&lt;/span&gt; such that&lt;/p&gt;
 &lt;div class="math"&gt;$$y_i(\omega^T\cdot x_i +b)\ngtr 1$$&lt;/div&gt;
 &lt;p&gt;
 See picture above.&lt;/p&gt;
