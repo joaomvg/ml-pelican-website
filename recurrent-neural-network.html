@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Recurrent Neural Network" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Recurrent Neural Network"; Date: 2021-01-02; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Recurrent Neural Network"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2021-01-02T00:00:00+01:00" itemprop="datePublished">Sat 02 January 2021</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/machine-learning.html" rel="category">Machine Learning</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#rnn">RNN architecture</a></li>
+<li><a href="#train">Training</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="rnn"></a></p>
+<h3><strong>1. RNN architecture</strong></h3>
+<p>A recurrent neural network (RNN) learns sequential data. For example, text is a type of sequential data because a character depends on their previous neighbors, in order of appearance. Similarly, for the sequence of words themselves. Suppose we want to study a sequence of data <span class="math">\(x_{0},x_{1},\ldots x_{t}\)</span>. Given this data we want to model the probability of finding <span class="math">\(x_{t+1}\)</span>, that is, we want to calculate </p>
+<div class="math">$$P(x_{t+1}|x_{t},\ldots,x_0)$$</div>
+<p>.</p>
+<p>Using the chain rule we can write the probability of finding the full sequence as</p>
+<div class="math">$$P(x_{0},\ldots,x_{t},x_{t+1})=P(x_{t+1}|x_{t},\ldots, x_0)P(x_{t}|x_{t-1},\ldots,x_0)\ldots P(x_{1}|x_0)P(x_0)$$</div>
+<p>If we write <span class="math">\(h_t\)</span> to denote all the previous states up to time <span class="math">\(t-1\)</span>
+</p>
+<div class="math">$$h_t\equiv \{x_0,x_1\ldots x_{t-1}\}$$</div>
+<p>then the probability becomes
+</p>
+<div class="math">$$P(x_{0},\ldots,x_{t},x_{t+1})=P(x_{t+1}|x_t,h_t)P(x_t|x_{t-1},h_{t-1})\ldots P(x_1|x_0,h_0)$$</div>
+<p>The hidden variable <span class="math">\(h_t\)</span> lives in a space we have yet to determine. Because the probability is now the product of the probabilities at each time <span class="math">\(t\)</span>, the loss function (using maximum likelihood) is just</p>
+<div class="math">$$L=-\sum_t \ln P(x_t|x_{t-1},h_{t-1})$$</div>
+<p>
+where the sum runs over all the elements in the sequence.</p>
+<p>Below is depicted a recurrent neural network unit that attempts to model the probability <span class="math">\(P(x_{t+1}|x_t,h_t)\)</span>:</p>
+<p><img alt="" height="350" src="/images/rnn.png" style="display: block; margin: 0 auto" width="350"> </p>
+<p>Each node <span class="math">\(N_i\)</span> contains an activation unit that takes the input <span class="math">\(x_t\)</span> and the hidden state <span class="math">\(h_t\)</span>. That is, for each node <span class="math">\(N_i\)</span> one calculates</p>
+<div class="math">$$h_{t+1}^i=g(\sum_jW^x_{ij}x_t^j+\sum_{\alpha}W^h_{i\alpha}h^{\alpha}_t+b_i)$$</div>
+<p>where <span class="math">\(W^x, W^h, b\)</span> are the parameters we want to fit. The resulting hidden state <span class="math">\(h_{t+1}\)</span> is passed to the next unit in a sequential manner. To determine the probability, we stack a softmax layer on top of the hidden layer, that is,</p>
+<div class="math">$$P(x_{t+1}|x_t,h_t)=\frac{e^{\sum_iw_{ai}h_{t+1}^i+\tilde{b}_a}}{\sum_a e^{\sum_i w_{ai}h_{t+1}^i+\tilde{b}_a}}$$</div>
+<p>where <span class="math">\(a\)</span> is the class of <span class="math">\(x_{t+1}\)</span>.</p>
+<p>We can include additional hidden layers and they can have different number of nodes. At each step we have a set of ingoing hidden states <span class="math">\(h^1,h^2,\ldots\)</span> for the layers 1,2,etc, and an outgoing set of hidden states.</p>
+<p><a name="train"></a></p>
+<h3><strong>2. Training</strong></h3>
+<p>Training a full sequence of data can be problematic. The gradients depend on all the past units which for long sequence makes the problem computationally very expensive. To add to this, due to the backpropagation algorithm the gradients contain a very large number of products which may lead the gradient to explode or become extremely small. Instead, we can divide the full sequence into smaller sequences. We feed the algorithm using batches of size <span class="math">\(N\)</span> with sequences of size <span class="math">\(L\)</span>. We can stack horizontally several units, so we have a single network acting on a sequence. </p>
+<p><img alt="" height="350" src="/images/rnn_2.png" style="display: block; margin: 0 auto" width="350"> </p>
+<p>Here <span class="math">\(Y\)</span> stands for the target. </p>
+<p>The backpropagation algorithm acquires a component along the time direction. Say we want to calculate the derivative of the loss function with respect to <span class="math">\(\omega\)</span>, the parameter that multiplies <span class="math">\(x_0\)</span>. Then the gradient will receive several contributions coming from the later units because of the recurrence relationship.</p>
+<p><img alt="" height="400" src="/images/rnn_backprop.png" style="display: block; margin: 0 auto" width="400"> </p>
+<p>In this example we have 
+</p>
+<div class="math">$$\begin{aligned}
+\frac{\partial L}{\partial \omega}&amp;=\frac{\partial L_1}{\partial h_1}\frac{\partial h_1}{\partial \omega}+\frac{\partial L_2}{\partial h_2}\frac{\partial h_2}{\partial \omega}+\frac{\partial L_3}{\partial h_3}\frac{\partial h_3}{\partial \omega}+\ldots\\
+&amp;+\frac{\partial L_2}{\partial h_2}\frac{\partial h_2}{\partial h_1}\frac{\partial h_1}{\partial \omega}+\frac{\partial L_3}{\partial h_3}\frac{\partial h_3}{\partial h_2}\frac{\partial h_2}{\partial \omega}+\ldots\\
+&amp;+\frac{\partial L_3}{\partial h_3}\frac{\partial h_3}{\partial h_2}\frac{\partial h_2}{\partial h_1}\frac{\partial h_1}{\partial \omega}+\ldots\end{aligned}$$</div>
+<p>where <span class="math">\(L_i\)</span> is the contribution to the loss function coming from the i-th term in the sequence.
+More generally, we calculate
+</p>
+<div class="math">$$\begin{aligned}
+\frac{\partial L}{\partial \omega}&amp;=\sum_i \frac{\partial L_i}{\partial h_i}\frac{\partial h_i}{\partial \omega}
++\sum_i\frac{\partial L_{i+1}}{\partial h_{i+1}}\frac{\partial h_{i+1}}{\partial h_i}\frac{\partial h_i}{\partial \omega} + \sum_i\frac{\partial L_{i+2}}{\partial h_{i+2}}\frac{\partial h_{i+2}}{\partial h_{i+1}}\frac{\partial h_{i+1}}{\partial h_i}\frac{\partial h_i}{\partial \omega}+\ldots\\
+&amp;=\sum_n \sum_i \frac{\partial L_{i+n}}{\partial h_{i+n}}\frac{\partial h_i}{\partial \omega}\prod_{j=i}^{n-1+i} \frac{\partial h_{j+1}}{\partial h_{j}}
+\end{aligned}
+$$</div>
+<p><a name="python"></a></p>
+<h3><strong>3. Python Implementation</strong></h3>
+<p>For this implementation, we consider a one-dimensional input <span class="math">\(x\)</span> and hidden state <span class="math">\(h\)</span> with dimension <span class="math">\(d\)</span>. For the activation function we take the <span class="math">\(\tanh\)</span> function. So in each unit we have</p>
+<div class="math">$$
+h_{t+1,i}=\tanh(w^0_ix_t+w^1_{ij}h^j_t+b^0_{t,i})
+$$</div>
+<p>
+and we calculate the derivatives
+</p>
+<div class="math">$$\begin{aligned}
+&amp;\frac{\partial h_{t+1,i}}{\partial h_{t,j}}=(1-h_{t+1,i}^2)w^1_{ij}\\
+&amp;\frac{\partial h_{t+1,i}}{\partial w^1_{ij}}=(1-h_{t+1,i}^2)h_{t,j}\\
+&amp;\frac{\partial h_{t+1,i}}{\partial w^0_i}=(1-h_{t+1,i}^2)x_t\\
+&amp;\frac{\partial h_{t+1,i}}{\partial b^0_{t,i}}=(1-h_{t+1,i}^2)
+\end{aligned}
+$$</div>
+<p>We consider a regression problem, and as such the predictor has the form
+</p>
+<div class="math">$$\hat{y}_{t+1,a}= w^2_{ai} h_{t+1,i}+b^1_{t,a}=w^2_{ai} \tanh(w^0_ix_t+w^1_{ij}h_{t,j}+b^0_{t,i}) + b^1_{t,a}$$</div>
+<p>where the target has features <span class="math">\(a\)</span>.</p>
+<p>From the loss function
+</p>
+<div class="math">$$L=\sum_t L_t=\frac{1}{2N}\sum_{t=1}^N (y_t-\hat{y}_t)^2$$</div>
+<p>we calculate
+</p>
+<div class="math">$$\frac{\partial L_t}{\partial h_{t,i}}=\frac{1}{N}(\hat{y}_t-y_t)_aw^2_{ai}$$</div>
+<p>We define classes for the recurrent neural network, loss function and optimizer, that implements, the gradient descent update. </p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinearLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">,</span><span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">out_dim</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">class</span> <span class="nc">RNN</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="o">=</span><span class="n">input_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="o">=</span><span class="n">out_dim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wx</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wh</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gradients</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">=</span><span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">wh</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
+                         <span class="s1">&#39;dh_dwx&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">wx</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
+                         <span class="s1">&#39;dh_db&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span>
+                         <span class="s1">&#39;dw2&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
+                         <span class="s1">&#39;db2&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="o">.</span><span class="n">bias</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">hidden</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">h</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">xi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wx</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">wh</span><span class="p">(</span><span class="n">hidden</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+            <span class="n">hidden</span><span class="o">=</span><span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;hidden&#39;</span><span class="p">:</span><span class="n">h</span><span class="p">,</span><span class="s1">&#39;output&#39;</span><span class="p">:</span><span class="n">out</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">grads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">h_t</span><span class="p">,</span><span class="n">h_tp1</span><span class="p">):</span>
+        <span class="n">mat</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="mi">1</span><span class="o">-</span><span class="n">h_tp1</span><span class="o">*</span><span class="n">h_tp1</span><span class="p">)</span>
+
+        <span class="n">dh_dwh</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">h_t</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#[hid_dim,hid_dim,hid_dim]</span>
+        <span class="n">dh_dwx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#[hid_dim,hid_dim,input_dim]</span>
+        <span class="n">dh_dh</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">wh</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="c1">#[hid_dim,hid_dim]</span>
+        <span class="n">dh_db</span><span class="o">=</span><span class="n">mat</span> <span class="c1">#[hid_dim,hid_dim]</span>
+
+        <span class="k">return</span> <span class="n">dh_dh</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">:</span><span class="n">dh_dwh</span><span class="p">,</span><span class="s1">&#39;dh_dwx&#39;</span><span class="p">:</span><span class="n">dh_dwx</span><span class="p">,</span><span class="s1">&#39;dh_db&#39;</span><span class="p">:</span><span class="n">dh_db</span><span class="p">}</span>
+</pre></div>
+
+
+<p>The mean-square loss function:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MSE_Loss</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="n">y_pred</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">=</span><span class="n">y</span><span class="o">-</span><span class="n">y_pred</span>
+        <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="o">*</span><span class="n">loss</span>
+
+        <span class="k">return</span> <span class="n">loss</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+
+        <span class="n">L</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">h</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span>
+        <span class="n">z</span><span class="o">=</span><span class="p">(</span><span class="n">out</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="n">L</span> <span class="c1"># (y_pred-y)/N</span>
+
+        <span class="n">w2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">out_layer</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">T</span> <span class="c1">#[out_dim,hidden_dim]</span>
+        <span class="n">grads_cache</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">:[],</span><span class="s1">&#39;dh_dwx&#39;</span><span class="p">:[],</span><span class="s1">&#39;dh_db&#39;</span><span class="p">:[]}</span>
+        <span class="n">grads_total</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;dh_dwx&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span><span class="s1">&#39;dh_db&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="n">hidden</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">xi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+
+            <span class="n">dh_dh</span><span class="p">,</span><span class="n">grads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">grads</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span><span class="n">hidden</span><span class="p">,</span><span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">hidden</span><span class="o">=</span><span class="n">h</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span><span class="n">grad</span> <span class="ow">in</span> <span class="n">grads</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">wt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w2</span><span class="p">,</span><span class="n">grad</span><span class="p">)</span>
+                <span class="n">grads_cache</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+                <span class="n">grads_total</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">+=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">wt</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">grads_cache</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">temp</span><span class="o">=</span><span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">dh</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grads_cache</span><span class="p">[</span><span class="n">var</span><span class="p">]):</span>
+                        <span class="n">wt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">dh_dh</span><span class="p">,</span><span class="n">dh</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wt</span><span class="p">)</span>
+                        <span class="n">wt2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">w2</span><span class="p">,</span><span class="n">wt</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">wt2</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">grads_total</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">+=</span><span class="n">a</span>
+
+                    <span class="n">grads_cache</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">=</span><span class="n">temp</span><span class="p">[:]</span>
+
+        <span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;dw2&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;db2&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">z</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;dh_dwh&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;dh_dwx&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">grads_total</span><span class="p">[</span><span class="s1">&#39;dh_dwx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradients</span><span class="o">=</span><span class="n">grads_total</span>
+</pre></div>
+
+
+<p>the optimizer</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Optimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">lr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="o">=</span><span class="n">lr</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">grads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">gradients</span>
+
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">-=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="o">*</span><span class="n">grads</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+</pre></div>
+
+
+<p>and the training function:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span><span class="n">targets</span><span class="p">,</span><span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span><span class="n">optimizer</span><span class="p">,</span><span class="n">epochs</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+        <span class="n">total_loss</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">seq</span><span class="p">,</span><span class="n">target</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span><span class="n">targets</span><span class="p">),</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)):</span>
+            <span class="n">ypred</span><span class="o">=</span><span class="n">model</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
+            <span class="n">total_loss</span><span class="o">+=</span><span class="n">loss</span><span class="p">(</span><span class="n">ypred</span><span class="p">,</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span><span class="n">target</span><span class="p">)</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;epoch: &#39;</span><span class="p">,</span><span class="n">epoch</span><span class="p">,</span><span class="s1">&#39; Loss: &#39;</span><span class="p">,</span><span class="n">total_loss</span><span class="p">)</span>
+</pre></div>
+
+
+<p><strong>Data preparation:</strong></p>
+<div class="highlight"><pre><span></span><span class="n">seq_len</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">seqs</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">targets</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">xs</span><span class="o">=</span><span class="p">[]</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">ts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span><span class="n">seq_len</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+    <span class="c1"># add noise</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">noise</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.008</span><span class="p">,</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">+=</span><span class="n">noise</span>
+
+    <span class="n">seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+
+
+<p>This is the result of training after only 6 epochs:
+<img alt="" height="400" src="/images/RNN_6epochs.png" style="display: block; margin: 0 auto" width="400"> </p>
+<p>and after 9 epochs:</p>
+<p><img alt="" height="400" src="/images/RNN_9epochs.png" style="display: block; margin: 0 auto" width="400"> </p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (20)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
