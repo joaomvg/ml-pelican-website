@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>"Gradients Automation" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Gradients Automation"; Date: 2021-01-15; Author: Joao Gomes">
+	<meta name="author" content="Joao Gomes">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+	<!--[if lt IE 9]>
+		<script src="/theme/html5.js"></script>
+		<![endif]-->
+	<link href="/theme/css/ipython.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/simplex/bootstrap.min.css" rel="stylesheet">
+	<link href="/theme/css/local.css" rel="stylesheet">
+	<link href="/theme/css/pygments.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+	<div class="page-header">
+		<h1><a href="/">Data Science and Machine Learning</a>
+			<br>	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+<div class="article" itemscope itemtype="http://schema.org/BlogPosting">
+	<div class="text-center article-header">
+		<h1 itemprop="name headline" class="article-title">"Gradients Automation"</h1>
+		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+			<h4 itemprop="name">Joao Gomes</h4>
+		</span>
+		<time datetime="2021-01-15T00:00:00+01:00" itemprop="datePublished">Fri 15 January 2021</time>
+	</div>
+	<div>
+		Category:
+		<span itemprop="articleSection">
+			<a href="/category/python.html" rel="category">Python</a>
+		</span>
+	</div>
+ 
+	<div>
+		Tags:
+		<span itemprop="keywords">
+			<a href="/tag/data-science.html" rel="tag">data science</a>
+		</span>
+	</div>
+	<div itemprop="articleBody" class="article-body"><ol>
+<li><a href="#def1">Gradients and tensors</a></li>
+<li><a href="#python">Python implementation</a></li>
+</ol>
+<p><a name="def1"></a></p>
+<h3><strong>1. Gradients and tensors</strong></h3>
+<p>Neural networks can get very complex very quickly. There are several type of architectures and each can have multiple layers. This makes the calculation of gradients a complex task, if they are coded from scratch. Instead, libraries such as Pytorch or TensorFlow use a smart mechanism that allows to calculate gradients without having to code them. Essentially, what these libraries do is to keep track of all the mathematical operations on a tensor object, and use the chain rule to determine the derivatives.</p>
+<p>So how to calculate derivatives of tensors? Consider the scalar
+</p>
+<div class="math">$$\Phi=\exp\Big(\sum_{ij} T_{ij}w_iw_j\Big)$$</div>
+<p>
+and its derivative relative to the tensor <span class="math">\(w_i\)</span>. First, we calculate the derivative of <span class="math">\(\Phi(u)\)</span> with respect to <span class="math">\(u\)</span></p>
+<div class="math">$$\frac{\partial\Phi}{\partial u}=\exp(u)$$</div>
+<p>
+and then use the chain rule together with the derivatives</p>
+<div class="math">$$\frac{\partial u}{\partial w_k}=\sum_{ij}T_{ij}\frac{\partial w_i}{\partial w_k}w_j+\sum_{ij}T_{ij} w_i\frac{\partial w_j}{\partial w_k}+\sum_{ij}\frac{\partial T_{ij}}{\partial w_k}w_iw_j$$</div>
+<p>But we can do this calculation in a different way. Instead of starting from the function <span class="math">\(\Phi(u)\)</span> and propagate back the derivatives, we can keep track of the derivatives at each step of forward operation. That is, we perform the calculation in the following order</p>
+<ol>
+<li>Calculate the derivatives <span class="math">\(\frac{\partial w_i}{\partial w_k}\)</span> and <span class="math">\(\frac{\partial T_{ij}}{\partial w_k}\)</span></li>
+<li>Determine <span class="math">\(X_i\equiv\sum_{ij}T_{ij}w_j\)</span> and <span class="math">\(\frac{\partial X_i}{\partial w_k}=\sum_{ij}\frac{\partial T_{ij}}{\partial w_k}w_i + \sum_{ij}T_{ij}\frac{\partial w_i}{\partial w_k}\)</span></li>
+<li>Determine <span class="math">\(Y\equiv\sum_i X_iw_i\)</span> and <span class="math">\(\frac{\partial Y}{\partial w_k}=\sum_{i}\frac{\partial X_{i}}{\partial w_k}w_i + \sum_{i}X_{i}\frac{\partial w_i}{\partial w_k}\)</span></li>
+<li>Finally calculate <span class="math">\(\Phi=\exp(Y)\)</span> and <span class="math">\(\frac{\partial \Phi}{\partial w_k}=\Phi \frac{\partial Y}{\partial w_k}\)</span></li>
+</ol>
+<p>At each step we calculate the resulting tensor and the corresponding derivative. To accomplish this, we need an object (class) that implements various mathematical operations and keeps track of the gradients while the operation takes place. In pseudo-code</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tensor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">gradient</span><span class="p">)</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=</span><span class="n">add_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">array</span>
+        <span class="n">gradient</span><span class="o">=</span><span class="n">grad_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">array</span>
+        <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">gradient</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">):</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=</span><span class="n">mul_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">array</span>
+        <span class="n">gradient</span><span class="o">=</span><span class="n">grad_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tensor</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">array</span>
+        <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">gradient</span><span class="p">)</span>
+</pre></div>
+
+
+<p>We should also define non-linear functions, such as the sigmoid activation function</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Sigmoid</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+</pre></div>
+
+
+<p>As an example, say we want to calculate the scalar
+</p>
+<div class="math">$$\phi=\sigma\Big(\sum_ix_i\omega_i\Big)$$</div>
+<p>
+where <span class="math">\(\sigma(z)\)</span> is the sigmoid function, and we are interested in the derivative relative to <span class="math">\(\omega_i\)</span>. First we create the Tensor objects,</p>
+<div class="highlight"><pre><span></span><span class="n">w_tensor</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">w_array</span><span class="p">,</span><span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">x_tensor</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">x_array</span><span class="p">,</span><span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+
+<p>where w_tensor and x_tensor have dimensions <span class="math">\((d,1)\)</span> and <span class="math">\((1,d)\)</span> respectively. The flag "requires_grad", specifies whether we want or not the derivative relative to that tensor. We instantiate the function Sigmoid</p>
+<div class="highlight"><pre><span></span><span class="n">sig</span><span class="o">=</span><span class="n">Sigmoid</span><span class="p">()</span>
+</pre></div>
+
+
+<p>and calculate</p>
+<div class="highlight"><pre><span></span><span class="n">phi</span><span class="o">=</span><span class="n">sig</span><span class="p">(</span><span class="n">x_tensor</span><span class="o">*</span><span class="n">w_tensor</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The operator * is overloaded in the class Tensor by the matrix multiplication operation.
+The object "phi" is an instance of the class Tensor, which contains both the result of the mathematical operation, and the gradient of "phi" with respect to <span class="math">\(\omega_i\)</span>. The gradient can be accessed by the attribute "phi.grad".</p>
+<p><a name="python"></a></p>
+<h3><strong>2. Python Implementation</strong></h3>
+<p>The Tensor class contains linear mathematical operations together with other methods such as transposing or squeezing.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tensor</span><span class="p">:</span>
+    <span class="n">calc_grad</span><span class="o">=</span><span class="kc">True</span> 
+
+    <span class="sd">&quot;&quot;&quot;calc_grad: bool, signaling whether to carry the gradients while artihmetic operations take place&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">array</span><span class="p">,</span>
+                <span class="n">grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        array: numpy array</span>
+<span class="sd">        grad: dic={id(object): numpy.array}</span>
+<span class="sd">        requires_grad: bool, signaling whether to calculate or not the derivative relative to this tensor</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">=</span><span class="n">array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requires_grad</span><span class="o">=</span><span class="n">requires_grad</span>
+
+        <span class="k">if</span> <span class="n">requires_grad</span><span class="p">:</span>
+            <span class="n">name</span><span class="o">=</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_grad</span><span class="p">()}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;none&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">T</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">shape</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">][</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">make_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">Kron</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">:</span>
+            <span class="n">ID</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">Kron</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">Kron</span><span class="p">,</span><span class="n">ID</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">new_shape</span><span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span><span class="mi">2</span><span class="p">)]</span>
+        <span class="n">new_shape</span><span class="o">+=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span><span class="mi">2</span><span class="p">)]</span>
+        <span class="n">Kron</span><span class="o">=</span><span class="n">Kron</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Kron</span>
+
+    <span class="k">def</span> <span class="nf">check_grads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">w</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">+</span><span class="n">x</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">check_grads</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">+</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">+</span><span class="n">x</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">+</span><span class="n">x</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">check_grads</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">-</span><span class="n">x</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">,</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">check_grads</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">grad1</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">grad1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="p">,</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">grad2</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">i</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                        <span class="n">grad2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">],</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="p">,</span><span class="n">axes</span><span class="o">=</span><span class="p">([</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">n1</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+                        <span class="n">n2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span>
+                        <span class="n">n3</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span>
+                        <span class="n">r1</span><span class="o">=</span><span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n1</span><span class="o">+</span><span class="n">n3</span><span class="o">-</span><span class="mi">2</span><span class="p">)]</span>
+                        <span class="n">r2</span><span class="o">=</span><span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+                        <span class="n">grad2</span><span class="o">=</span><span class="n">grad2</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">r1</span><span class="o">+</span><span class="n">r2</span><span class="p">)</span>
+
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">grad1</span><span class="o">+</span><span class="n">grad2</span>
+
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">axis</span><span class="p">):</span>
+        <span class="n">result</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Tensor(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="si">}</span><span class="s1">,dtype </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s1">,requires_grad=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">requires_grad</span><span class="si">}</span><span class="s1">)&#39;</span>
+</pre></div>
+
+
+<p>Non-linear functions (some examples) can be defined as:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Sigmoid</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    returns: Tensor with gradients</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+
+        <span class="n">u</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">u</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">l</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">expand</span><span class="o">=</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)])</span>
+                    <span class="n">grad_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+                    <span class="n">grad_func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">grad_func</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="n">expand</span><span class="p">)</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">grad_func</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+        <span class="n">den</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">gd</span><span class="o">=</span><span class="n">u</span><span class="o">/</span><span class="n">den</span>
+
+        <span class="k">return</span> <span class="n">gd</span>
+
+<span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
+
+        <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">i</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span>
+                <span class="n">l</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+                <span class="n">expand</span><span class="o">=</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)])</span>
+                <span class="n">grad_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">grad_func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">grad_func</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="n">expand</span><span class="p">)</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">grad_func</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">gd</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">array</span>
+
+        <span class="k">return</span> <span class="n">gd</span>
+
+<span class="k">class</span> <span class="nc">ReLU</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">sign</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">z</span><span class="p">[</span><span class="n">sign</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">l</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">expand</span><span class="o">=</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)])</span>
+                    <span class="n">grad_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sign</span><span class="p">)</span>
+                    <span class="n">grad_func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">grad_func</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="n">expand</span><span class="p">)</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">grad_func</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">grad</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">sign</span><span class="p">):</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">z</span><span class="p">[</span><span class="n">sign</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">z</span><span class="p">[</span><span class="o">~</span><span class="n">sign</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">z</span>
+
+<span class="k">class</span> <span class="nc">Softmax</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;calculate grads after softmaz operation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (Tensor): shape=(batch,num_classes)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tensor: contains gradients relative to softmax function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">prob</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">array</span><span class="p">)</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">prob</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">prob</span><span class="o">=</span><span class="n">prob</span><span class="o">/</span><span class="n">Z</span>
+
+        <span class="k">if</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">calc_grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">l</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">ndim</span>
+                    <span class="n">expand</span><span class="o">=</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">l</span><span class="p">)])</span>
+                    <span class="n">grad_func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="n">expand</span><span class="p">)</span>
+                    <span class="n">dp</span><span class="o">=</span><span class="n">grad_func</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="n">dp</span><span class="o">-</span><span class="n">grad_func</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">dp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span>
+
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Tensor</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>With these definitions it is now easy to build a simple feed forward neural network, without the trouble of coding the gradients explicitly. </p>
+<p>Here we show an example. First we define a LinearLayer class:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LinearLayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">in_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">,</span><span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_dim</span><span class="o">=</span><span class="n">in_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="o">=</span><span class="n">out_dim</span>
+
+        <span class="n">weight_</span><span class="p">,</span><span class="n">bias_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">init_params</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">weight_</span><span class="p">,</span><span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">bias_</span><span class="p">,</span><span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trainable</span><span class="o">=</span><span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span>
+                        <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        x: Tensor [batch,in_dim]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span><span class="o">=</span><span class="n">x</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">init_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">weight</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,(</span><span class="bp">self</span><span class="o">.</span><span class="n">in_dim</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="p">))</span>
+        <span class="n">bias</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">weight</span><span class="p">,</span> <span class="n">bias</span>
+</pre></div>
+
+
+<p>and the Feed Forward model is obtained by superimposing linear layers,</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FeedForward</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">n_hid_layers</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_layer</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hid_layers</span><span class="o">=</span><span class="p">[</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">hidden_dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_hid_layers</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="o">=</span><span class="n">LinearLayer</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span><span class="n">out_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="o">=</span><span class="n">ReLU</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="o">=</span><span class="n">Sigmoid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        assume two class problem</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">in_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hid_layers</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">=</span><span class="n">layer</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">out_layer</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sig</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        predict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#set model to eval mode so we dont need to calculate the derivatives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">pred</span><span class="o">=</span><span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">y_pred</span><span class="o">=</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">array</span><span class="o">&gt;=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int8&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">y_pred</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Tensor</span><span class="o">.</span><span class="n">calc_grad</span><span class="o">=</span><span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Tensor</span><span class="o">.</span><span class="n">calc_grad</span><span class="o">=</span><span class="kc">False</span> 
+</pre></div>
+
+
+<p>For a two-class problem we define the loss function and also the optimizer</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LogLoss</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">back_grads</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">=</span><span class="n">Log</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prob</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        prob: Tensor</span>
+<span class="sd">        y: Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">not_y</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">y</span><span class="o">.</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">not_y</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">not_y</span><span class="p">)</span>
+        <span class="n">y_</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">y_</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">y_</span><span class="p">)</span>
+
+        <span class="n">not_prob</span><span class="o">=</span><span class="mi">1</span><span class="o">-</span><span class="n">prob</span><span class="o">.</span><span class="n">array</span>
+        <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">prob</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span>
+            <span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">=-</span><span class="n">prob</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+        <span class="n">not_prob</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="n">not_prob</span><span class="p">,</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span><span class="p">)</span>
+
+        <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">prob</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">L</span><span class="o">=</span><span class="n">y_</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span><span class="o">+</span><span class="n">not_y</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">not_prob</span><span class="p">)</span>
+        <span class="n">L</span><span class="o">=-</span><span class="n">L</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">L</span><span class="o">=</span><span class="n">size</span><span class="o">*</span><span class="n">L</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">back_grads</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">grad</span>
+
+        <span class="k">return</span> <span class="n">L</span><span class="o">.</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">grads</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">back_grads</span>
+
+<span class="k">class</span> <span class="nc">Optimizer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">=</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="o">=</span><span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tensors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">find_tensor</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">zero_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">tensor</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">:</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{}</span>
+                <span class="n">grad</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">grad</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="n">tensor</span><span class="o">.</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">grad</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;none&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span>
+                <span class="n">tensor</span><span class="o">.</span><span class="n">grad</span><span class="o">=</span><span class="n">grad</span> 
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">grads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">tensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">grads</span><span class="p">:</span>
+                    <span class="n">tensor</span><span class="o">.</span><span class="n">array</span><span class="o">-=</span><span class="bp">self</span><span class="o">.</span><span class="n">lr</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">grads</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No grads!&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">find_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">tensors</span><span class="o">=</span><span class="p">{}</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">param1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="n">tensors</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">param1</span><span class="p">)]</span><span class="o">=</span><span class="n">param1</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span><span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">param2</span> <span class="ow">in</span> <span class="n">param1</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param2</span><span class="p">,</span><span class="n">Tensor</span><span class="p">):</span>
+                        <span class="n">tensors</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">param2</span><span class="p">)]</span><span class="o">=</span><span class="n">param2</span>
+        <span class="k">return</span> <span class="n">tensors</span>
+</pre></div>
+
+
+<p>For mini-batch gradient descent we use the data loader</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DataSet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">28</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_x</span><span class="o">=</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_y</span><span class="o">=</span><span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bsz</span><span class="o">=</span><span class="n">batch_size</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">L</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bsz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bsz</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">L</span><span class="p">,</span><span class="n">bsz</span><span class="p">):</span>
+            <span class="n">batch_x</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_x</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">bsz</span><span class="p">])</span>
+            <span class="n">batch_y</span><span class="o">=</span><span class="n">Tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_y</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">bsz</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">batch_x</span><span class="p">,</span> <span class="n">batch_y</span>
+</pre></div>
+
+
+<p>Now, we are ready to train a one-hidden layer model. As an example, we load the breast_cancer dataset from sklearn api.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span> 
+
+<span class="n">data</span><span class="o">=</span><span class="n">load_breast_cancer</span><span class="p">()</span>
+<span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+<span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+<span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+<span class="n">data_loader</span><span class="o">=</span><span class="n">DataSet</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="mi">128</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Define model, loss function and optimizer</p>
+<div class="highlight"><pre><span></span><span class="n">model</span><span class="o">=</span><span class="n">FeedForward</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">loss</span><span class="o">=</span><span class="n">LogLoss</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">opt</span><span class="o">=</span><span class="n">Optimizer</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Perform training</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">loss</span><span class="p">,</span><span class="n">optimizer</span><span class="p">,</span><span class="n">data_loader</span><span class="p">,</span><span class="n">epochs</span><span class="p">):</span>
+
+    <span class="n">L</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">)):</span>
+        <span class="n">total_loss</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
+            <span class="n">x_batch</span><span class="p">,</span> <span class="n">y_batch</span><span class="o">=</span><span class="n">batch</span>
+            <span class="n">bsz</span><span class="o">=</span><span class="n">x_batch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">out</span><span class="o">=</span><span class="n">model</span><span class="p">(</span><span class="n">x_batch</span><span class="p">)</span>
+            <span class="n">total_loss</span><span class="o">+=</span><span class="n">loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span><span class="n">y_batch</span><span class="p">)</span><span class="o">*</span><span class="n">bsz</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">epoch</span><span class="o">%</span><span class="mi">10</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loss: &#39;</span><span class="p">,</span><span class="n">total_loss</span><span class="o">/</span><span class="n">L</span><span class="p">)</span>
+
+<span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">loss</span><span class="p">,</span><span class="n">opt</span><span class="p">,</span><span class="n">data_loader</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+
+
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.3/latest.js?config=TeX-AMS-MML_HTMLorMML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script></div>
+	<hr>
+	<h2>Comments</h2>
+</div>
+		</div>
+	</div> 	<!-- <hr> -->
+</div> <!-- /container -->
+<footer class="aw-footer bg-danger">
+	<div class="container"> <!-- footer -->
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="row">
+					<div class="col-md-3">
+						<h4>Navigation</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="">Data Science and Machine Learning</a></li>
+							<li><a href="/pages/about-me.html"><i class="fa fa-About me "></i> About me</a></li>
+							<li><a href="/feeds/all.atom.xml" type="application/atom+xml"><i class="fa fa-rss "></i> atom</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Author</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="https://www.linkedin.com/in/joaomvg/">LinkedIn</a></li>
+							<li><a href="https://github.com/joaomvg">GitHub</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Categories</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="/category/data-science.html">Data Science (1)</a></li>
+							<li><a href="/category/machine-learning.html">Machine Learning (21)</a></li>
+							<li><a href="/category/python.html">Python (1)</a></li>
+							<li><a href="/category/statistics.html">Statistics (2)</a></li>
+						</ul>
+					</div>
+					<div class="col-md-3">
+						<h4>Links</h4>
+						<ul class="list-unstyled my-list-style">
+							<li><a href="archives.html">Archives</a></li>
+							<li><a href="tags.html">Tags</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</footer>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12 text-center center-block aw-bottom">
+			<p>&copy; Joao Gomes 2016</p>
+			<p>Powered by Pelican</p>
+		</div>
+	</div>
+</div>
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	$("div.collapseheader").click(function () {
+		$header = $(this).children("span").first();
+		$codearea = $(this).children(".input_area");
+		$codearea.slideToggle(500, function () {
+			$header.text(function () {
+				return $codearea.is(":visible") ? "Collapse Code" : "Expand Code";
+			});
+		});
+	});
+});
+</script>
+</body>
+</html>
