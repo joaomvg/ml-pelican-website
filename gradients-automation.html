@@ -51,7 +51,7 @@
 </ol>
 <p><a name="def1"></a></p>
 <h3><strong>1. Gradients and tensors</strong></h3>
-<p>Neural networks can get very complex very quickly. There are several type of architectures and each can have multiple layers. This makes the calculation of gradients a complex task, if they are coded from scratch. Instead, libraries such as Pytorch or TensorFlow use a smart mechanism that allows to calculate gradients without having to code them. Essentially, what these libraries do is to keep track of all the mathematical operations on a tensor object, and use the chain rule to determine the derivatives.</p>
+<p>Neural networks can get very complicated very quickly. There are several types of architectures, and each can have multiple layers. Coding the gradients becomes a complicated task. Instead, libraries such as Pytorch or TensorFlow use a smart mechanism that allows to calculate gradients without having to code them. Essentially, these libraries keep track of all the mathematical operations on a tensor object and use the chain rule to determine the derivatives.</p>
 <p>So how to calculate derivatives of tensors? Consider the scalar
 </p>
 <div class="math">$$\Phi=\exp\Big(\sum_{ij} T_{ij}w_iw_j\Big)$$</div>
@@ -61,14 +61,14 @@ and its derivative relative to the tensor <span class="math">\(w_i\)</span>. Fir
 <p>
 and then use the chain rule together with the derivatives</p>
 <div class="math">$$\frac{\partial u}{\partial w_k}=\sum_{ij}T_{ij}\frac{\partial w_i}{\partial w_k}w_j+\sum_{ij}T_{ij} w_i\frac{\partial w_j}{\partial w_k}+\sum_{ij}\frac{\partial T_{ij}}{\partial w_k}w_iw_j$$</div>
-<p>But we can do this calculation in a different way. Instead of starting from the function <span class="math">\(\Phi(u)\)</span> and propagate back the derivatives, we can keep track of the derivatives at each step of forward operation. That is, we perform the calculation in the following order</p>
+<p>But we can do this calculation differently. Instead of starting from the function <span class="math">\(\Phi(u)\)</span> and propagate back the derivatives, we can keep track of the results at each step of the forward operation. That is, we perform the calculation in the following order</p>
 <ol>
 <li>Calculate the derivatives <span class="math">\(\frac{\partial w_i}{\partial w_k}\)</span> and <span class="math">\(\frac{\partial T_{ij}}{\partial w_k}\)</span></li>
 <li>Determine <span class="math">\(X_i\equiv\sum_{ij}T_{ij}w_j\)</span> and <span class="math">\(\frac{\partial X_i}{\partial w_k}=\sum_{ij}\frac{\partial T_{ij}}{\partial w_k}w_i + \sum_{ij}T_{ij}\frac{\partial w_i}{\partial w_k}\)</span></li>
 <li>Determine <span class="math">\(Y\equiv\sum_i X_iw_i\)</span> and <span class="math">\(\frac{\partial Y}{\partial w_k}=\sum_{i}\frac{\partial X_{i}}{\partial w_k}w_i + \sum_{i}X_{i}\frac{\partial w_i}{\partial w_k}\)</span></li>
 <li>Finally calculate <span class="math">\(\Phi=\exp(Y)\)</span> and <span class="math">\(\frac{\partial \Phi}{\partial w_k}=\Phi \frac{\partial Y}{\partial w_k}\)</span></li>
 </ol>
-<p>At each step we calculate the resulting tensor and the corresponding derivative. To accomplish this, we need an object (class) that implements various mathematical operations and keeps track of the gradients while the operation takes place. In pseudo-code</p>
+<p>At each step, we calculate the resulting tensor and the corresponding derivative. To accomplish this, we need an object (class) that implements various mathematical operations and keeps track of the gradients while the function takes place. In pseudo-code</p>
 <div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Tensor</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">gradient</span><span class="p">)</span>
         <span class="o">...</span>
@@ -109,7 +109,7 @@ where <span class="math">\(\sigma(z)\)</span> is the sigmoid function, and we ar
 </pre></div>
 
 
-<p>where w_tensor and x_tensor have dimensions <span class="math">\((d,1)\)</span> and <span class="math">\((1,d)\)</span> respectively. The flag "requires_grad", specifies whether we want or not the derivative relative to that tensor. We instantiate the function Sigmoid</p>
+<p>where w_tensor and x_tensor have dimensions <span class="math">\((d,1)\)</span> and <span class="math">\((1,d)\)</span> respectively. The flag "requires_grad" specifies whether we want or not the derivative relative to that tensor. We instantiate the function Sigmoid</p>
 <div class="highlight"><pre><span></span><span class="n">sig</span><span class="o">=</span><span class="n">Sigmoid</span><span class="p">()</span>
 </pre></div>
 
@@ -120,7 +120,7 @@ where <span class="math">\(\sigma(z)\)</span> is the sigmoid function, and we ar
 
 
 <p>The operator * is overloaded in the class Tensor by the matrix multiplication operation.
-The object "phi" is an instance of the class Tensor, which contains both the result of the mathematical operation, and the gradient of "phi" with respect to <span class="math">\(\omega_i\)</span>. The gradient can be accessed by the attribute "phi.grad".</p>
+The object "phi" is an instance of the class Tensor, which contains both the result of the mathematical operation and the gradient of "phi" with respect to <span class="math">\(\omega_i\)</span>. Then we can access the gradient by the attribute "phi.grad".</p>
 <p><a name="python"></a></p>
 <h3><strong>2. Python Implementation</strong></h3>
 <p>The Tensor class contains linear mathematical operations together with other methods such as transposing or squeezing.</p>

@@ -52,8 +52,8 @@
 </ol>
 <p><a name="def1"></a></p>
 <h3><strong>1. Boosting</strong></h3>
-<p>Problems in machine learning often consist of a very large number of features, which can lead to difficulties in training and generalization properties. Boosting is a type of algorithm that allows to focus on the most relevant features in an iterative manner, selecting only those features that improve the model.</p>
-<p>Consider a binary classification model with classes <span class="math">\(\{-1,1\}\)</span>. In adaboosting or adaptive boosting, we fit a series of weak-learners in an iterative way. A weak-learner is an algorithm that performs only slightly better than chance. An example, can be a decision tree with small depth. At each step in adaboosting, a new weak learner is fitted to the data but using different weights so that the algorithm focus on the datapoints it finds harder to classify. </p>
+<p>Problems in machine learning often consist of a large number of features. This can cause difficulties in training and generalization properties. Boosting is a type of algorithm that focuses on the most relevant features iteratively, selecting only those features that improve the model.</p>
+<p>Consider a binary classification model with labels <span class="math">\(\{-1,1\}\)</span>. In adaboost or adaptive boosting, we fit a series of weak-learners iteratively. A weak-learner is an algorithm that performs only slightly better than chance. An example can be a decision tree with small depth. At each step in adaboosting, a new weak learner is fitted to the data but using different weights so that the algorithm focus on the datapoints it finds harder to classify.</p>
 <p>After the mth-step the classifier will have the form
 </p>
 <div class="math">$$C_{m}(x)=\alpha_1h_1(x)+\ldots+\alpha_{m}h_{m}(x)$$</div>

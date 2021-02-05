@@ -52,10 +52,10 @@
 </ol>
 <p><a name="rnn"></a></p>
 <h3><strong>1. RNN architecture</strong></h3>
-<p>A recurrent neural network (RNN) learns sequential data. For example, text is a type of sequential data because a character depends on their previous neighbors, in order of appearance. Similarly, for the sequence of words themselves. Suppose we want to study a sequence of data <span class="math">\(x_{0},x_{1},\ldots x_{t}\)</span>. Given this data we want to model the probability of finding <span class="math">\(x_{t+1}\)</span>, that is, we want to calculate </p>
+<p>A recurrent neural network (RNN) learns sequential data. For example, text is a type of sequential data because a character depends on their previous neighbors in order of appearance. Similarly, for the sequence of words themselves. Suppose we want to study a sequence of data <span class="math">\(x_{0},x_{1},\ldots x_{t}\)</span>. Given this data, we want to model the probability of finding <span class="math">\(x_{t+1}\)</span> that is, we want to calculate </p>
 <div class="math">$$P(x_{t+1}|x_{t},\ldots,x_0)$$</div>
 <p>.</p>
-<p>Using the chain rule we can write the probability of finding the full sequence as</p>
+<p>Using the chain rule, we can write the probability of finding the full sequence as</p>
 <div class="math">$$P(x_{0},\ldots,x_{t},x_{t+1})=P(x_{t+1}|x_{t},\ldots, x_0)P(x_{t}|x_{t-1},\ldots,x_0)\ldots P(x_{1}|x_0)P(x_0)$$</div>
 <p>If we write <span class="math">\(h_t\)</span> to denote all the previous states up to time <span class="math">\(t-1\)</span>
 </p>
@@ -63,7 +63,7 @@
 <p>then the probability becomes
 </p>
 <div class="math">$$P(x_{0},\ldots,x_{t},x_{t+1})=P(x_{t+1}|x_t,h_t)P(x_t|x_{t-1},h_{t-1})\ldots P(x_1|x_0,h_0)$$</div>
-<p>The hidden variable <span class="math">\(h_t\)</span> lives in a space we have yet to determine. Because the probability is now the product of the probabilities at each time <span class="math">\(t\)</span>, the loss function (using maximum likelihood) is just</p>
+<p>The hidden variable <span class="math">\(h_t\)</span> lives in a space we have yet to determine. Because the probability is now the product of the probabilities at each time <span class="math">\(t\)</span>, the loss function (using maximum likelihood) is,</p>
 <div class="math">$$L=-\sum_t \ln P(x_t|x_{t-1},h_{t-1})$$</div>
 <p>
 where the sum runs over all the elements in the sequence.</p>
@@ -71,13 +71,13 @@ where the sum runs over all the elements in the sequence.</p>
 <p><img alt="" height="350" src="/images/rnn.png" style="display: block; margin: 0 auto" width="350"> </p>
 <p>Each node <span class="math">\(N_i\)</span> contains an activation unit that takes the input <span class="math">\(x_t\)</span> and the hidden state <span class="math">\(h_t\)</span>. That is, for each node <span class="math">\(N_i\)</span> one calculates</p>
 <div class="math">$$h_{t+1}^i=g(\sum_jW^x_{ij}x_t^j+\sum_{\alpha}W^h_{i\alpha}h^{\alpha}_t+b_i)$$</div>
-<p>where <span class="math">\(W^x, W^h, b\)</span> are the parameters we want to fit. The resulting hidden state <span class="math">\(h_{t+1}\)</span> is passed to the next unit in a sequential manner. To determine the probability, we stack a softmax layer on top of the hidden layer, that is,</p>
+<p>where <span class="math">\(W^x, W^h, b\)</span> are the parameters we want to fit. The resulting hidden state <span class="math">\(h_{t+1}\)</span> sequentially passes to the next unit. To determine the probability, we stack a softmax layer on top of the hidden layer, that is,</p>
 <div class="math">$$P(x_{t+1}|x_t,h_t)=\frac{e^{\sum_iw_{ai}h_{t+1}^i+\tilde{b}_a}}{\sum_a e^{\sum_i w_{ai}h_{t+1}^i+\tilde{b}_a}}$$</div>
 <p>where <span class="math">\(a\)</span> is the class of <span class="math">\(x_{t+1}\)</span>.</p>
-<p>We can include additional hidden layers and they can have different number of nodes. At each step we have a set of ingoing hidden states <span class="math">\(h^1,h^2,\ldots\)</span> for the layers 1,2,etc, and an outgoing set of hidden states.</p>
+<p>We can include additional hidden layers, and they can have a different number of nodes. At each step, we have a set of ingoing hidden states <span class="math">\(h^1,h^2,\ldots\)</span> for the layers 1,2, etc, and an outgoing set of hidden states.</p>
 <p><a name="train"></a></p>
 <h3><strong>2. Training</strong></h3>
-<p>Training a full sequence of data can be problematic. The gradients depend on all the past units which for long sequence makes the problem computationally very expensive. To add to this, due to the backpropagation algorithm the gradients contain a very large number of products which may lead the gradient to explode or become extremely small. Instead, we can divide the full sequence into smaller sequences. We feed the algorithm using batches of size <span class="math">\(N\)</span> with sequences of size <span class="math">\(L\)</span>. We can stack horizontally several units, so we have a single network acting on a sequence. </p>
+<p>Training a full sequence of data can be problematic. The gradients depend on all the past units, which for a long series makes the problem computationally very expensive. Due to the backpropagation algorithm the gradients contain many products that may lead the gradient to explode or become extremely small. Instead, we can divide the full sequence into shorter sequences. We feed the algorithm using batches of size <span class="math">\(N\)</span> with sequences of length <span class="math">\(L\)</span>. We can stack several units horizontally, so we have a single network acting on a series. </p>
 <p><img alt="" height="350" src="/images/rnn_2.png" style="display: block; margin: 0 auto" width="350"> </p>
 <p>Here <span class="math">\(Y\)</span> stands for the target. </p>
 <p>The backpropagation algorithm acquires a component along the time direction. Say we want to calculate the derivative of the loss function with respect to <span class="math">\(\omega\)</span>, the parameter that multiplies <span class="math">\(x_0\)</span>. Then the gradient will receive several contributions coming from the later units because of the recurrence relationship.</p>

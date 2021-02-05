@@ -53,11 +53,11 @@
 </ol>
 <p><a name="def1"></a></p>
 <h3><strong>1. Linear SVM</strong></h3>
-<p>The Support Vector Machine is a learning algorithm that whose primary goal is to find the optimal decision boundary. In the separable case, when the decision boundary is a hyperplane, it can be shown that the solution only depends on a few datapoints, which are known as support vectors, and hence the name.</p>
+<p>The Support Vector Machine is a learning algorithm whose primary goal is to find the optimal decision boundary. In the separable case, when the decision boundary is a hyperplane, we can show that the solution only depends on a few data points, known as support vectors, and hence the name.</p>
 <ul>
 <li><strong>Linearly separable case:</strong></li>
 </ul>
-<p>Lets say we are in two dimensions and we have a dataset with two labels. We want to find the line that achieves maximal separation between the two classes. That is, of all the separating lines, we want to find the one that maximizes the margin <span class="math">\(\rho\)</span>, as depicted below.</p>
+<p>Let's say we are in two dimensions, and we have a dataset with two labels. We want to find the line that achieves maximal separation between the two classes. That is, of all the separating lines, we want to find the one that maximizes the margin <span class="math">\(\rho\)</span>, as depicted below.</p>
 <p><img alt="" height="250" src="/images/svm.png" style="display: block; margin: 0 auto" width="250"> </p>
 <p>A line has equation
 </p>
@@ -86,7 +86,7 @@ where <span class="math">\(\alpha_i\)</span> are Lagrange multipliers, <span cla
 \end{aligned}$$</div>
 <p>
 Provided <span class="math">\(\alpha_i&gt;0\)</span> for which the loss function is differentiable in <span class="math">\(\alpha\)</span>. If <span class="math">\(\alpha_i=0\)</span> then the we only have the first two equations. This means that <span class="math">\(\alpha_i&gt;0\)</span> corresponds to points that sit exactly on the margin, and the remaining equations depend only on these points. These are known as support vectors.</p>
-<p>If we replace <span class="math">\(\omega\)</span> by its equation in the loss function <span class="math">\(L\)</span> we obtain the dual problem</p>
+<p>If we replace <span class="math">\(\omega\)</span> with its equation in the loss function <span class="math">\(L\)</span>, we obtain the dual problem:</p>
 <div class="math">$$\hat{L}=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j x_i^T\cdot x_j,\;\alpha_i\geq 0 $$</div>
 <p>where we have used that <span class="math">\(\sum_i\alpha_iy_i=0\)</span>. The problem with <span class="math">\(-\hat{L}\)</span> is actually a convex minimization problem and can be solved using traditional methods. The solution of the dual problem must suplemented with the additional conditions:
 </p>
@@ -110,7 +110,7 @@ So the margin is inversely proportional to the linear norm of <span class="math"
 <li><strong>Non-separable case:</strong></li>
 </ul>
 <p><img alt="" height="250" src="/images/svm3.png" style="display: block; margin: 0 auto" width="250"> </p>
-<p>In the non-separable case one cannot find a hyperplane that separates the classes. That is, for any hyperplane there exists <span class="math">\(x_i,y_i\)</span> such that</p>
+<p>In the non-separable case, one cannot find a hyperplane that separates the classes. That is, for any hyperplane, there exists <span class="math">\(x_i,y_i\)</span> such that</p>
 <div class="math">$$y_i(\omega^T\cdot x_i +b)\ngtr 1$$</div>
 <p>
 See picture above.</p>
@@ -118,7 +118,7 @@ See picture above.</p>
 </p>
 <div class="math">$$y_i(\omega^T\cdot x_i +b)\geq 1-\xi_i$$</div>
 <p>
-If we remove the points for which <span class="math">\(0 &lt; y_i(\omega^T\cdot x_i +b)&lt;1\)</span> then the data is linearly separable. With the remaining data we can define a margin, which is called a soft-margin instead of a hard-margin as in the separable case. The points for which <span class="math">\(\xi_i\)</span> is non-zero can be considered as outliers. </p>
+If we remove the points for which <span class="math">\(0 &lt; y_i(\omega^T\cdot x_i +b)&lt;1\)</span> then the data is linearly separable. With the remaining data, we can define a margin called a soft-margin instead of a hard-margin as in the separable case. The points for which <span class="math">\(\xi_i\)</span> is non-zero are the outliers. </p>
 <p>As before, we want to minimize <span class="math">\(\lVert\omega\rVert\)</span>, but at the same time we want to use the smallest possible number of <span class="math">\(\xi\)</span> with the smallest values possible. This can be written as
  </p>
 <div class="math">$$\frac{1}{2}\lVert\omega\rVert^2+\lambda \sum_i \xi_i^p-\sum_i\alpha_i[y_i(\omega^T\cdot x_i +b)- 1+\xi_i],\;\alpha_i\geq 0,\xi_i\geq 0$$</div>
@@ -147,19 +147,19 @@ In more detail,
 &amp;=\mathbb{E}_{S'\sim D^{m-1},x\sim D}1_{h_{S'}(x)\neq y}\\
 &amp;=\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})
 \end{aligned}$$</div>
-<p>Lets estimate <span class="math">\(R_{LLO}(x)\)</span> for the SVM in the separable case. If <span class="math">\(x\)</span> is above the margin then the error is zero, because if we remove this point the predictor will not change as it depends only on the support vectors. However if <span class="math">\(x\)</span> is exactly on the margin, then the support vectors of the new predictor will change. This point <span class="math">\(x\)</span> may or may not be correctly classified, and so the maximum number of points that can be misclassified by this procedure is the same as the number of support vectors. This means that,
+<p>Let's estimate <span class="math">\(R_{LLO}(x)\)</span> for the SVM in the separable case. If <span class="math">\(x\)</span> is above the margin, then the error is zero because if we remove this point, the predictor will not change as it depends only on the support vectors. However, if <span class="math">\(x\)</span> is exactly on the margin, then the new predictor's support vectors will change. This point <span class="math">\(x\)</span> may or may not be correctly classified, and so the maximum number of points that this procedure can misclassify is the same as the number of support vectors. This means that,
 </p>
 <div class="math">$$\hat{R}_{LLO}\leq \frac{NV(S)}{m}$$</div>
 <p>
 where <span class="math">\(NV\)</span> is the number of support vectors for the dataset <span class="math">\(S\)</span>. We may therefore conclude that the average generalization error is bounded by the average number of support vectors, that is,
 </p>
 <div class="math">$$\mathbb{E}_{S'\sim D^{m-1}}R(h_{S'})\leq \frac{\mathbb{E}_{S\sim D^m}NV(S)}{m}$$</div>
-<p>Assuming that <span class="math">\(NV\)</span> remains small for different datasets, the above result implies that the average error also remains small.</p>
-<p><a name="non-linear"></a></p>
+<p>Assuming that <span class="math">\(NV\)</span> remains small for different datasets, the above result implies that the average error remains small.
+<a name="non-linear"></a></p>
 <h3><strong>3. Non-linear decision boundary</strong></h3>
-<p>It is possible that the dataset is separable but the decision boundary is not a hyperplane.
+<p>The dataset may be separable, but the decision boundary is not a hyperplane.
 In this case, there should exist a map <span class="math">\(\phi: x\rightarrow x'\)</span> that makes the problem linearly separable.
-All the previous steps follow except that we use <span class="math">\(x'\)</span> instead of <span class="math">\(x\)</span>. The problem is in determining the map <span class="math">\(\phi\)</span>, which is usual a difficult problem. </p>
+All the previous steps follow except that we use <span class="math">\(x'\)</span> instead of <span class="math">\(x\)</span>. The problem is in determining the map <span class="math">\(\phi\)</span>, which is usually a difficult problem. </p>
 <p><img alt="" height="300" src="/images/svm2.png" style="display: block; margin: 0 auto" width="300"> </p>
 <p>Kernel methods are used to address solutions of this type. Suppose we find such a map. Then we have a new set of features <span class="math">\(\phi(x_1),\phi(x_2),\ldots \phi(x_n)\)</span>. The dual problem becomes</p>
 <div class="math">$$L_D=\sum_{i=1}^N\alpha_i-\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\alpha_i \alpha_j y_iy_j \phi(x_i)^T\cdot \phi(x_j),\;\alpha_i\geq 0 $$</div>
@@ -173,12 +173,12 @@ The constant <span class="math">\(b\)</span> can be determined from the location
 <li>It is symmetric: <span class="math">\(K(x,x')=K(x',x)\)</span></li>
 <li>It is positive semi-definite: <span class="math">\(\sum_{i,j}K(x_i,x_j)\lambda_i\lambda_j\geq 0,\; \forall \lambda_i\)</span></li>
 </ul>
-<p>Instead of looking for the map <span class="math">\(\phi\)</span> we can search for the Kernel which is a scalar function. 
-For example, lets consider the gaussian Kernel
+<p>Instead of looking for the map <span class="math">\(\phi\)</span>, we can search for the Kernel, a scalar function. 
+For example, let's consider the gaussian Kernel:
 </p>
 <div class="math">$$K(x,y)=e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}$$</div>
 <p>
-Since this is a positive and symmetric function, it is easy to see that above conditions are satisfied. But can we find the map <span class="math">\(\phi\)</span> such that <span class="math">\(K(x,x')=\phi(x)^T\phi(x')\)</span>? Note that</p>
+Since this is a positive and symmetric function, it is easy to see that the above conditions are satisfied. But can we find the map <span class="math">\(\phi\)</span> such that <span class="math">\(K(x,x')=\phi(x)^T\phi(x')\)</span>? Note that</p>
 <div class="math">$$e^{-\frac{\lVert x-y\rVert^2}{2\sigma^2}}=e^{-\frac{x^2+y^2}{2\sigma^2}}\sum_{n=1}^{\infty}\frac{(xy)^n}{(2\sigma^2)^n n!}$$</div>
 <p>For each polynomial term in the expansion</p>
 <div class="math">$$\begin{aligned}(x y)^n=(\sum_{i=1}^d x_iy_i)^n&amp;=\sum_{\sum_i k_i=n}\frac{n!}{k_1!k_2!\ldots k_d!}(x_1y_1)^{k_1}(x_2y_2)^{k_2}\ldots (x_dy_d)^{k_d}\\

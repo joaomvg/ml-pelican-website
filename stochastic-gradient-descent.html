@@ -51,28 +51,28 @@
 </ol>
 <p><a name="sgd"></a></p>
 <h3><strong>1. SGD</strong></h3>
-<p>The gradient descent is an algorithm for solving optimization problems. It uses the gradients of the function we want to optimize to search for a solution. The concept is very simple. Suppose we want to minimize a loss function. We start by choosing a random point in the loss function surface. Then we make a step proportional to the gradient of the function at that point but in the opposite direction. This guarantees, if the step is sufficiently small, that the new point has smaller loss value. We continue this process until the gradient is zero, or smaller than a predefined threshold. </p>
-<p>The loss is usually a multivariate function in a high dimensional space, that is, <span class="math">\(L=L(x)\)</span> with <span class="math">\(x\in\mathbb{R}^d\)</span>. The gradient step ensures that we always make steps in a direction orthogonal to the surfaces of constant loss value. That is, consider the surface that has loss value <span class="math">\(L=L_1\)</span>. A small step <span class="math">\(dx\)</span> on this surface does not change the loss value. Therefore we must have </p>
+<p>Gradient descent is an algorithm for solving optimization problems. It uses the gradients of the function we want to optimize to search for a solution. The concept is straightforward. Suppose we want to minimize a loss function. We start by choosing a random point in the loss function surface. Then we make a step proportional to the function's gradient at that point but in the opposite direction. This guarantees if the step is sufficiently small that the new point has a smaller loss value. We continue this process until the gradient is zero or smaller than a predefined threshold. </p>
+<p>The loss is usually a multivariate function in a high dimensional space, that is, <span class="math">\(L=L(x)\)</span> with <span class="math">\(x\in\mathbb{R}^d\)</span>. The gradient descent ensures that we always take steps in a direction orthogonal to constant loss value surfaces. That is, consider the region that has a loss value <span class="math">\(L=L_1\)</span>. A small step <span class="math">\(dx\)</span> along this surface does not change the loss value. Therefore we must have </p>
 <div class="math">$$\frac{\partial L}{\partial x_1}dx_1+\frac{\partial L}{\partial x_2}dx_2+\ldots+\frac{\partial L}{\partial x_d}dx_d=\frac{\partial L}{\partial x}\cdot dx=0$$</div>
 <p>
 and so the gradient vector <span class="math">\(\partial L /\partial x\)</span> is an orthogonal vector to the surface <span class="math">\(L=L_1\)</span>.
 In other words, a gradient step moves the parameter away from surfaces of constant loss. </p>
 <p><img alt="" height="300" src="/images/grad_descent.png" style="display: block; margin: 0 auto" width="300"> </p>
-<p>In practice we perform the update
+<p>In practice, we perform the update
 </p>
 <div class="math">$$w_t=w_{t-1}-\eta \frac{\partial L}{\partial w_{t-1}}$$</div>
 <p>
-where <span class="math">\(w\)</span> is the parameter to be learnt and <span class="math">\(\eta\)</span> is the learning rate. Usually, we need to adapt the learning rate during the descent. A large learning rate may lead to non-convergent results. On the other hand, a small learning rate will make the convergence very slow. </p>
-<p>One of the most important shortcomings of the gradient descent is that it may get stuck in a local minimum. To add to this, calculating the gradient at every step may be computationally very expensive. For example, in neural networks the computational cost is at least of order <span class="math">\(\mathcal{O}(Nm)\)</span>, where <span class="math">\(N\)</span> is the number of datapoints and <span class="math">\(m\)</span> the number of parameters. For very large neural networks with millions of parameters, calculating the gradient at each step is infeasable. To solve these issues, instead of calculating the loss overall all the datapoints we can consider small batches at each step. We calculate the contribution to the gradient from the smaller batch
+where <span class="math">\(w\)</span> is the parameter to be learned and <span class="math">\(\eta\)</span> is the learning rate. Usually, we need to adapt the learning rate during the descent. A large learning rate may lead to non-convergent results. On the other hand, a small learning rate will make the convergence very slow. </p>
+<p>One of the most important shortcomings of the gradient descent is that it may get stuck in a local minimum. To add to this, calculating the gradient at every step may be computationally very expensive. For example, in neural networks, the computational cost is at least of order <span class="math">\(\mathcal{O}(Nm)\)</span>, where <span class="math">\(N\)</span> is the number of datapoints and <span class="math">\(m\)</span> the number of parameters. For large neural networks with millions of parameters, calculating the gradient at each step is infeasible. To solve these issues, instead of calculating the loss overall all datapoints, we can consider small batches at each step. We calculate the contribution to the gradient from the smaller batch
 </p>
 <div class="math">$$\frac{\partial L^{B}}{\partial w}=\sum_{i\in\text{Batch}}\frac{\partial L_i}{\partial w}$$</div>
 <p> <br>
-where <span class="math">\(L_i\)</span> is the loss contribution from a single datapoint, and use this to update the parameters in an iterative way.</p>
-<p>In stochastic gradient descent we update the parameters using a small-batch gradient descent. We run over all small-batches to guarantee that we learn over all the data. Suppose we have a sequence of non-overlapping and randomly chosen small batches <span class="math">\(\{B_0,B_1,\ldots,B_n\}\)</span> each of size <span class="math">\(b\)</span>. Then at each step in the gradient descent we update the parameters using the corresponding batch, that is,</p>
+where <span class="math">\(L_i\)</span> is the loss contribution from a single datapoint, and use this to update the parameters iteratively.</p>
+<p>In stochastic gradient descent, we update the parameters using small-batch gradient descent. We run through all small-batches to guarantee that we learn all the data. Suppose we have a sequence of non-overlapping and randomly chosen small batches <span class="math">\(\{B_0,B_1,\ldots,B_n\}\)</span> each of size <span class="math">\(b\)</span>. Then at each step in the gradient descent, we update the parameters using the corresponding batch, that is,</p>
 <div class="math">$$w_t=w_{t-1}-\eta \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}$$</div>
 <p>Once we run over all batches, if the parameters <span class="math">\(w_t\)</span> do not change considerably, the total distance traveled in parameter space is proportional to the gradient calculated on the full dataset. That is,</p>
 <div class="math">$$\sum_{t=0}^T \Delta w_t=-\eta \sum_{t=0}^T  \frac{\partial L^{B_{t-1}}}{\partial w_{t-1}}\simeq -\eta\frac{\partial L}{\partial w_{T}}$$</div>
-<p>If the batches have size one, then this is a Monte-Carlo estimation of the unbiased gradient descent <span class="math">\(\sum_i \frac{\partial L_i}{\partial w}D(x_i)\)</span>, where <span class="math">\(D(x_i)\)</span> is the true distribution, and hence the name stochastic descent. Even if the descent takes us to a local minimum, the batch-gradient may not be zero and we will avoid being stuck there. </p>
+<p>If the batches have size one, then this is a Monte-Carlo estimation of the unbiased gradient descent <span class="math">\(\sum_i \frac{\partial L_i}{\partial w}D(x_i)\)</span>, where <span class="math">\(D(x_i)\)</span> is the actual distribution, and hence the name stochastic descent. Even if the descent takes us to a local minimum, the batch-gradient may not be zero, and we will avoid being stuck there. </p>
 <p><a name="var"></a></p>
 <h3><strong>2. Variants</strong></h3>
 <ul>
@@ -130,7 +130,7 @@ A similar algorithm which goes by the name <strong>RMSprop</strong> has been dev
 \end{aligned}
 $$</div>
 <p>
-But it also introduces bias corrections. That is, after time <span class="math">\(t\)</span> the components above have the expression
+But it also introduces bias corrections. That is, after time <span class="math">\(t\)</span>, the components above have the expression
 </p>
 <div class="math">$$
 \begin{aligned}

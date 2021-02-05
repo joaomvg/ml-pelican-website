@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>"Bias-Variance/Complexity trade-off" — Data Science and Machine Learning</title>
-	<meta name="description" content="Title: "Bias-Variance/Complexity trade-off"; Date: 2020-06-05; Author: Joao Gomes">
+	<title>"Bias-Variance/Complexity tradeoff" — Data Science and Machine Learning</title>
+	<meta name="description" content="Title: "Bias-Variance/Complexity tradeoff"; Date: 2020-06-05; Author: Joao Gomes">
 	<meta name="author" content="Joao Gomes">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
@@ -26,7 +26,7 @@
 		<div class="col-md-8 col-md-offset-2">
 <div class="article" itemscope itemtype="http://schema.org/BlogPosting">
 	<div class="text-center article-header">
-		<h1 itemprop="name headline" class="article-title">"Bias-Variance/Complexity trade-off"</h1>
+		<h1 itemprop="name headline" class="article-title">"Bias-Variance/Complexity tradeoff"</h1>
 		<span itemprop="author" itemscope itemtype="http://schema.org/Person">
 			<h4 itemprop="name">Joao Gomes</h4>
 		</span>
@@ -45,7 +45,8 @@
 			<a href="/tag/data-science.html" rel="tag">data science</a>
 		</span>
 	</div>
-	<div itemprop="articleBody" class="article-body"><ol>
+	<div itemprop="articleBody" class="article-body"><hr>
+<ol>
 <li><a href="#def1">Basic concept</a></li>
 <li><a href="#python">Python implementation: Classification</a></li>
 <li><a href="#python2">Python implementation: Regression</a></li>
@@ -59,18 +60,18 @@
 with 
 </p>
 <div class="math">$$\epsilon_{app}=\text{min}_{h\in \mathcal{H}}L_D(h),\;\;\epsilon_{est}=L_D(h_S)-\text{min}_{h\in \mathcal{H}}L_D(h)$$</div>
-<p>Here <span class="math">\(\epsilon_{app}\)</span> is the <strong>approximation error</strong> which is the smallest error one can achieve using the hypothesis class <span class="math">\(\mathcal{H}\)</span>. This error is independent of the data and depends only on the choice of the hypothesis class. On the other hand, <span class="math">\(\epsilon_{est}\)</span> is the <strong>estimation error</strong>, that is, it measuers how far the generalization error is from the approximation error. Since <span class="math">\(h_S\)</span> depends on the training set, the estimation error depends strongly on the training data. </p>
-<p>In order to reduce the approximation error we need a more complex hypothesis class but this might make the estimation error worse, since a more complex hypothesis may lead to overfitting. On the other hand, a smaller hypothesis class, that is, less complex, reduces the estimation error, because <span class="math">\(h_S\)</span> and <span class="math">\(\text{argmin}_hL_D(h)\)</span> are now closer, but it will increase the approximation error because of underfitting. This tradeoff is known as <strong>bias-complexity</strong> tradeoff.</p>
-<p>Lets see how this works in practice. We create artificial data of around 1million samples in a 10 dimensional feature space, according to the classification rule:</p>
+<p>Here <span class="math">\(\epsilon_{app}\)</span> is the <strong>approximation error</strong> which is the smallest error one can achieve using the hypothesis class <span class="math">\(\mathcal{H}\)</span>. This error is independent of the data and depends only on the choice of the hypothesis class. On the other hand, <span class="math">\(\epsilon_{est}\)</span> is the <strong>estimation error</strong>, that is, it measures how far the generalization error is from the approximation error. Since <span class="math">\(h_S\)</span> depends on the training set, the estimation error depends strongly on the training data. </p>
+<p>To reduce the approximation error we need a more complex hypothesis class but this might make the estimation error worse, since a more complex hypothesis may lead to overfitting. On the other hand, a smaller hypothesis class, that is, less complex, reduces the estimation error, because <span class="math">\(h_S\)</span> and <span class="math">\(\text{argmin}_hL_D(h)\)</span> are now closer, but it increases the approximation error because of underfitting. This tradeoff is known as the <strong>bias-complexity</strong> tradeoff.</p>
+<p>Lets see how this works in practice. We create artificial data of around 1 million samples in a 10 dimensional feature space, according to the classification rule:</p>
 <div class="math">$$y(x)=\text{sign}(w^0_1\tanh(w^1_ix^i)+w^0_2\tanh(w^2_ix^i))$$</div>
 <p>
 where <span class="math">\(w^1,w^2\)</span> are 10 dimensional parameters and <span class="math">\((w^0_1,w^0_2)\)</span> is a two parameter. For the classification we use a decision tree and adjust its max depth and number of features used in order to obtain different levels of complexity. Below we show the behaviour of the estimation (est_error), approximation (app_error) and generalization errors (gen_error):</p>
 <p><img alt="" height="400" src="/images/bias_vs_complexity.png" style="display: block; margin: 0 auto" width="400"></p>
-<p>To determine the approximation error we train the decision tree on the full data keeping fixed the number of features used and adjusting the depth of the tree (max_depth in the picture above). On the other hand, to determine the estimation error we train the decision tree on 10% of the data (around 100k samples) for a variety of depths and number of features. The generalization error is calculated on the remaining 90% of the data.</p>
-<p>The generalization error curves shows a tradeoff between bias and complexity. When the depth is smaller, so bias is larger, the approximation error grows but the estimation error is smaller. In contrast, if we increase the depth, the approximation error becomes smaller but the estimation error grows due to overfitting. The "sweet spot" occurs for an intermediate value of the depth, where the generalization error is a minimum.  </p>
+<p>To determine the approximation error, we train the decision tree on the full data while keeping fixed the number of features used and adjusting the tree's depth (max_depth in the picture above). On the other hand, to determine the estimation error, we train the decision tree on 10% of the data (around 100k samples) for various depths and number of features. The generalization error is calculated on the remaining 90% of the data.</p>
+<p>The generalization error curves show a tradeoff between bias and complexity. When the depth is smaller, so bias is more considerable, the approximation error grows, but the estimation error is smaller. In contrast, if we increase the depth, the approximation error becomes smaller, but the estimation error grows due to overfitting. The "sweet spot" occurs for an intermediate value of the depth, where the generalization error is a minimum.  </p>
 <p>Similar behaviour is obtained for different number of features (max_features):
 <img alt="" height="600" src="/images/bias_vs_complex_multiple.png" style="display: block; margin: 0 auto" width="600"></p>
-<p>In case of regression, a similar trade-off is observed. Nevertheless the analysis is slightly different. In general we want to model <span class="math">\(y=f(x)+\epsilon\)</span> where <span class="math">\(\epsilon\)</span> is noise with mean zero and standard deviation <span class="math">\(\sigma\)</span>. So we use an algorithm to approximate <span class="math">\(f(x)\simeq \hat{f}(x)\)</span>. Here <span class="math">\(\hat{f}\)</span> is the output of our algorithm.</p>
+<p>In the case of regression, we observe a similar tradeoff. Nevertheless, the analysis is slightly different. In general we want to model <span class="math">\(y=f(x)+\epsilon\)</span> where <span class="math">\(\epsilon\)</span> is noise with mean zero and standard deviation <span class="math">\(\sigma\)</span>. So we use an algorithm to approximate <span class="math">\(f(x)\simeq \hat{f}(x)\)</span>. Here <span class="math">\(\hat{f}\)</span> is the output of our algorithm.</p>
 <p>The mean square error of a predictor (regression problem) can be decomposed as follows:
 </p>
 <div class="math">$$E_D[(y-\hat{f}(x_0;D))^2]=\text{Bias}^2+\text{Var}^2+\sigma^2$$</div>
@@ -84,15 +85,15 @@ and
 <div class="math">$$\text{Var}^2=E_D[E_D[\hat{f}(x_0;D)]-\hat{f}(x_0;D)]^2$$</div>
 <p>
 Note that the expectation <span class="math">\(E_D\)</span> is calculated by using different training datasets and <span class="math">\(x_0\)</span> is a reference point- the error will depend on this point which is kept fixed while averaging over different training sets.</p>
-<p>We use again fake data (1million samples) in a 10 dimensional feature space and target function
+<p>We use fake data (1million samples) in a 10 dimensional feature space and target function
 </p>
 <div class="math">$$f(x)=(x.w)^4+(x.w)^2+x.h$$</div>
 <p>
 where <span class="math">\(w,h\)</span> are 10 dimensional parameter arrays. We use a decision tree regressor and adjust number of features used and max depth. </p>
 <p><img alt="" height="400" src="/images/bias_variance_maxfeatures.png" style="display: block; margin: 0 auto" width="400"></p>
-<p>In each iteration, we sample about 20k datapoints and fit the decision tree,  calculate <span class="math">\(\hat{f}(x_0)\)</span> for a determined reference point and store this value. The bias is then calculated from the mean of the difference <span class="math">\(\hat{f}(x_0)-f(x_0)\)</span> and for the variance we calculate <span class="math">\(\hat{f}(x_0)\)</span> after each training sample and then calculate the variance of that array.</p>
+<p>We sample about 20k data points in each iteration and fit the decision tree,  calculate <span class="math">\(\hat{f}(x_0)\)</span> for a determined reference point and store this value. The bias is calculated from the mean of the difference <span class="math">\(\hat{f}(x_0)-f(x_0)\)</span> and for the variance, we compute <span class="math">\(\hat{f}(x_0)\)</span> after each training sample and then calculate the variance of that array.</p>
 <p><img alt="" height="600" src="/images/bias_variance_multiple.png" style="display: block; margin: 0 auto" width="600"></p>
-<p>We can see that while variance increases with increasing depth, bias decreases. This behaviour translates into a trade-off between bias and variance which explains why the mean square error (mse) reachs its minimum at an intermediate depth. </p>
+<p>We can see that while variance increases with increasing depth, bias decreases. This behavior translates into a trade-off between bias and variance, explaining why the mean square error (mse) reachs its minimum at an intermediate depth. </p>
 <p><a name="python"></a></p>
 <h3><strong>2. Python implementation: Classification</strong></h3>
 <p>Classification with Decision Tree:</p>

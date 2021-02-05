@@ -83,12 +83,12 @@ where the sum is over the <span class="math">\(N_c\)</span> datapoints with clas
 <p>
 <a name="decision"></a></p>
 <h3><strong>2. Decision Boundary</strong></h3>
-<p>The predictor is determined by the maximum of <span class="math">\(p(c|x)\)</span>. As we have seen above, this probability has the same form as the logistic regression. This means that also for LDA the regions of predicted class are singly connected convex sets. </p>
+<p>The predictor is determined by the maximum of <span class="math">\(p(c|x)\)</span>. As we have seen above, this probability has the same form as the logistic regression. This means that also, for LDA, the regions of the predicted class are singly connected convex sets. </p>
 <p><a name="dimension"></a></p>
 <h3><strong>3. Dimensionality Reduction</strong></h3>
-<p>The PCA, or principal component analysis, is an algorithm that allows to reduce the dimensionality of the dataset while keeping the most relevant features. The PCA analysis however does not discriminate over the classes which may lead to a lack of predictability in supervised learning problems. In the example below the projection on the right keeps the classes separated which is a better projection than the one on the left.</p>
+<p>The PCA, or principal component analysis, is an algorithm that reduces the dimensionality of the dataset while keeping the most relevant features. However, the PCA analysis does not discriminate over the classes, which may lead to a lack of predictability in supervised learning problems. The right projection keeps the classes separated in the example below, which is a better projection than the one on the left.</p>
 <p><img alt="" height="400" src="/images/lda_projection.png" style="display: block; margin: 0 auto" width="400"> </p>
-<p>The LDA besides being a Gaussian classifier, can be used to dimensionally reduce the data. The basic idea is to find a projection axis that maximizes the "between" class variance while, at the same time, minimizes the "within" class variance. That is, we make the gaussians more narrow and at the same time the centers become farther apart from each other.  <br>
+<p>Besides being a Gaussian classifier, the LDA can be used to reduce the data dimensionally. The basic idea is to find a projection axis that maximizes the "between" class variance while, at the same time, minimizes the "within" class variance. That is, we make the gaussians more narrow, and at the same time, the centers become farther apart from each other.  <br>
 Consider the covariance matrix given by
 </p>
 <div class="math">$$\Sigma_{ij}=\frac{1}{N}\sum_x (x_i-\bar{x}_i)(x_j-\bar{x}_j)$$</div>

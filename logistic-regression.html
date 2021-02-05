@@ -70,7 +70,7 @@ The predictor is obtained from
 The red dots in the picture above represent a few examples.</p>
 <p>The logistic function is composed of a linear followed by a non-linear operation, given by the sigmoid function. This composed operation is usually represented in the diagram
 <img alt="" height="200" src="/images/logistic.png" style="display: block; margin: 0 auto" width="200"> 
-where <span class="math">\(x^i\)</span> are the features of the datapoint <span class="math">\(x\)</span>. The node (circle) represents the composition of a linear operation followed by a non-linear function. In more complex graphs the output of the sigmoid function can become the input of an additional non-linear operation. This way we can stack various non-linear operations which give an increased level of complexity. This type of graph has the name of neural network. </p>
+where <span class="math">\(x^i\)</span> are the features of the datapoint <span class="math">\(x\)</span>. The node (circle) represents the composition of a linear operation followed by a non-linear function. In more complex graphs, the sigmoid function's output can become the input of an additional non-linear operation. This way, we can stack various non-linear operations, which give an increased level of complexity. This type of graph has the name of neural network. </p>
 <p>In the multiclass case, the probabilities have instead the form
 </p>
 <div class="math">$$p(y^k|x)=\frac{e^{z^k(x)}}{Z(x)}$$</div>
@@ -105,7 +105,7 @@ To show this is a convex optimization problem, we build the quadratic polynomial
 </p>
 <div class="math">$$\mathcal{L}=\mathcal{L}(\omega_0)+\frac{\partial \mathcal{L}}{\partial\omega_i}|_{\omega_0}\Delta\omega_i+\frac{1}{2}\frac{\partial^2 \mathcal{L}}{\partial\omega_i\partial\omega_j}|_{\omega_0}\Delta\omega_i\Delta\omega_j+\mathcal{O}(\Delta\omega^3)$$</div>
 <p>
-The we solve for <span class="math">\(\Delta\omega\)</span>
+Then we solve for <span class="math">\(\Delta\omega\)</span>
 </p>
 <div class="math">$$\Delta\omega=\text{argmin}\frac{\partial \mathcal{L}}{\partial\omega_i}|_{\omega_0}\Delta\omega_i+\frac{1}{2}\frac{\partial^2 \mathcal{L}}{\partial\omega_i\partial\omega_j}|_{\omega_0}\Delta\omega_i\Delta\omega_j$$</div>
 <p>
@@ -113,11 +113,11 @@ that is,
 </p>
 <div class="math">$$\Delta\omega_i=-\sum_j\Big(\frac{\partial^2 \mathcal{L}}{\partial\omega_i\partial\omega_j}|_{\omega_0}\Big)^{-1}\frac{\partial \mathcal{L}}{\partial\omega_j}|_{\omega_0}$$</div>
 <p>
-The algorithm consists in updating the reference point <span class="math">\(\omega_0\)</span> as
+The algorithm consists of updating the reference point <span class="math">\(\omega_0\)</span> as
 </p>
 <div class="math">$$\omega_0\rightarrow \omega_0+\Delta\omega$$</div>
 <p>
-and continuing iteratively by solving the derivatives on the new reference point. In the case of the logistic regression, the parameter <span class="math">\(\omega_i\)</span> is actually a matrix with components <span class="math">\(\omega^k_i\)</span>. Determining the inverse of a <span class="math">\(n\times n\)</span> matrix is an order <span class="math">\(\mathcal{O}(n^3)\)</span> (with Gaussian elimination) process, while the matrix times vector multiplication operations is of order <span class="math">\(\mathcal{O}(n^2)\)</span>. Therefore each step of the Newton-Raphson method is a <span class="math">\(\mathcal{O}(n^3)\)</span> process. Since <span class="math">\(n=K(d+1)\)</span> where <span class="math">\(K\)</span> is the number of classes and <span class="math">\(d\)</span> is the feature dimension, the Newton-Raphson is a fast algorithm provided both <span class="math">\(K\)</span> and <span class="math">\(d\)</span> are relatively small.</p>
+and continuing iteratively by solving the derivatives on the new reference point. In the logistic regression case, the parameter <span class="math">\(\omega_i\)</span> is a matrix with components <span class="math">\(\omega^k_i\)</span>. Determining the inverse of a <span class="math">\(n\times n\)</span> matrix is an order <span class="math">\(\mathcal{O}(n^3)\)</span> (with Gaussian elimination) process, while the matrix-vector multiplication operations are of order <span class="math">\(\mathcal{O}(n^2)\)</span>. Therefore each step of the Newton-Raphson method is a <span class="math">\(\mathcal{O}(n^3)\)</span> process. Since <span class="math">\(n=K(d+1)\)</span> where <span class="math">\(K\)</span> is the number of classes and <span class="math">\(d\)</span> is the feature dimension, the Newton-Raphson is a fast algorithm provided both <span class="math">\(K\)</span> and <span class="math">\(d\)</span> are relatively small.</p>
 <p><a name="decision"></a></p>
 <h3><strong>3. Decision Boundary</strong></h3>
 <p>In a binary classification problem the decision boundary of the logistic regression is a hyperplane. This is because the threshold value <span class="math">\(p(0|x)=0.5\)</span> implies the linear constraint <span class="math">\(\sum_i\omega_i x^i+b=0\)</span>. For more classes, the decision boundary corresponds to regions bounded by hyperplanes. For any two classes <span class="math">\(c_1,c_2\)</span> we determine a pseudo-boundary, that is, the hyperplane represented by the equation <span class="math">\(p(c_1|x)=p(c_2|x)\)</span>. This gives

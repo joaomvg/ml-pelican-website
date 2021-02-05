@@ -70,7 +70,7 @@ where <span class="math">\(\sim\)</span> means that we fit the learner. In order
 <div class="math">$$\gamma_m=\text{argmin}_{\gamma_m} L(y,F_{m-1}+\gamma_m w(x))$$</div>
 <p>
 where <span class="math">\(y\)</span> is the target array. We repeat this process until the solution is sufficiently accurate.</p>
-<p>To exemplify how this works in practice, consider a binary classification problem. In this case, the want to determine the logit function using the boosting algorithm. In other words, we assume that the likelihood <span class="math">\(p(y=0|x)\)</span> has the form
+<p>To exemplify how this works in practice, consider a binary classification problem. In this case, we use the logit function using the boosting algorithm. In other words, we assume that the likelihood <span class="math">\(p(y=0|x)\)</span> has the form
 </p>
 <div class="math">$$p(y=0|x)=\frac{1}{1+e^{-F_m(x)}}$$</div>
 <p>

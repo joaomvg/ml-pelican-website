@@ -113,7 +113,7 @@ and integrating over &lt;span class="math"&gt;\(t: (-\infty,\infty)\)&lt;/span&g
 &lt;ul&gt;
 &lt;li&gt;Two-sample mean (equal variance)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;For two samples with sizes &lt;span class="math"&gt;\(n_1,n_2\)&lt;/span&gt; the idea is roughly the same. We follow similar steps as in the previous case. After some algebra, the exponential contains the terms&lt;/p&gt;
+&lt;p&gt;For two samples with sizes &lt;span class="math"&gt;\(n_1,n_2\)&lt;/span&gt;, the idea is roughly the same. We follow similar steps as in the previous case. After some algebra, the exponential contains the terms&lt;/p&gt;
 &lt;div class="math"&gt;$$-(n_1-1)\frac{s_1^2}{2\sigma^2}-(n_2-1)\frac{s_2^2}{2\sigma^2}-n_1\frac{(\bar{x}_1-\mu_1)^2}{2\sigma^2}-n_2\frac{(\bar{x}_2-\mu_2)^2}{2\sigma^2}$$&lt;/div&gt;
 &lt;p&gt;
 where &lt;span class="math"&gt;\(s_1\)&lt;/span&gt; and &lt;span class="math"&gt;\(s_2\)&lt;/span&gt; are the two sample means.&lt;/p&gt;
@@ -319,7 +319,7 @@ Remember that for a normally distributed random variable &lt;span class="math"&g
     (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-&lt;/script&gt;</content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive the Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
+&lt;/script&gt;</content><category term="Statistics"></category><category term="data science"></category></entry><entry><title>"Hoeffding's inequality"</title><link href="/hoeffdings-inequality.html" rel="alternate"></link><published>2020-05-05T00:00:00+02:00</published><updated>2020-05-05T00:00:00+02:00</updated><author><name>Joao Gomes</name></author><id>tag:None,2020-05-05:/hoeffdings-inequality.html</id><summary type="html">&lt;p&gt;We derive Hoeffding's inequality. This is one of the most used results in machine learning theory.&lt;/p&gt;</summary><content type="html">&lt;h3&gt;&lt;strong&gt;Hoeffding's inequality&lt;/strong&gt;&lt;/h3&gt;
 &lt;p&gt;&lt;br/&gt;
 Let &lt;span class="math"&gt;\(X_1,\ldots,X_m\)&lt;/span&gt; be &lt;span class="math"&gt;\(m\)&lt;/span&gt; independent random variables (not necessarily identically distributed). All &lt;span class="math"&gt;\(X_i\)&lt;/span&gt; takes values in &lt;span class="math"&gt;\([a_i,b_i]\)&lt;/span&gt;. Then for any &lt;span class="math"&gt;\(\epsilon&amp;gt;0\)&lt;/span&gt; we have&lt;/p&gt;
 &lt;div class="math"&gt;$$\mathbb{P}(|S_m-E(S_m)|\geq\epsilon)\leq e^{-2\epsilon^2/\sum_i(b_i-a_i)^2},\;S_m=\sum_{i=1}^mX_i$$&lt;/div&gt;

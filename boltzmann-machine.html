@@ -52,7 +52,7 @@
 </ol>
 <p><a name="bm"></a></p>
 <h3><strong>1. Boltzmann Machine</strong></h3>
-<p>A Boltzmann machine models an unsupervised probability distribution using a graphical representation composed of visible and hidden units. The probability of the visible data is given as a sum of the exponential of an energy term <span class="math">\(E(v,h)\)</span>, much like the Boltzmann distribution in statistical mechanics. For the diagram below 
+<p>A Boltzmann machine models an unsupervised probability distribution using a graphical representation composed of visible and hidden units. The visible data's probability is obtained by summing over the hidden variables, with a weight function, which is the exponential of the energy term <span class="math">\(E(v,h)\)</span>, like the Boltzmann distribution in statistical mechanics. For the diagram below 
 <img alt="" height="200" src="/images/bm.png" style="display: block; margin: 0 auto" width="200"> </p>
 <p>the probability has the form
 </p>
@@ -65,10 +65,10 @@ where the sum is over all hidden configurations <span class="math">\(h=\{0,1\}^d
 <div class="math">$$Z(a,b,W)=\sum_{v,h}P(v,h)$$</div>
 <p>The Boltzmann machine can have more complicated graph interaction including edges between both visible and hidden units. For example
 <img alt="" height="200" src="/images/bm3.png" style="display: block; margin: 0 auto" width="200"> </p>
-<p>A restricted Boltzmann machine is a Boltzmann machine for which there are no interactions between the nodes in the same layer. In terms of parameters, for each node <span class="math">\(i\)</span>, either visible or hidden, we have a bias <span class="math">\(b_i\)</span>, and for each edge between the nodes <span class="math">\(i\)</span> and <span class="math">\(j\)</span> we have a parameter <span class="math">\(W_{ij}\)</span> .</p>
-<p><a name="Train"></a></p>
+<p>A restricted Boltzmann machine is a Boltzmann machine for which there are no interactions between the nodes in the same layer. In terms of parameters, each node <span class="math">\(i\)</span> contains a bias <span class="math">\(b_i\)</span>, and a parameter <span class="math">\(W_{ij}\)</span> for each edge between the nodes <span class="math">\(i\)</span> and <span class="math">\(j\)</span>.
+<a name="Train"></a></p>
 <h3><strong>2. Training</strong></h3>
-<p>In training we want to minimize the Kullback-Leibler divergence between the true distribution of visible data <span class="math">\(D(v)\)</span> and the output of the Boltzmann machine <span class="math">\(P(v)\)</span>. That is, we seek the optimum of</p>
+<p>During training, we want to minimize the Kullback-Leibler divergence between the actual distribution of visible data <span class="math">\(D(v)\)</span> and the output of the Boltzmann machine <span class="math">\(P(v)\)</span>. That is, we seek the optimum of</p>
 <div class="math">$$
 KL(D||P)=\sum_v D(v)\ln\Big(\frac{D(v)}{P(v)}\Big)
 $$</div>
@@ -90,7 +90,7 @@ and similarly for the biases
 \end{aligned}
 $$</div>
 <p>
-Since the gradient can be written as the sum of two averages one may try to use stochastic optimization. In order to calculate <span class="math">\(\langle hv\rangle_{data}\)</span> we can generate unbiased samples <span class="math">\(h_iv_j\)</span> and then take the average as an estimate. To do that we can use Gibbs sampling. First we pick a training sample <span class="math">\(v\)</span> and then generate a sample <span class="math">\(h\)</span> using the conditional probability <span class="math">\(P(h_1,h_2,\ldots|v)\)</span>. In fact we can write</p>
+Since the gradient is the sum of two averages, one may try to use stochastic optimization. To calculate <span class="math">\(\langle hv\rangle_{data}\)</span> we can generate unbiased samples <span class="math">\(h_iv_j\)</span> and then take the average as an estimate. To do that, we can use Gibbs sampling. First we pick a training sample <span class="math">\(v\)</span> and then generate a sample <span class="math">\(h\)</span> using the conditional probability <span class="math">\(P(h_1,h_2,\ldots|v)\)</span>. We can write</p>
 <div class="math">$$\begin{aligned}
 P(h_1,h_2,\ldots|v)&amp;=\frac{P(h_1,h_2,\ldots,v)}{\sum_h P(h,v)}=\\
 &amp;=\frac{\exp{(-\sum_j h_jb_j -\sum_{ij}v_iW_{ij}h_j)}}{\prod_{j}(1+\exp{(-b_j-\sum_{i}v_i W_{ij})})}\\
@@ -145,8 +145,8 @@ where <span class="math">\(\eta\)</span> is the learning rate.</p>
 \end{aligned}
 $$</div>
 <p>
-Again the idea is to replace the model average with a point estimate, by generating unbiased samples <span class="math">\(v_iv_j\)</span> and <span class="math">\(h_ih_j\)</span> and calculate their sample averages.</p>
-<p>To monitor training we usually plot values of the log-likelihood function. However, in a Boltzmann machine determining the probability <span class="math">\(P(v)\)</span> is prohibitively expensive since calculating the partition function <span class="math">\(Z\)</span> requires adding up an exponential number of terms. The complexity is of order <span class="math">\(\mathcal{O}(2^{N_v})\)</span>, where <span class="math">\(N_v\)</span> is the number of visible units. Instead, we calculate the pseudo-loglikelihood. This quantity is defined as
+Again the idea is to replace the model average with a point estimate by generating unbiased samples <span class="math">\(v_iv_j\)</span> and <span class="math">\(h_ih_j\)</span> and calculate their sample averages.</p>
+<p>To monitor training, we usually plot values of the log-likelihood function. However, in a Boltzmann machine determining the probability <span class="math">\(P(v)\)</span> is prohibitively expensive since calculating the partition function <span class="math">\(Z\)</span> requires adding up an exponential number of terms. The complexity is of order <span class="math">\(\mathcal{O}(2^{N_v})\)</span>, where <span class="math">\(N_v\)</span> is the number of visible units. Instead, we calculate the pseudo-loglikelihood. This quantity is defined as
 </p>
 <div class="math">$$
 \text{Pseudo-LL}(v)=\sum_{i}\ln P(v_i|\{v_{j\neq i}\})
@@ -162,7 +162,7 @@ after using the Bayes theorem. It can be shown that the pseudo-loglikelihood des
 <p><a name="python"></a></p>
 <h3><strong>3. Python implementation</strong></h3>
 <p>We use the MNIST dataset for a python experiment on Boltzmann machines. The dataset consists of 70000 images of handwritten digits, from 0 to 9. Each image contains <span class="math">\(28\times 28=784\)</span> pixels ranging from 0 to 255. If we work with normalized pixels, then we can interpret that value as the probability of being white or black. We can then generate a set of binary states by drawing zeros or ones according to each pixel probability.</p>
-<p>Once the model is trained we can generate samples of visible states using Gibbs sampling. First we take a random set of visible states <span class="math">\(v^0\)</span>, then we use <span class="math">\(P(h|v^0)\)</span> to generate a sample of hidden states <span class="math">\(h^0\)</span>. Given this hidden state we can generate a new sample of visible states <span class="math">\(v^1\)</span> using <span class="math">\(P(v|h^0)\)</span>. </p>
+<p>Once the model is trained, we can generate samples of visible states using Gibbs sampling. First, we take a random set of visible states <span class="math">\(v^0\)</span>, and then we use <span class="math">\(P(h|v^0)\)</span> to generate a sample of hidden states <span class="math">\(h^0\)</span>. Given this hidden state, we can sample a new set of visible states <span class="math">\(v^1\)</span> using <span class="math">\(P(v|h^0)\)</span>.</p>
 <ul>
 <li>RBM class</li>
 </ul>

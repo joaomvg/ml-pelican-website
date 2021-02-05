@@ -52,7 +52,7 @@
 </ol>
 <p><a name="def1"></a></p>
 <h3><strong>1. The algorithm</strong></h3>
-<p>The decision tree algorithm consists in a sequence of splits, or decisions, which take the form of a tree. This tree organizes the data in a way that there is a gain of information at each node. </p>
+<p>The decision tree algorithm consists of a sequence of splits, or decisions, which take the form of a tree. This tree organizes the data in a way that there is a gain of information at each node. </p>
 <p>A measure of information is the Shannon entropy, defined as 
 </p>
 <div class="math">$$S=-\sum_i p_i\ln(p_i)$$</div>
@@ -67,7 +67,7 @@ This means that more diverse the set is, larger the entropy. </p>
 <div class="math">$$S(A)&gt; S(A_{f_i&lt; t_i})+S(A_{f_i\geq t_i})$$</div>
 <p>In the example below we have 7 balls: 3 of color red, 2 green, 1 pink and 1 blue. 
 <img alt="" height="250" src="/images/tree1.png" style="display: block; margin: 0 auto" width="250"> </p>
-<p>The balls are distributed along the <span class="math">\(x\)</span>-axis and we want to determine a rule that predicts the color of the ball. For that purpose we build a decision tree containing splits with thresholds as function of <span class="math">\(x\)</span>.</p>
+<p>We want to determine a rule that predicts the ball's color as a function of <span class="math">\(x\)</span>. For that purpose, we build a decision tree containing splits with thresholds as a function of <span class="math">\(x\)</span>.</p>
 <p><img alt="" height="300" src="/images/tree2.png" style="display: block; margin: 0 auto" width="300"> 
 Following, we show that this particular tree provides information gains at each step of the splits. The entropy of the initial configuration is 
 </p>
@@ -87,18 +87,18 @@ That is, at each depth level we loop through each of the leaves and split if the
 </p>
 <div class="math">$$\text{Split }(f,t)=\text{argmin}_{f,t} \sum_{i\in A_l}(y_i-\bar{y}_l)^2+\sum_{i\in A_r}(y_i-\bar{y}_r)^2$$</div>
 <p>
-where <span class="math">\(A_l,A_r\)</span> are the left and right split configurations, and <span class="math">\(\bar{y}_l,\bar{y}_r\)</span> are the average values in each of the configurations.</p>
-<p><strong>Other measures of information gain</strong></p>
-<p>The gini index, defined as 
+where <span class="math">\(A_l,A_r\)</span> are the left and right split configurations, and <span class="math">\(\bar{y}_l,\bar{y}_r\)</span> are the average values in each of the configurations.
+<strong>Other measures of information gain</strong></p>
+<p>The Gini index, defined as 
 </p>
 <div class="math">$$G=1-\sum_ip_i^2$$</div>
 <p>
 provides another measure of information. The gini index is a bounded quantity that is <span class="math">\(0\leq G&lt;1\)</span>, unlike the Shannon entropy. Noting that <span class="math">\(\sum_i p_i=1\)</span> we can write <span class="math">\(G=\sum_i p_i(1-p_i)\)</span>. For <span class="math">\(p_i=1-\epsilon\)</span> with <span class="math">\(\epsilon\ll 1\)</span> we can approximate <span class="math">\(-p_i\ln p_i\simeq \epsilon(1-\epsilon)=p_i(1-p_i)\)</span>. Analogously for <span class="math">\(p_i\simeq \epsilon\)</span> we can approximate <span class="math">\(p_i(1-p_i)\simeq -(1-p_i)\ln(1-p_i)\)</span>. Therefore for distributions which are concentrated in a particular class the gini index is an approximation to the Shannon entropy. 
-One of the advantages of using the gini index is its simpler computational complexity due to its polynomial form as compared to the logarithm in the Shannon entropy.</p>
+One of the advantages of using the Gini index is its simpler computational complexity due to its polynomial form compared to the logarithm in the Shannon entropy.</p>
 <p><strong>Time complexity</strong></p>
-<p>Take a node as an example. An effective algorithm for the split consists, first in sorting the data for each of the features and then choose the threshold that produces higher gains in information. Calculating the frequencies for each threshold is of order <span class="math">\(\mathcal{O}(N)\)</span>, with <span class="math">\(N\)</span> the number of samples. Therefore, finding the right split is of order <span class="math">\(\mathcal{O}(dN\log N)\)</span>, with <span class="math">\(d\)</span> the number of features. The number of splits increases exponentially with the depth, but the number of samples per node decreases also exponientially which gives a net effect of <span class="math">\(\mathcal{O}(dN\log N)\)</span> at each depth. Since the maximum depth attainable is of order <span class="math">\(\log N\)</span>, the total time complexity of training a decision tree should be at most <span class="math">\(\mathcal{O}(dN\log^2 N)\)</span> </p>
+<p>Take a note as an example. A practical algorithm for the split consists of sorting the data for each of the features and then choosing the threshold that produces higher information gains. Calculating the frequencies for each threshold is of order <span class="math">\(\mathcal{O}(N)\)</span>, with <span class="math">\(N\)</span> the number of samples. Therefore, finding the right split is of order <span class="math">\(\mathcal{O}(dN\log N)\)</span>, with <span class="math">\(d\)</span> the number of features. The number of splits increases exponentially with the depth, but the number of samples per node decreases exponentially, which gives a net effect of <span class="math">\(\mathcal{O}(dN\log N)\)</span> at each depth. Since the maximum depth attainable is of order <span class="math">\(\log N\)</span>, the total time complexity of training a decision tree should be at most <span class="math">\(\mathcal{O}(dN\log^2 N)\)</span> </p>
 <p><strong>Sample complexity</strong></p>
-<p>Consider a binary classification problem where the feature space is of the form <span class="math">\(\chi=\{0,1\}^d\)</span>, with <span class="math">\(d\)</span> the dimension. It is easy to see that a tree with depth <span class="math">\(d\)</span> has <span class="math">\(2^d\)</span> leaves and can represent all datapoints in <span class="math">\(\chi\)</span>. The <span class="math">\(\text{VC}\)</span>-dimension is therefore <span class="math">\(\text{VC}_{dim}=2^d\)</span>.</p>
+<p>Consider a binary classification problem where the feature space is of the form <span class="math">\(\chi=\{0,1\}^d\)</span>, with <span class="math">\(d\)</span> the dimension. It is easy to see that a tree with depth <span class="math">\(d\)</span> has <span class="math">\(2^d\)</span> leaves and can represent all data points in <span class="math">\(\chi\)</span>. The <span class="math">\(\text{VC}\)</span>-dimension is therefore <span class="math">\(\text{VC}_{dim}=2^d\)</span>.</p>
 <p><a name="decision"></a></p>
 <h3><strong>2. Decision Boundary</strong></h3>
 <p>Below we depict the sucession of splits for a 2-dimensional feature space. As we can see the tree divides the feature space into successive rectangles.</p>
